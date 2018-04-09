@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<plugin
+   id="ZosFileInputFiexd"
+   iconfile="ZOSFIN.png"
+   description="z/OS File Input (Fiexd)"
+   tooltip="This plug-in allows read z/OS file"
+   category="Output"
+   classname="org.pentaho.di.trans.steps.zosfileinput.ZosFileInputMeta">
+   
+   <libraries>
+     <library name="pentaho-zosfile-input-1.0.0.jar"/>
+	 <library name="legstar/ant-1.6.5.jar"/>
+	 <library name="legstar/antlr-runtime-3.2.jar"/>
+	 <library name="legstar/commons-cli-1.1.jar"/>
+	 <!-- <library name="legstar/commons-io-1.4.jar"/> -->
+	 <!-- <library name="legstar/commons-logging-1.1.jar"/> -->
+	 <!-- <library name="legstar/kettle-vfs-20100924.jar"/> -->
+	 <library name="legstar/legstar-cob2xsd-0.3.4.jar"/>
+	 <library name="legstar/legstar-codegen-1.5.4.jar"/>
+	 <library name="legstar/legstar-coxbapi-1.5.5.jar"/>
+	 <library name="legstar/legstar-pdi-xsd2xml-0.2.0.jar"/>
+	 <library name="legstar/legstar-xsd2cob-0.2.1.jar"/>
+	 <library name="legstar/velocity-1.6.1.jar"/>
+	 <library name="legstar/XmlSchema-1.4.7.jar"/>
+	 <library name="legstar/xstream-1.3.1.jar"/>
+   </libraries>
+   
+   <localized_category>
+     <category locale="en_US">Input</category>
+     <category locale="zh_CN">输入</category>
+   </localized_category>
+   
+   <localized_description>
+     <description locale="en_US">z/OS File Input (Fiexd)</description>
+     <description locale="zh_CN">z/OS File Input (Fiexd)</description>
+   </localized_description>
+   
+   <localized_tooltip>
+     <tooltip locale="en_US">z/OS File Input (Fiexd)</tooltip>
+     <tooltip locale="zh_CN">z/OS File Input (Fiexd)</tooltip>
+   </localized_tooltip>
+</plugin>

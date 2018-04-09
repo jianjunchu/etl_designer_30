@@ -1,0 +1,12 @@
+<attributes>  
+
+  <!-- Top level attributes -->
+  <attribute id="name"> <xmlcode>name</xmlcode> <repcode/> <description>TextFileOutputDialog.Filename.Label</description> <tooltip/> <valuetype>String</valuetype> <parentid/> </attribute>
+  <attribute id="separator"> <xmlcode>separator</xmlcode> <repcode/> <description>TextFileOutputDialog.Separator.Label</description> <tooltip/> <valuetype>String</valuetype> <parentid/></attribute>
+  <attribute id="header"> <xmlcode>header</xmlcode>  <repcode/> <description>TextFileOutputDialog.Header.Label</description> <tooltip/> <valuetype>Integer</valuetype> <parentid/></attribute>
+
+  <attribute id="REMOVES"> <xmlcode>removes</xmlcode> <repcode/>  <description>TextFileOutputDialog.Removes.Label</description> <tooltip/> <valuetype>None</valuetype> <parentid/> </attribute>
+  <attribute id="REMOVE"> <xmlcode>remove</xmlcode> <repcode/>  <description>TextFileOutputDialog.Remove.Label</description> <tooltip/> <valuetype>None</valuetype> <parentid>REMOVES</parentid> </attribute>
+  <attribute id="REMOVE_NAME"> <xmlcode>name</xmlcode> <repcode>remove_name</repcode> <description>TextFileOutputDialog.ColumnInfo.Fieldname</description> <tooltip/> <valuetype>String</valuetype> <parentid>REMOVE</parentid> </attribute>
+
+</attributes>
