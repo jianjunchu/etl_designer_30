@@ -58,6 +58,7 @@ public class SFTPClient {
 	public static final  String HTTP_DEFAULT_PORT="80"; 
 	public static final  String SOCKS5_DEFAULT_PORT="1080";
 	public static final int SSH_DEFAULT_PORT=22;
+	public static final int MAX_TRY_TIMES=10;
 	  
 	private InetAddress serverIP;
 	private int serverPort;
@@ -168,17 +169,22 @@ public class SFTPClient {
 	public void login(String password) throws KettleJobException
 	{
 		int count=0;
-		while (!login_internal( password) && count<5)//try five times
+		while (!login_internal( password) && count<SFTPClient.MAX_TRY_TIMES)//try some times
 		{
 			count++;
 			try {
-				Thread.sleep(5000*(count+1));//wait 10 secs
+				Thread.sleep(5000*(count+1));//wait 5 secs*times （usually there are connection limits for ftp server）
 				System.out.println("try to connect to ftp server, the "+count+ "th times" );
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
+		if(count ==SFTPClient.MAX_TRY_TIMES)
+		{
+			throw new KettleJobException("can't connect to ftp server."+this.getServerIP()+" retry times="+count);
+		}
 	}
+
 	public boolean login_internal(String password){
 		this.password = password;
 
@@ -199,6 +205,7 @@ public class SFTPClient {
 			channel.connect();
 			c=(ChannelSftp)channel;
 		} catch (JSchException e) {
+			e.printStackTrace();
 			return false;
 		}
 		return true;
