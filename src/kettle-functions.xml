@@ -4,6 +4,13 @@
     <!-- NOTE i18n arguments are : i18n package and key separated by colon (:)
     --> 
 
+  <function id="udf1">
+    <classname>com.aofei.udf.UDFReplace</classname>
+    <description>i18n:org.pentaho.di.core.util.mask.AddressMask.Description.AddressMaskDescription</description>
+    <tooltip>i18n:org.pentaho.di.core.util.mask.AddressMask.Tooltip.AddressMaskDescription</tooltip>
+  </function>
+
+
   <function id="AddressMask">
     <classname>org.pentaho.di.core.util.mask.AddressMask</classname>
     <description>i18n:org.pentaho.di.core.util.mask.AddressMask.Description.AddressMaskDescription</description>
@@ -65,4 +72,5 @@
     <tooltip>PhoneMask</tooltip>
   </function>
 
+  
 </functions>

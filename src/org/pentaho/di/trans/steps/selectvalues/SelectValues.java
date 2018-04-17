@@ -175,7 +175,8 @@ public class SelectValues extends BaseStep implements StepInterface
 				} else{
 					try {
 
-						o= functionUtil.eval(valueMeta.getName(),rowData[idx],meta.getFunctionExpession()[i]);
+						o= functionUtil.eval(rowMeta.getFieldNames(),rowData,meta.getFunctionExpession()[i]);
+						//o= functionUtil.eval(valueMeta.getName(),rowData[idx],meta.getFunctionExpession()[i]);
 						//o  = FunctionUtil.execStatement(meta.getFunctionExpession()[i],rowMeta,rowData);
 					} catch (Exception e) {
 						e.printStackTrace();

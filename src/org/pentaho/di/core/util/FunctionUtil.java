@@ -39,9 +39,12 @@ public class FunctionUtil {
 	
 	
 
-	public Object eval(String key ,Object value ,String exp) throws Exception {
+	public Object eval(String[] key ,Object[] value ,String exp) throws Exception {
 		DefaultContext<String,Object> context = new DefaultContext<String,Object>();
-		context.put(key,value);
+		for(int i=0;i<key.length;i++)
+		{
+			context.put(key[i],value[i]);
+		}
 		
 		return runner.execute(exp,context,null,true,false);
 	}
