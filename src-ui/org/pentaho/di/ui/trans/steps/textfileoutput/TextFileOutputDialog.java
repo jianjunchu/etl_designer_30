@@ -1780,7 +1780,8 @@ public class TextFileOutputDialog extends BaseStepDialog implements StepDialogIn
 
 
 
-		tfoi.allocate(nrremove,nrfields);
+		tfoi.allocate(nrfields);
+		tfoi.allocateRemove(nrremove);
 		
 		for (i=0;i<nrfields;i++)
 		{

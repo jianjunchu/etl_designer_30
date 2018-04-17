@@ -896,7 +896,8 @@ public class ConcatFieldsDialog extends BaseStepDialog implements StepDialogInte
 
 		int nrfields = wFields.nrNonEmpty();
 
-		tfoi.allocate(0,nrfields);
+		tfoi.allocate(nrfields);
+		tfoi.allocateRemove(0);
 
 		for (i=0;i<nrfields;i++)
 		{
