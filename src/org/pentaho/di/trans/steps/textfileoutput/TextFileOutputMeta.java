@@ -670,6 +670,13 @@ public class TextFileOutputMeta extends BaseStepMeta  implements StepMetaInterfa
 		readData(stepnode);
 	}
 
+  public void allocate(int nrfields)
+  {
+      outputFields = new TextFileField[nrfields];
+      //Modify by njsun 2018-04-18 for Hadoop File Output
+      allocateRemove(0);
+  }
+
 	public void allocate(int nrremove,int nrfields)
 	{
 	    outputFields = new TextFileField[nrfields];
