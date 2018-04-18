@@ -670,9 +670,18 @@ public class TextFileOutputMeta extends BaseStepMeta  implements StepMetaInterfa
 		readData(stepnode);
 	}
 
-	public void allocate(int nrfields)
+  public void allocate(int nrfields)
+  {
+      outputFields = new TextFileField[nrfields];
+      //Modify by njsun 2018-04-18 for Hadoop File Output
+      allocateRemove(0);
+  }
+
+	public void allocate(int nrremove,int nrfields)
 	{
 	    outputFields = new TextFileField[nrfields];
+        allocateRemove(nrremove);
+
 	}
 	
 	public Object clone()
@@ -680,10 +689,7 @@ public class TextFileOutputMeta extends BaseStepMeta  implements StepMetaInterfa
 		TextFileOutputMeta retval = (TextFileOutputMeta)super.clone();
 		int nrfields=outputFields.length;
         int nrremove = deleteName.length; //Tony 20180315
-        
-        //Modify by njsun 2018-04-17
-		retval.allocate(nrfields);
-		retval.allocateRemove(nrremove);
+		retval.allocate(nrremove,nrfields);
 		
         for (int i=0;i<nrfields;i++)
         {
@@ -773,8 +779,7 @@ public class TextFileOutputMeta extends BaseStepMeta  implements StepMetaInterfa
 			Node fields  = XMLHandler.getSubNode(stepnode, "fields");
 			int nrfields = XMLHandler.countNodes(fields, "field");
             int nrremove   = XMLHandler.countNodes(fields, "remove"); //$NON-NLS-1$
-			allocate(nrfields);
-			allocateRemove(nrremove);
+			allocate(nrremove,nrfields);
 			
 			for (int i=0;i<nrfields;i++)
 			{
@@ -857,8 +862,7 @@ public class TextFileOutputMeta extends BaseStepMeta  implements StepMetaInterfa
 			
 		int i, nrremove = 0,nrfields=0;
 		
-		allocate(nrfields);
-		allocateRemove(nrremove);
+		allocate(nrremove,nrfields);
 					
 		for (i=0;i<nrfields;i++)
 		{
@@ -878,7 +882,7 @@ public class TextFileOutputMeta extends BaseStepMeta  implements StepMetaInterfa
 	}
 
   //Tony 20180315
-  public void allocateRemove(int nrRemove) {
+  private void allocateRemove(int nrRemove) {
     deleteName      = new String[nrRemove];
   }
 	
@@ -1180,9 +1184,7 @@ public class TextFileOutputMeta extends BaseStepMeta  implements StepMetaInterfa
             int nrremove = rep.countNrStepAttributes(id_step, "remove_name");//Tony 20180315
 			int nrfields = rep.countNrStepAttributes(id_step, "field_name");
 			
-			allocate(nrfields);//Tony 20180315
-			allocateRemove(nrremove);
-			
+			allocate(nrremove,nrfields);//Tony 20180315
 			//Tony 20180315
             for (int i=0;i<nrremove;i++)
             {
