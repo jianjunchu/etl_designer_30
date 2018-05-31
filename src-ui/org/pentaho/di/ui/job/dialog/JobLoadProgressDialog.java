@@ -109,7 +109,8 @@ public class JobLoadProgressDialog
 		}
 		catch (InvocationTargetException e)
 		{
-		   Spoon.getInstance().hideSplash();
+			e.printStackTrace();
+		    Spoon.getInstance().hideSplash();
 			new ErrorDialog(shell, "Error loading job", "An error occured loading the job!", e);
 			jobInfo = null;
 		}

@@ -67,7 +67,10 @@ public class SFTPClient {
 	private String prvkey = null; // Private key       
 	private String passphrase = null; // Empty passphrase for now
 	private String compression=null;
-	
+	private String privateKeyFilename=null;
+	private String passPhrase=null;
+	//passPhrase
+
 	private Session s;
 	private ChannelSftp c;
 	
@@ -113,7 +116,13 @@ public class SFTPClient {
 		this.serverIP = serverIP;
 		this.serverPort = serverPort;
 		this.userName = userName;
-		
+		this.privateKeyFilename=privateKeyFilename;
+		this.passPhrase = passPhrase;
+		initSession();
+	}
+
+	public void initSession() throws KettleJobException
+	{
 		JSch jsch = new JSch();
 		try {
 			if(!Const.isEmpty(privateKeyFilename)) {
@@ -125,15 +134,15 @@ public class SFTPClient {
 					this.passphrase=passPhrase;
 					passphrasebytes = GetPrivateKeyPassPhrase().getBytes();
 				}
-				jsch.addIdentity(            
-			    		  getUserName(),       
-			    		  FileUtils.readFileToByteArray(new File(GetPrivateKeyFileName())),   // byte[] privateKey         
-			    		  null,            // byte[] publicKey            
-			    		  passphrasebytes  // byte[] passPhrase        
-			    	);
+				jsch.addIdentity(
+						getUserName(),
+						FileUtils.readFileToByteArray(new File(GetPrivateKeyFileName())),   // byte[] privateKey
+						null,            // byte[] publicKey
+						passphrasebytes  // byte[] passPhrase
+				);
 			}
 			s = jsch.getSession(userName, serverIP.getHostAddress(), serverPort);
-		} 
+		}
 		catch (IOException e) {
 			throw new KettleJobException(e);
 		}
@@ -186,9 +195,6 @@ public class SFTPClient {
 	}
 
 	public boolean login_internal(String password){
-		this.password = password;
-
-		s.setPassword(this.getPassword());
 		try {
 			java.util.Properties config=new java.util.Properties();
 			config.put("StrictHostKeyChecking", "no");
@@ -199,12 +205,15 @@ public class SFTPClient {
 				config.put(COMPRESSION_S2C, compress);
 				config.put(COMPRESSION_C2S, compress);
 			}
+			initSession();
+			this.password = password;
+			s.setPassword(this.getPassword());
 			s.setConfig(config);
 			s.connect();
 			Channel channel=s.openChannel("sftp");
 			channel.connect();
 			c=(ChannelSftp)channel;
-		} catch (JSchException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
 		}

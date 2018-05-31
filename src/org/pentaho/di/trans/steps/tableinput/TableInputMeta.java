@@ -83,6 +83,18 @@ public class TableInputMeta extends BaseStepMeta implements StepMetaInterface,St
 
     private boolean lazyConversionActive;
 
+
+	public String getContinueExtractOrderFieldName() {
+
+		return continueExtractOrderFieldName;
+	}
+
+	public void setContinueExtractOrderFieldName(String continueExtractOrderFieldName) {
+		this.continueExtractOrderFieldName = continueExtractOrderFieldName;
+	}
+
+	private String continueExtractOrderFieldName;
+
 	public TableInputMeta()
 	{
 		super();
@@ -177,10 +189,10 @@ public class TableInputMeta extends BaseStepMeta implements StepMetaInterface,St
 	        String lookupFromStepname = XMLHandler.getTagValue(stepnode, "lookup"); //$NON-NLS-1$
 	        StreamInterface infoStream = getStepIOMeta().getInfoStreams().get(0);
 	        infoStream.setSubject(lookupFromStepname);
-
 			executeEachInputRow       = "Y".equals(XMLHandler.getTagValue(stepnode, "execute_each_row"));
             variableReplacementActive = "Y".equals(XMLHandler.getTagValue(stepnode, "variables_active"));
             lazyConversionActive      = "Y".equals(XMLHandler.getTagValue(stepnode, "lazy_conversion_active"));
+			continueExtractOrderFieldName  = XMLHandler.getTagValue(stepnode, "continue_extract_order_field_name");
 		}
 		catch(Exception e)
 		{
@@ -279,7 +291,8 @@ public class TableInputMeta extends BaseStepMeta implements StepMetaInterface,St
         retval.append("    "+XMLHandler.addTagValue("execute_each_row",   executeEachInputRow));
         retval.append("    "+XMLHandler.addTagValue("variables_active",   variableReplacementActive));
         retval.append("    "+XMLHandler.addTagValue("lazy_conversion_active",   lazyConversionActive));
-        
+		retval.append("    "+XMLHandler.addTagValue("continue_extract_order_field_name",        this.continueExtractOrderFieldName));
+
 		return retval.toString();
 	}
 
@@ -302,6 +315,7 @@ public class TableInputMeta extends BaseStepMeta implements StepMetaInterface,St
             executeEachInputRow       =      rep.getStepAttributeBoolean(id_step, "execute_each_row");
             variableReplacementActive =      rep.getStepAttributeBoolean(id_step, "variables_active");
             lazyConversionActive      =      rep.getStepAttributeBoolean(id_step, "lazy_conversion_active");
+			continueExtractOrderFieldName                       =      rep.getStepAttributeString (id_step, "continue_extract_order_field_name");
 		}
 		catch(Exception e)
 		{
@@ -321,7 +335,7 @@ public class TableInputMeta extends BaseStepMeta implements StepMetaInterface,St
             rep.saveStepAttribute(id_transformation, id_step, "execute_each_row", executeEachInputRow);
             rep.saveStepAttribute(id_transformation, id_step, "variables_active", variableReplacementActive);
             rep.saveStepAttribute(id_transformation, id_step, "lazy_conversion_active", lazyConversionActive);
-			
+			rep.saveStepAttribute(id_transformation, id_step, "continue_extract_order_field_name", continueExtractOrderFieldName);
 			// Also, save the step-database relationship!
 			if (databaseMeta!=null) rep.insertStepDatabase(id_transformation, id_step, databaseMeta.getObjectId());
 		}

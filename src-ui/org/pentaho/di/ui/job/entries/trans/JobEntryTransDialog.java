@@ -209,6 +209,9 @@ public class JobEntryTransDialog extends JobEntryDialog implements JobEntryDialo
   private ObjectId         referenceObjectId;
   private ObjectLocationSpecificationMethod specificationMethod;
 
+  private Label            wlErrorRetryTimes;
+  private TextVar          wErrorRetryTimes;
+
   public JobEntryTransDialog(Shell parent, JobEntryInterface jobEntryInt, Repository rep, JobMeta jobMeta) {
     super(parent, jobEntryInt, rep, jobMeta);
     jobEntry = (JobEntryTrans) jobEntryInt;
@@ -660,6 +663,24 @@ public class JobEntryTransDialog extends JobEntryDialog implements JobEntryDialo
     fdFollowingAbortRemotely.top = new FormAttachment(wWaitingToFinish, margin);
     fdFollowingAbortRemotely.right = new FormAttachment(100, 0);
     wFollowingAbortRemotely.setLayoutData(fdFollowingAbortRemotely);
+
+    // Follow a local abort remotely?
+    //
+    wlErrorRetryTimes = new Label(wAdvanced, SWT.RIGHT);
+    wlErrorRetryTimes.setText(BaseMessages.getString(PKG, "JobTrans.ErrorRetryTimes.Label"));
+    props.setLook(wlErrorRetryTimes);
+    FormData fdlErrorRetryTimes = new FormData();
+    fdlErrorRetryTimes.left = new FormAttachment(0, 0);
+    fdlErrorRetryTimes.top = new FormAttachment(wFollowingAbortRemotely, margin);
+    fdlErrorRetryTimes.right = new FormAttachment(middle, -margin);
+    wlErrorRetryTimes.setLayoutData(fdlErrorRetryTimes);
+    wErrorRetryTimes = new TextVar(jobMeta, wAdvanced, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+    props.setLook(wlErrorRetryTimes);
+    FormData fdErrorRetryTimes = new FormData();
+    fdErrorRetryTimes.left = new FormAttachment(middle, 0);
+    fdErrorRetryTimes.top = new FormAttachment(wFollowingAbortRemotely, margin);
+    fdErrorRetryTimes.right = new FormAttachment(100, 0);
+    wErrorRetryTimes.setLayoutData(fdErrorRetryTimes);
 
     FormData fdAdvanced = new FormData();
     fdAdvanced.left = new FormAttachment(0, 0);
@@ -1363,6 +1384,7 @@ public class JobEntryTransDialog extends JobEntryDialog implements JobEntryDialo
     if (jobEntry.logFileLevel!=null) {
       wLoglevel.select(jobEntry.logFileLevel.getLevel());
     }
+    this.wErrorRetryTimes.setText(new Integer(jobEntry.getErrorRetryTimes()).toString());
   }
 
   private void getByReferenceData(RepositoryElementMetaInterface transInf) {
@@ -1484,7 +1506,7 @@ public class JobEntryTransDialog extends JobEntryDialog implements JobEntryDialo
     jet.setAppendLogfile = wAppendLogfile.getSelection();
     jet.setWaitingToFinish(wWaitingToFinish.getSelection());
     jet.setFollowingAbortRemotely(wFollowingAbortRemotely.getSelection());
-    
+    jet.setErrorRetryTimes( wErrorRetryTimes.getText()==null?0: new Integer(wErrorRetryTimes.getText()).intValue());
   }
   private void ok() {
     if (Const.isEmpty(wName.getText())) {

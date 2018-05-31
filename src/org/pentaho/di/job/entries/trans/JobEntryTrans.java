@@ -128,6 +128,8 @@ public class JobEntryTrans extends JobEntryBase implements Cloneable, JobEntryIn
 
 	private Trans	trans;
 
+    private int errorRetryTimes;
+
 	public JobEntryTrans(String name)
 	{
 		super(name, "");
@@ -263,6 +265,8 @@ public class JobEntryTrans extends JobEntryBase implements Cloneable, JobEntryIn
     retval.append("      ").append(XMLHandler.addTagValue("wait_until_finished", waitingToFinish));
     retval.append("      ").append(XMLHandler.addTagValue("follow_abort_remote", followingAbortRemotely));
     retval.append("      ").append(XMLHandler.addTagValue("create_parent_folder", createParentFolder));
+    retval.append("      ").append(XMLHandler.addTagValue("error_retry_times", errorRetryTimes));
+
 
     if (arguments != null)
       for (int i = 0; i < arguments.length; i++) {
@@ -350,6 +354,8 @@ public class JobEntryTrans extends JobEntryBase implements Cloneable, JobEntryIn
         waitingToFinish = "Y".equalsIgnoreCase(wait);
 
       followingAbortRemotely = "Y".equalsIgnoreCase(XMLHandler.getTagValue(entrynode, "follow_abort_remote"));
+      errorRetryTimes = new Integer(XMLHandler.getTagValue(entrynode, "error_retry_times")).intValue();
+
 
       // How many arguments?
       int argnr = 0;
@@ -419,7 +425,7 @@ public class JobEntryTrans extends JobEntryBase implements Cloneable, JobEntryIn
       setAppendLogfile = rep.getJobEntryAttributeBoolean(id_jobentry, "set_append_logfile");
       waitingToFinish = rep.getJobEntryAttributeBoolean(id_jobentry, "wait_until_finished", true);
       followingAbortRemotely = rep.getJobEntryAttributeBoolean(id_jobentry, "follow_abort_remote");
-
+      errorRetryTimes =  (int)rep.getJobEntryAttributeInteger(id_jobentry, "error_retry_times");
       // How many arguments?
       int argnr = rep.countNrJobEntryAttributes(id_jobentry, "argument");
       arguments = new String[argnr];
@@ -475,8 +481,9 @@ public class JobEntryTrans extends JobEntryBase implements Cloneable, JobEntryIn
 			rep.saveJobEntryAttribute(id_job, getObjectId(), "wait_until_finished", waitingToFinish);
 			rep.saveJobEntryAttribute(id_job, getObjectId(), "follow_abort_remote", followingAbortRemotely);
 			rep.saveJobEntryAttribute(id_job, getObjectId(), "create_parent_folder", createParentFolder);
-			
-			// Save the arguments...
+            rep.saveJobEntryAttribute(id_job, getObjectId(), "error_retry_times", errorRetryTimes);
+
+            // Save the arguments...
 			if (arguments != null) {
 				for (int i = 0; i < arguments.length; i++) {
 					rep.saveJobEntryAttribute(id_job, getObjectId(), i, "argument", arguments[i]);
@@ -533,8 +540,6 @@ public class JobEntryTrans extends JobEntryBase implements Cloneable, JobEntryIn
      * In this case it means, just set the result boolean in the Result class.
      * @param result The result of the previous execution
      * @param nr the job entry number
-     * @param rep the repository connection to use
-     * @param parentJob the parent job
      * @return The Result of the execution.
      */
     public Result execute(Result result, int nr) throws KettleException
@@ -1031,16 +1036,46 @@ public class JobEntryTrans extends JobEntryBase implements Cloneable, JobEntryIn
                     try {
             			// Start execution...
                     	//
+                        int count=0;
+                        while(count==0 ||(count<=this.getErrorRetryTimes() && trans.getErrors()!=0)) {
 
-                    	trans.execute(args);
+                            if(count>0)
+                            {
+                                log.logBasic("Error retry...: "+count+" times");
+                                try {
+                                    Thread.sleep(5000);// wait for 5s if error occured
+                                } catch (InterruptedException e) {
+                                }
+                            }
+                            count++;
+                            try {
+                                trans.execute(args);
+                                // Wait until we're done with it...
+                                //
+                                while (!trans.isFinished() && !parentJob.isStopped() && trans.getErrors() == 0) {
+                                    try {
+                                        Thread.sleep(0, 500);
+                                    } catch (InterruptedException e) {
+                                    }
+                                }
+                            } catch (KettleException e) {
+                                if(count==this.getErrorRetryTimes())
+                                {
+                                    logError(BaseMessages.getString(PKG, "JobTrans.Error.UnablePrepareExec"), e);
+                                    result.setNrErrors(1);
+                                    throw e;
+                                }
+                            }
+                        }
 
-                    	// Wait until we're done with it...
-                    	//
-        				while (!trans.isFinished() && !parentJob.isStopped() && trans.getErrors() == 0)
-        				{
-        					try { Thread.sleep(0,500);}
-        					catch(InterruptedException e) { }
-        				}
+//                        trans.execute(args);
+//                        // Wait until we're done with it...
+//                        //
+//                        while (!trans.isFinished() && !parentJob.isStopped() && trans.getErrors() == 0) {
+//                            try {
+//                                Thread.sleep(0, 500);
+//                            } catch (InterruptedException e) {
+//                            }
 
         				if (parentJob.isStopped() || trans.getErrors() != 0)
         				{
@@ -1437,4 +1472,12 @@ public class JobEntryTrans extends JobEntryBase implements Cloneable, JobEntryIn
     RepositoryDirectoryInterface repositoryDirectoryInterface = RepositoryImportLocation.getRepositoryImportLocation().findDirectory(directory);
     transObjectId = repository.getTransformationID(transname, repositoryDirectoryInterface);
   }
+
+    public int getErrorRetryTimes() {
+        return errorRetryTimes;
+    }
+
+    public void setErrorRetryTimes(int errorRetryTimes) {
+        this.errorRetryTimes = errorRetryTimes;
+    }
 }

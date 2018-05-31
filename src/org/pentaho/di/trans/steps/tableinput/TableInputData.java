@@ -46,7 +46,9 @@ public class TableInputData extends BaseStepData implements StepDataInterface
 	public RowSet rowSet;
 	public boolean isCanceled;
     public StreamInterface infoStream;
-	
+	public int continueExtractFieldIndex;
+	public String continueExtractFieldValue;
+
 	public TableInputData()
 	{
 		super();

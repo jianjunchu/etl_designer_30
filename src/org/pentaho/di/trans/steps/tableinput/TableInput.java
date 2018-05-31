@@ -22,6 +22,7 @@
 
 package org.pentaho.di.trans.steps.tableinput;
 
+import java.io.*;
 import java.sql.ResultSet;
 
 import org.pentaho.di.core.Const;
@@ -137,6 +138,8 @@ public class TableInput extends BaseStep implements StepInterface
             if (meta.isExecuteEachInputRow() && ( parameters==null || parametersMeta.size()==0) )
             {
                 setOutputDone(); // signal end to receiver(s)
+                data.continueExtractFieldValue=null;
+                removeTempleFile();
                 return false; // stop immediately, nothing to do here.
             }
             
@@ -144,6 +147,20 @@ public class TableInput extends BaseStep implements StepInterface
             if (!success) 
             { 
                 return false; 
+            }
+            if(meta.getContinueExtractOrderFieldName()!=null && meta.getContinueExtractOrderFieldName().length()>0)
+            {
+                RowMetaInterface outputRowMeta;
+                if(getInputRowMeta()!=null)
+                    outputRowMeta= getInputRowMeta().clone();
+                else
+                    outputRowMeta= new RowMeta();
+                meta.getFields(outputRowMeta, getStepname(), null, null, this);
+                int fieldIndex = outputRowMeta.indexOfValue(meta.getContinueExtractOrderFieldName());
+                if(fieldIndex==-1)
+                    throw new KettleException(meta.getContinueExtractOrderFieldName()+" not found in the input stream!");
+                else
+                    data.continueExtractFieldIndex = fieldIndex;
             }
 		}
         else
@@ -196,12 +213,16 @@ public class TableInput extends BaseStep implements StepInterface
             if (done)
             {
                 setOutputDone(); // signal end to receiver(s)
+                data.continueExtractFieldValue=null;
+                removeTempleFile();
                 return false; // end of data or error.
             }
         }
         else
         {
             putRow(data.rowMeta, data.thisrow); // fill the rowset(s). (wait for empty)
+            data.continueExtractFieldValue =data.thisrow[data.continueExtractFieldIndex].toString();
+
             data.thisrow = data.nextrow;
 
             if (checkFeedback(getLinesInput())) 
@@ -212,7 +233,64 @@ public class TableInput extends BaseStep implements StepInterface
 		
 		return true;
 	}
-    
+
+    private void writeContinueFieldValueToTempleFile(Object continueExtractFieldValue) {
+        File file = new File(this.getTempleFileName());
+        FileWriter writer = null;
+        try {
+            writer = new FileWriter(file);
+            writer.write(continueExtractFieldValue.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+
+            try {
+                if(writer !=null)
+                    writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private String readContinueFieldValueFromTepleFile() {
+        File file = new File(this.getTempleFileName());
+        FileInputStream fis = null;
+        StringBuffer buffer = new StringBuffer();
+        int c;
+        try {
+            fis = new FileInputStream(file);
+            c = (int)fis.read();
+            while(c>0) {
+                buffer.append((char)c);
+                c = fis.read();
+            }
+        } catch (IOException e) {
+            return null;
+            //e.printStackTrace();
+        }finally {
+
+            try {
+                if(fis !=null)
+                    fis.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return buffer.toString();
+    }
+
+    private void removeTempleFile() {
+	    File file = new File(this.getTempleFileName());
+	    if(file.exists())
+	        file.delete();
+    }
+
+    private String getTempleFileName() {
+	    return Const.getKettleDirectory()+ Const.FILE_SEPARATOR+this.getTrans().getRepositoryDirectory().getPath().replace(Const.FILE_SEPARATOR,"_")+"_"+this.getTrans().getName()+".tableinput";
+    }
+
+
     private void closePreviousQuery() throws KettleDatabaseException {
         if(data.db!=null) {
         	data.db.closeQuery(data.rs);
@@ -227,7 +305,15 @@ public class TableInput extends BaseStep implements StepInterface
         String sql = null;
         if (meta.isVariableReplacementActive()) sql = environmentSubstitute(meta.getSQL());
         else sql = meta.getSQL();
-        
+        if(meta.getContinueExtractOrderFieldName()!=null && meta.getContinueExtractOrderFieldName().length()>0) {
+            if(this.readContinueFieldValueFromTepleFile()!=null && this.readContinueFieldValueFromTepleFile().length()>0) {
+                if (sql.indexOf("where ") == -1) //fixme: matach  pattern
+                    sql = sql + " where " + meta.getContinueExtractOrderFieldName() + " > " + this.readContinueFieldValueFromTepleFile();
+                else
+                    sql = sql + " and " + meta.getContinueExtractOrderFieldName() + " > " + this.readContinueFieldValueFromTepleFile();
+            }
+            sql = sql +" order by " + meta.getContinueExtractOrderFieldName();
+        }
         if (log.isDetailed()) logDetailed("SQL query : "+sql);
         if (parametersMeta.isEmpty()) {
         	data.rs = data.db.openQuery(sql, null, null, ResultSet.FETCH_FORWARD, meta.isLazyConversionActive());
@@ -285,7 +371,8 @@ public class TableInput extends BaseStep implements StepInterface
             	data.db.disconnect();
 			}
 		}
-
+		if(data.continueExtractFieldValue!=null)
+            writeContinueFieldValueToTempleFile(data.continueExtractFieldValue);
 		super.dispose(smi, sdi);
 	}
 	
