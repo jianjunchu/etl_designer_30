@@ -67,8 +67,9 @@ public class PGBulkLoader extends BaseStep implements StepInterface
 	private static Class<?> PKG = PGBulkLoaderMeta.class; // for i18n purposes, needed by Translator2!!   $NON-NLS-1$
 
 	private PGBulkLoaderMeta meta;
-	private PGBulkLoaderData data;	
-	
+	private PGBulkLoaderData data;
+    private boolean isKillProcess= false;
+
 	public PGBulkLoader(StepMeta stepMeta, StepDataInterface stepDataInterface, int copyNr, TransMeta transMeta, Trans trans)
 	{
 		super(stepMeta, stepDataInterface, copyNr, transMeta, trans);
@@ -456,6 +457,7 @@ public class PGBulkLoader extends BaseStep implements StepInterface
     	}
     	catch(Exception e)
     	{
+    		e.printStackTrace();
     		throw new KettleException("Error serializing rows of data to the psql command", e);
     	}
 		
@@ -480,24 +482,27 @@ public class PGBulkLoader extends BaseStep implements StepInterface
 						if(!StringUtil.isEmpty(schemaName)){
 							//checkSql = "use "+ schemaName+";" +Const.CR;
 						}
-						checkSql = checkSql+ "SELECT  pid FROM pg_locks a JOIN pg_class b ON a.relation = b.oid where b.relname = '"+ tableName+"'";
 
-						log.logBasic(checkSql);
-						ResultSet rs = database.openQuery(checkSql);
-						while (rs.next()){
+						if(isKillProcess) { //kill all other process on this table
+                            checkSql = checkSql + "SELECT  pid FROM pg_locks a JOIN pg_class b ON a.relation = b.oid where b.relname = '" + tableName + "'";
 
-							int pid = rs.getInt("pid");
+                            log.logBasic(checkSql);
+                            ResultSet rs = database.openQuery(checkSql);
+                            while (rs.next()) {
 
-							log.logBasic("kill lock table  pid :"+pid);
+                                int pid = rs.getInt("pid");
 
-							String killSql = "select pg_terminate_backend("+pid+")";
-							log.logBasic(killSql);
-							ResultSet killRs = database.openQuery(killSql);
-							while (killRs.next()){
-								log.logBasic("kill result :"+killRs.getString(1));
-							}
+                                log.logBasic("kill lock table  pid :" + pid);
 
-						}
+                                String killSql = "select pg_terminate_backend(" + pid + ")";
+                                log.logBasic(killSql);
+                                ResultSet killRs = database.openQuery(killSql);
+                                while (killRs.next()) {
+                                    log.logBasic("kill result :" + killRs.getString(1));
+                                }
+
+                            }
+                        }
 
 
 						if(meta.getFieldTable() ==null || meta.getFieldTable().length ==0){
