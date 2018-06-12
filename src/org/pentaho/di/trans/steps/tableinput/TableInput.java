@@ -307,11 +307,14 @@ public class TableInput extends BaseStep implements StepInterface
         else sql = meta.getSQL();
         if(meta.getContinueExtractOrderFieldName()!=null && meta.getContinueExtractOrderFieldName().length()>0) {
             if(this.readContinueFieldValueFromTepleFile()!=null && this.readContinueFieldValueFromTepleFile().length()>0) {
-                if (sql.indexOf("where ") == -1) //fixme: matach  pattern
-                    sql = sql + " where " + meta.getContinueExtractOrderFieldName() + " > " + this.readContinueFieldValueFromTepleFile();
-                else
-                    sql = sql + " and " + meta.getContinueExtractOrderFieldName() + " > " + this.readContinueFieldValueFromTepleFile();
-            }
+//                if (sql.indexOf("where")>-1 || sql.indexOf("WHERE")> -1) //fixme: matach  pattern
+//                    sql = sql + " and " + meta.getContinueExtractOrderFieldName() + " > " +"'"+ this.readContinueFieldValueFromTepleFile()+"'";
+//                else
+//                    sql = sql + " where " + meta.getContinueExtractOrderFieldName() + " > " +"'"+ this.readContinueFieldValueFromTepleFile()+"'";
+
+                sql = "SELECT * FROM ("+ sql +") table1"+  " WHERE " + meta.getContinueExtractOrderFieldName() + " > " +"'"+ this.readContinueFieldValueFromTepleFile()+"'";
+
+        }
             sql = sql +" order by " + meta.getContinueExtractOrderFieldName();
         }
         if (log.isDetailed()) logDetailed("SQL query : "+sql);
