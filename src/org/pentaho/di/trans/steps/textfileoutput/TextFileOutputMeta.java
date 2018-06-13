@@ -167,8 +167,7 @@ public class TextFileOutputMeta extends BaseStepMeta  implements StepMetaInterfa
     private boolean specifyingFormat;
     
     private String dateTimeFormat;
-    
-    /** Jason KDI */
+
     private  boolean writeSeparatorAfterLastColumn;
 
 	public TextFileOutputMeta()
@@ -273,7 +272,7 @@ public class TextFileOutputMeta extends BaseStepMeta  implements StepMetaInterfa
     /**
      * @param enclosureFixDisabled The enclosureFixDisabled to set.
      */
-    public void setEnclosureFixDisabled(boolean disableEnclosureFix) {
+    public void setEnclosureFixDisabled(boolean enclosureFixDisabled) {
     	this.disableEnclosureFix = disableEnclosureFix;
     }
 
@@ -1423,19 +1422,17 @@ public void injectStepMetadataEntries(List<StepInjectionMetaEntry> metadata)  th
   public List<StepInjectionMetaEntry> getStepInjectionMetadataEntries() throws KettleException {
     return getStepInjectionMetadataEntries(PKG);
   }
-//JASON KDI
-public boolean isWriteSepatatorAfterLashColumn() {
-	// TODO Auto-generated method stub
-	return writeSeparatorAfterLastColumn;
-}
-public void setWriteSepatatorAfterLashColumn(boolean s) {
-	// TODO Auto-generated method stub
-	writeSeparatorAfterLastColumn = s;
-}
 
+  public boolean isWriteSepatatorAfterLastColumn() {
+      // TODO Auto-generated method stub
+      return writeSeparatorAfterLastColumn;
+  }
 
+  public void setWriteSepatatorAfterLashColumn(boolean s) {
+      // TODO Auto-generated method stub
+      writeSeparatorAfterLastColumn = s;
+  }
 
-//JASON KDI
 
   public RowMetaInterface getDeleteFields(RowMetaInterface inputRowMeta) throws KettleStepException {
     if (deleteName!=null && deleteName.length>0)  // DESELECT values from the stream...
@@ -1455,6 +1452,9 @@ public void setWriteSepatatorAfterLashColumn(boolean s) {
     return inputRowMeta;
   }
 
-
+  public boolean isRemoveCRLF()
+  {
+    return true;
+  }
 
 }

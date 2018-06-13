@@ -1651,7 +1651,7 @@ public class TextFileOutputDialog extends BaseStepDialog implements StepDialogIn
 		wCreateParentFolder.setSelection(input.isCreateParentFolder());
 		wExtension.setText(Const.NVL(input.getExtension(), ""));
 		wSeparator.setText(Const.NVL(input.getSeparator(), ""));
-		wSeparatorAfterLastColumn.setSelection(input.isWriteSepatatorAfterLashColumn());//jason 2016	
+		wSeparatorAfterLastColumn.setSelection(input.isWriteSepatatorAfterLastColumn());//jason 2016
 		wEnclosure.setText(Const.NVL(input.getEnclosure(), ""));
 		
 		if (input.getFileFormat()!=null) {

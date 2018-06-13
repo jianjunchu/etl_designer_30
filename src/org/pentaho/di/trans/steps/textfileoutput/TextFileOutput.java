@@ -76,8 +76,8 @@ public class TextFileOutput extends BaseStep implements StepInterface
 	/**
 
 	 Remove the values that are no longer needed.<p>
-
-	 @param row The row to manipulate
+	 @param rowMeta The row meta to manipulate
+	 @param rowData The row to manipulate
 	 @return true if everything went well, false if we need to stop because of an error!
 
 	 */
@@ -261,6 +261,7 @@ public class TextFileOutput extends BaseStep implements StepInterface
 		}
 
 		if (data.deselect) r = removeValues(getInputRowMeta(), r);
+		if (meta.isRemoveCRLF()) r = removeCRLF(data.outputRowMeta,r);
 
 		writeRowToFile(data.outputRowMeta, r);
 		putRow(data.outputRowMeta, r); // in case we want it to go further...
@@ -268,6 +269,19 @@ public class TextFileOutput extends BaseStep implements StepInterface
 		if (checkFeedback(getLinesOutput()))
 			logBasic("linenr " + getLinesOutput());
 
+		return result;
+	}
+
+	private Object[] removeCRLF(RowMetaInterface outputRowMeta, Object[] r) {
+		Object[] result=new Object[r.length];
+		for(int i=0;i<outputRowMeta.size();i++)
+		{
+			boolean isStr = outputRowMeta.getValueMeta(i).isString();
+			if(isStr && r[i]!=null)
+				result[i]=Const.removeCRLF(r[i].toString());
+			else
+				result[i]=r[i];
+		}
 		return result;
 	}
 
@@ -322,10 +336,10 @@ public class TextFileOutput extends BaseStep implements StepInterface
                     //
 					writeField(v, valueData, null); 
 				}
-				//KDI Jason 2016
-				if(meta.isWriteSepatatorAfterLashColumn())
+
+				if(meta.isWriteSepatatorAfterLastColumn())
 					data.writer.write(data.binarySeparator);
-				//KDI END
+
 				
                 data.writer.write(data.binaryNewline);
 			}
@@ -343,10 +357,10 @@ public class TextFileOutput extends BaseStep implements StepInterface
 					Object valueData = r[data.fieldnrs[i]];
 					writeField(v, valueData, data.binaryNullValue[i]);
 				}
-				//KDI Jason 2016
-				if(meta.isWriteSepatatorAfterLashColumn())
+
+				if(meta.isWriteSepatatorAfterLastColumn())
 					data.writer.write(data.binarySeparator);
-				//KDI END
+
                 data.writer.write(data.binaryNewline);
 			}
 
