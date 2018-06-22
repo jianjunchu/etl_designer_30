@@ -148,7 +148,7 @@ public class TableInput extends BaseStep implements StepInterface
             { 
                 return false; 
             }
-            if(meta.getContinueExtractOrderFieldName()!=null && meta.getContinueExtractOrderFieldName().length()>0)
+            if(meta.getContinueExtractOrderFieldName()!=null && meta.getContinueExtractOrderFieldName().trim().length()>0)
             {
                 RowMetaInterface outputRowMeta;
                 if(getInputRowMeta()!=null)
@@ -221,7 +221,15 @@ public class TableInput extends BaseStep implements StepInterface
         else
         {
             putRow(data.rowMeta, data.thisrow); // fill the rowset(s). (wait for empty)
-            data.continueExtractFieldValue =data.thisrow[data.continueExtractFieldIndex].toString();
+            if(data.continueExtractFieldIndex>-1)
+            {
+                if(data.thisrow[data.continueExtractFieldIndex]!=null)
+                    data.continueExtractFieldValue =data.thisrow[data.continueExtractFieldIndex].toString();
+                else
+                {
+                    this.logError("Continue Extract Field alue is null, field index=" +data.continueExtractFieldIndex);
+                }
+            }
 
             data.thisrow = data.nextrow;
 
