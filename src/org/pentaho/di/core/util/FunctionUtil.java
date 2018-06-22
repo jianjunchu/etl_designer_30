@@ -11,7 +11,7 @@ import org.pentaho.di.core.plugins.PluginInterface;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.util.function.FunctionInterface;
-
+import org.pentaho.di.core.util.function.datastage.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -56,10 +56,10 @@ public class FunctionUtil {
 			runner.addOperatorWithAlias("Then","then",null);
 			runner.addOperatorWithAlias("Else","else",null);
 
-			/*runner.addFunction("AlNum",new JavaAlNum());
-			runner.addFunction("Alpha",new JavaAlpha());
-			runner.addFunction("Char",new JavaChar());
-			runner.addFunction("Compare",new JavaCompare());
+			runner.addFunction("AlNum",new AlNum());
+			runner.addFunction("Alpha",new Alpha());
+			runner.addFunction("Compare",new Compare());
+			/*runner.addFunction("Char",new JavaChar());
 			runner.addFunction("CompareNoCase",new JavaCompareNoCase());
 			runner.addFunction("CompareNum",new JavaCompareNum());
 			runner.addFunction("Convert",new JavaConvert());
@@ -88,10 +88,10 @@ public class FunctionUtil {
 			runner.addFunction("Ereplace",new JavaEreplace());
 			runner.addFunction("FileNorm",new JavaFileNorm());
 			runner.addFunction("HoursFromTime",new JavaHoursFromTime());
-			runner.addFunction("Index",new JavaIndex());
-			runner.addFunction("Left",new JavaLeft());
-			runner.addFunction("Len",new JavaLen());
-			runner.addFunction("MicroSecondsFromTime",new JavaMicroSecondsFromTime());
+			runner.addFunction("Index",new JavaIndex());*/
+			runner.addFunction("Left",new Left());
+			runner.addFunction("Len",new Len());
+			/*runner.addFunction("MicroSecondsFromTime",new JavaMicroSecondsFromTime());
 			runner.addFunction("MidnightSecondsFromTime",new JavaMidnightSecondsFromTime());
 			runner.addFunction("MinutesFromTime",new JavaMinutesFromTime());
 			runner.addFunction("MonthDayFromDate",new JavaMonthDayFromDate());
