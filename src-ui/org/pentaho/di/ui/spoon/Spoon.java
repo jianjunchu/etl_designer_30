@@ -306,8 +306,8 @@ import org.pentaho.xul.swt.tab.TabSet;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import com.kingbase.ktrl.system.priviledge.bean.MenuPrivileges;
-import com.kingbase.ktrl.system.priviledge.bean.PriviledgeType;
+import com.auphi.ktrl.system.priviledge.bean.MenuPrivileges;
+import com.auphi.ktrl.system.priviledge.bean.PriviledgeType;
 
 /**
  * This class handles the main window of the Spoon graphical transformation

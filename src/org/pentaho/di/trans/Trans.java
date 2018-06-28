@@ -22,7 +22,7 @@
 
 package org.pentaho.di.trans;
 
-import com.kingbase.ktrl.engine.KettleEngine;
+import com.auphi.ktrl.engine.KettleEngine;
 import org.apache.commons.vfs.FileName;
 import org.apache.commons.vfs.FileObject;
 import org.pentaho.di.cluster.SlaveServer;

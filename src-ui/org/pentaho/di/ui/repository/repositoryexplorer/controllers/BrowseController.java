@@ -68,8 +68,8 @@ import org.pentaho.ui.xul.swt.SwtBindingFactory;
 import org.pentaho.ui.xul.swt.custom.DialogConstant;
 import org.pentaho.ui.xul.util.XulDialogCallback;
 
-import com.kingbase.ktrl.system.priviledge.bean.MenuPrivileges;
-import com.kingbase.ktrl.system.priviledge.bean.PriviledgeType;
+import com.auphi.ktrl.system.priviledge.bean.MenuPrivileges;
+import com.auphi.ktrl.system.priviledge.bean.PriviledgeType;
 
 /**
  *

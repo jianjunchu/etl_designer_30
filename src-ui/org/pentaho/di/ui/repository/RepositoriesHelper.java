@@ -56,7 +56,7 @@ import org.pentaho.ui.xul.components.XulConfirmBox;
 import org.pentaho.ui.xul.dom.Document;
 import org.pentaho.ui.xul.util.XulDialogCallback;
 
-import com.kingbase.ktrl.util.Constants;
+import com.auphi.ktrl.util.Constants;
 
 public class RepositoriesHelper {
   private static Class<?> PKG = RepositoriesHelper.class; // for i18n purposes, needed by Translator2!!   $NON-NLS-1$

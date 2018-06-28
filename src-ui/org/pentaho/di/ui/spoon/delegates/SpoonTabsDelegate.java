@@ -55,7 +55,7 @@ import org.pentaho.ui.util.Launch.Status;
 import org.pentaho.xul.swt.tab.TabItem;
 import org.pentaho.xul.swt.tab.TabSet;
 
-import com.kingbase.ktrl.system.priviledge.bean.PriviledgeType;
+import com.auphi.ktrl.system.priviledge.bean.PriviledgeType;
 
 public class SpoonTabsDelegate extends SpoonDelegate
 {

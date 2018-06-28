@@ -56,9 +56,9 @@ import org.w3c.dom.Node;
 
 //import com.sforce.soap.partner.LoginResponse;
 
-import com.kingbase.ktrl.system.repository.bean.RepositoryBean;
-import com.kingbase.ktrl.system.user.bean.LoginResponse;
-import com.kingbase.ktrl.system.user.util.UMStatus;
+import com.auphi.ktrl.system.repository.bean.RepositoryBean;
+import com.auphi.ktrl.system.user.bean.LoginResponse;
+import com.auphi.ktrl.system.user.util.UMStatus;
 
 
 

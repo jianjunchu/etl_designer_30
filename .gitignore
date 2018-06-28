@@ -1,0 +1,9 @@
+*.iml
+*.DS_Store
+.idea/
+target/
+*.class 
+distrib/
+lib/
+classes*/
+testClasses/
