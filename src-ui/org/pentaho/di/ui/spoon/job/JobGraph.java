@@ -164,8 +164,8 @@ import org.pentaho.ui.xul.dom.Document;
 import org.pentaho.ui.xul.impl.XulEventHandler;
 import org.pentaho.ui.xul.swt.SwtXulLoader;
 
-import com.kingbase.ktrl.system.priviledge.bean.MenuPrivileges;
-import com.kingbase.ktrl.system.priviledge.bean.PriviledgeType;
+import com.auphi.ktrl.system.priviledge.bean.MenuPrivileges;
+import com.auphi.ktrl.system.priviledge.bean.PriviledgeType;
 
 /**
  * Handles the display of Jobs in Spoon, in a graphical form.

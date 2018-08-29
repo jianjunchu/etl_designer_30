@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.pentaho.di.core.logging.LogChannel;
 import org.pentaho.di.core.logging.LogChannelInterface;
 
-import com.kingbase.ktrl.system.repository.bean.RepositoryBean;
+import com.auphi.ktrl.system.repository.bean.RepositoryBean;
 
 public class BaseHttpServlet extends HttpServlet {
 

@@ -51,7 +51,7 @@ import org.pentaho.di.repository.kdr.KettleDatabaseRepositoryMeta;
 import org.pentaho.di.www.BaseHttpServlet;
 import org.w3c.dom.Node;
 
-import com.kingbase.ktrl.system.repository.bean.RepositoryBean;
+import com.auphi.ktrl.system.repository.bean.RepositoryBean;
 
 
 public class JobExecutionConfiguration implements Cloneable

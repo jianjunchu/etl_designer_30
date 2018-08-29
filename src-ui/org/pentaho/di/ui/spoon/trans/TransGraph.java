@@ -186,8 +186,8 @@ import org.pentaho.ui.xul.dom.Document;
 import org.pentaho.ui.xul.impl.XulEventHandler;
 import org.pentaho.ui.xul.swt.SwtXulLoader;
 
-import com.kingbase.ktrl.system.priviledge.bean.MenuPrivileges;
-import com.kingbase.ktrl.system.priviledge.bean.PriviledgeType;
+import com.auphi.ktrl.system.priviledge.bean.MenuPrivileges;
+import com.auphi.ktrl.system.priviledge.bean.PriviledgeType;
 
 /**
  * This class handles the display of the transformations in a graphical way using icons, arrows, etc.
