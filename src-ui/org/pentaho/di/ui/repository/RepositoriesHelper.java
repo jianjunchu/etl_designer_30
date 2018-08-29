@@ -330,4 +330,5 @@ public class RepositoriesHelper {
   public int getRepositoryCount(){
 	  return this.input.nrRepositories();
   }
+
 }

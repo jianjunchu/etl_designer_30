@@ -472,7 +472,8 @@ public class Database implements VariableSpace, LoggingObjectInterface
                   if (databaseMeta.getDatabaseInterface() instanceof MSSQLServerNativeDatabaseMeta) {
                     // Needs user & password in the URL
                     //
-                    String instance = environmentSubstitute(databaseMeta.getSQLServerInstance());
+                    //String instance = environmentSubstitute(databaseMeta.getSQLServerInstance());
+                      String instance = environmentSubstitute(databaseMeta.getInstanceName());
                     if (Const.isEmpty(instance)) {
                       connection = DriverManager.getConnection(url+";user="+username+";password="+password);
                     } else {
@@ -1498,7 +1499,7 @@ public class Database implements VariableSpace, LoggingObjectInterface
 		 * 
 		 * @param ps The prepared statement to empty and close.
 		 * @param batch true if you are using batch processing
-		 * @param psBatchCounter The number of rows on the batch queue
+		 * @param batchCounter The number of rows on the batch queue
 		 * @throws KettleDatabaseException
 		 */
 	public void emptyAndCommit(PreparedStatement ps, boolean batch, int batchCounter) throws KettleDatabaseException {

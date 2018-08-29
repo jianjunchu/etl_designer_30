@@ -181,6 +181,19 @@ public interface DatabaseInterface extends Cloneable
 	 * @param index_tablespace the tablespace to store indexes in
 	 */
 	public void setIndexTablespace(String index_tablespace);
+
+	/**
+	 * @return the instance name for MS SQLSERVER
+	 */
+	public String getInstanceName();
+
+	/**
+	 * @param instanceName the MS SQLSERVER instance name to set
+	 */
+	public void setInstanceName(String instanceName);
+
+
+
 	
     /**
     * @return The extra attributes for this database connection
@@ -670,7 +683,7 @@ public interface DatabaseInterface extends Cloneable
 
     
     /**
-     * @param columnname The column to verify the existance for
+     * @param column The column to verify the existance for
      * @param tablename The table to verify the existance for
      * @return The SQL to execute to verify if the given table exists.  If an Exception is thrown for this SQL, we don't have the column.
      */
@@ -717,7 +730,7 @@ public interface DatabaseInterface extends Cloneable
     public boolean isForcingIdentifiersToUpperCase();
     
     /**
-     * @param forceLowerCase true if all identifiers should be forced to upper case
+     * @param forceUpperCase true if all identifiers should be forced to upper case
      */
     public void setForcingIdentifiersToUpperCase(boolean forceUpperCase);
     
@@ -907,8 +920,8 @@ public interface DatabaseInterface extends Cloneable
    * Returns the tablespace DDL fragment for a "Data" tablespace.  In most databases that use tablespaces this 
    * is where the tables are to be created.
    * 
-   * @param VariableSpace variables used for possible substitution
-   * @param DatabaseMeta databaseMeta the database meta used for possible string enclosure of the tablespace.  This
+   * @param variables variables used for possible substitution
+   * @param databaseMeta databaseMeta the database meta used for possible string enclosure of the tablespace.  This
    * method needs this as this is done after environmental substitution.
    * 
    * @return String the tablespace name for tables in the format "tablespace TABLESPACE_NAME".  The TABLESPACE_NAME and
@@ -919,8 +932,8 @@ public interface DatabaseInterface extends Cloneable
   /**
    * Returns the tablespace DDL fragment for a "Index" tablespace.
    * 
-   * @param VariableSpace variables used for possible substitution
-   * @param DatabaseMeta databaseMeta the database meta used for possible string enclosure of the tablespace.  This
+   * @param variables variables used for possible substitution
+   * @param databaseMeta databaseMeta the database meta used for possible string enclosure of the tablespace.  This
    * method needs this as this is done after environmental substitution.
    * 
    * @return String the tablespace name for indicis in the format "tablespace TABLESPACE_NAME".  The TABLESPACE_NAME and

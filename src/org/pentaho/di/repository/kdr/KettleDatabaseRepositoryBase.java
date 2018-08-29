@@ -78,7 +78,9 @@ public class KettleDatabaseRepositoryBase {
 	public static final String FIELD_DATABASE_PASSWORD            = "PASSWORD";
 	public static final String FIELD_DATABASE_SERVERNAME          = "SERVERNAME";
 	public static final String FIELD_DATABASE_INDEX_TBS           = "INDEX_TBS";
-	
+	public static final String FIELD_DATABASE_INSTANCE_NAME           = "INSTANCE_NAME";
+
+
 	public static final String TABLE_R_DATABASE_ATTRIBUTE     = "R_DATABASE_ATTRIBUTE";
 	public static final String FIELD_DATABASE_ATTRIBUTE_ID_DATABASE_ATTRIBUTE = "ID_DATABASE_ATTRIBUTE";
 	public static final String FIELD_DATABASE_ATTRIBUTE_ID_DATABASE           = "ID_DATABASE";

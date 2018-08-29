@@ -145,7 +145,7 @@ public class DataHandler extends AbstractXulEventHandler {
   protected XulTextbox indexTablespaceBox;
 
   // MS SQL Server specific
-  private XulTextbox serverInstanceBox;
+  protected XulTextbox serverInstanceBox;
 
   // Informix specific
   private XulTextbox serverNameBox;
@@ -1090,9 +1090,10 @@ public class DataHandler extends AbstractXulEventHandler {
     // Empty doesn't clear the option, we have mercy.
 
     if (serverInstanceBox != null) {
-      if (serverInstanceBox.getValue().trim().length() > 0) {
-        meta.setSQLServerInstance(serverInstanceBox.getValue());
-      }
+      //if (serverInstanceBox.getValue().trim().length() > 0) { //commit here, so we can save empty instance name. auphi2018
+      //  meta.setSQLServerInstance(serverInstanceBox.getValue());
+        meta.setInstanceName(serverInstanceBox.getValue());
+      //}
     }
 
     // SQL Server double decimal separator
@@ -1175,7 +1176,8 @@ public class DataHandler extends AbstractXulEventHandler {
     }
 
     if (serverInstanceBox != null) {
-      serverInstanceBox.setValue(meta.getSQLServerInstance());
+      //serverInstanceBox.setValue(meta.getSQLServerInstance());
+      serverInstanceBox.setValue(meta.getInstanceName());
     }
 
     // SQL Server double decimal separator

@@ -215,7 +215,8 @@ public abstract class BaseDatabaseMeta implements Cloneable
 	
 	private String dataTablespace;  // data storage location, For Oracle & perhaps others
 	private String indexTablespace; // index storage location, For Oracle & perhaps others
-	
+	private String instanceName;    // instance name , For MS SQLSERVER
+
 	private boolean changed;
     
     private Properties attributes;
@@ -448,7 +449,22 @@ public abstract class BaseDatabaseMeta implements Cloneable
 	{
 		this.indexTablespace = indexTablespace;
 	}
-	
+
+	/**
+	 * @return Returns the index tablespace.
+	 */
+	public String getInstanceName()
+	{
+		return instanceName;
+	}
+
+	/**
+	 * @param instanceName The index tablespace to set.
+	 */
+	public void setInstanceName(String instanceName)
+	{
+		this.instanceName = instanceName;
+	}
 	/**
 	 * @return Returns the username.
 	 */

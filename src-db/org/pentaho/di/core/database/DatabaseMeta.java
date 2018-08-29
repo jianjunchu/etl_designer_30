@@ -827,9 +827,20 @@ public class DatabaseMeta
         return databaseInterface.getIndexTablespace();
     }
 
+    public String getInstanceName()
+    {
+        return databaseInterface.getInstanceName();
+    }
+
+
     public void setIndexTablespace(String index_tablespace)
     {
         databaseInterface.setIndexTablespace(index_tablespace);
+    }
+
+    public void setInstanceName(String instanceName)
+    {
+        databaseInterface.setInstanceName(instanceName);
     }
 
     public void setChanged()
@@ -2431,27 +2442,27 @@ public class DatabaseMeta
         variables.injectVariables(prop);
     }
 
-    /**
-     * @return the SQL Server instance
-     */
-    public String getSQLServerInstance()
-    {
-        // This is also covered/persisted by JDBC option MS SQL Server / instancename / <somevalue>
-        // We want to return <somevalue>
-        // --> MSSQL.instancename
-        return (String) getExtraOptions().get("MSSQL.instance");
-    }
-
-    /**
-     * @param instanceName the SQL Server instance
-     */
-    public void setSQLServerInstance(String instanceName)
-    {
-        // This is also covered/persisted by JDBC option MS SQL Server / instancename / <somevalue>
-        // We want to return set <somevalue>
-        // --> MSSQL.instancename
-        addExtraOption("MSSQL", "instance", instanceName);
-    }
+//    /**
+//     * @return the SQL Server instance
+//     */
+//    public String getSQLServerInstance()
+//    {
+//        // This is also covered/persisted by JDBC option MS SQL Server / instancename / <somevalue>
+//        // We want to return <somevalue>
+//        // --> MSSQL.instancename
+//        return (String) getExtraOptions().get("MSSQL.instance");
+//    }
+//
+//    /**
+//     * @param instanceName the SQL Server instance
+//     */
+//    public void setSQLServerInstance(String instanceName)
+//    {
+//        // This is also covered/persisted by JDBC option MS SQL Server / instancename / <somevalue>
+//        // We want to return set <somevalue>
+//        // --> MSSQL.instancename
+//        addExtraOption("MSSQL", "instance", instanceName);
+//    }
 
     /**
      * @return true if the Microsoft SQL server uses two decimals (..) to separate schema and table (default==false).

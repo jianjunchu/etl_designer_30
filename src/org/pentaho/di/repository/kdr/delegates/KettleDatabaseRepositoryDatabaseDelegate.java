@@ -136,7 +136,8 @@ public class KettleDatabaseRepositoryDatabaseDelegate extends KettleDatabaseRepo
 				databaseMeta.setServername( r.getString(KettleDatabaseRepository.FIELD_DATABASE_SERVERNAME, "") );
 				databaseMeta.setDataTablespace( r.getString(KettleDatabaseRepository.FIELD_DATABASE_DATA_TBS, "") );
 				databaseMeta.setIndexTablespace( r.getString(KettleDatabaseRepository.FIELD_DATABASE_INDEX_TBS, "") );
-                
+				databaseMeta.setInstanceName( r.getString(KettleDatabaseRepository.FIELD_DATABASE_INSTANCE_NAME, "") );
+
                 // Also, load all the properties we can find...
 				final Collection<RowMetaAndData> attrs = repository.connectionDelegate.getDatabaseAttributes(id_database);
                 for (RowMetaAndData row : attrs)
@@ -190,7 +191,8 @@ public class KettleDatabaseRepositoryDatabaseDelegate extends KettleDatabaseRepo
 											databaseMeta.getPassword(),
 											databaseMeta.getServername(),
 											databaseMeta.getDataTablespace(),
-											databaseMeta.getIndexTablespace()
+											databaseMeta.getIndexTablespace(),
+											databaseMeta.getInstanceName()
 										)
 					); 
 			}
@@ -208,7 +210,8 @@ public class KettleDatabaseRepositoryDatabaseDelegate extends KettleDatabaseRepo
 											databaseMeta.getPassword(),
 											databaseMeta.getServername(),
 											databaseMeta.getDataTablespace(),
-											databaseMeta.getIndexTablespace()
+											databaseMeta.getIndexTablespace(),
+											databaseMeta.getInstanceName()
 										);
 			}
             
@@ -236,7 +239,7 @@ public class KettleDatabaseRepositoryDatabaseDelegate extends KettleDatabaseRepo
 	}
 
 	public synchronized ObjectId insertDatabase(String name, String type, String access, String host, String dbname, String port,
-			String user, String pass, String servername, String data_tablespace, String index_tablespace)
+			String user, String pass, String servername, String data_tablespace, String index_tablespace,String instanceName)
 			throws KettleException
 	{
 
@@ -283,6 +286,7 @@ public class KettleDatabaseRepositoryDatabaseDelegate extends KettleDatabaseRepo
 		table.addValue(new ValueMeta(KettleDatabaseRepository.FIELD_DATABASE_SERVERNAME, ValueMetaInterface.TYPE_STRING), servername);
 		table.addValue(new ValueMeta(KettleDatabaseRepository.FIELD_DATABASE_DATA_TBS, ValueMetaInterface.TYPE_STRING), data_tablespace);
 		table.addValue(new ValueMeta(KettleDatabaseRepository.FIELD_DATABASE_INDEX_TBS, ValueMetaInterface.TYPE_STRING), index_tablespace);
+		table.addValue(new ValueMeta(KettleDatabaseRepository.FIELD_DATABASE_INSTANCE_NAME, ValueMetaInterface.TYPE_STRING), instanceName);
 
 		repository.connectionDelegate.getDatabase().prepareInsert(table.getRowMeta(), KettleDatabaseRepository.TABLE_R_DATABASE);
 		repository.connectionDelegate.getDatabase().setValuesInsert(table);
@@ -293,7 +297,7 @@ public class KettleDatabaseRepositoryDatabaseDelegate extends KettleDatabaseRepo
 	}
 
 	public synchronized void updateDatabase(ObjectId id_database, String name, String type, String access, String host, String dbname,
-			String port, String user, String pass, String servername, String data_tablespace, String index_tablespace)
+			String port, String user, String pass, String servername, String data_tablespace, String index_tablespace,String instanceName)
 			throws KettleException
 	{
 		ObjectId id_database_type = getDatabaseTypeID(type);
@@ -311,6 +315,7 @@ public class KettleDatabaseRepositoryDatabaseDelegate extends KettleDatabaseRepo
 		table.addValue(new ValueMeta(KettleDatabaseRepository.FIELD_DATABASE_SERVERNAME, ValueMetaInterface.TYPE_STRING), servername);
 		table.addValue(new ValueMeta(KettleDatabaseRepository.FIELD_DATABASE_DATA_TBS, ValueMetaInterface.TYPE_STRING), data_tablespace);
 		table.addValue(new ValueMeta(KettleDatabaseRepository.FIELD_DATABASE_INDEX_TBS, ValueMetaInterface.TYPE_STRING), index_tablespace);
+		table.addValue(new ValueMeta(KettleDatabaseRepository.FIELD_DATABASE_INSTANCE_NAME, ValueMetaInterface.TYPE_STRING), instanceName);
 
 		repository.connectionDelegate.updateTableRow(KettleDatabaseRepository.TABLE_R_DATABASE, KettleDatabaseRepository.FIELD_DATABASE_ID_DATABASE, table, id_database);
 	}
