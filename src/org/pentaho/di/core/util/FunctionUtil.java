@@ -59,12 +59,13 @@ public class FunctionUtil {
 			runner.addFunction("AlNum",new AlNum());
 			runner.addFunction("Alpha",new Alpha());
 			runner.addFunction("Compare",new Compare());
-			/*runner.addFunction("Char",new JavaChar());
-			runner.addFunction("CompareNoCase",new JavaCompareNoCase());
-			runner.addFunction("CompareNum",new JavaCompareNum());
-			runner.addFunction("Convert",new JavaConvert());
-			runner.addFunction("Count",new JavaCount());
-			runner.addFunction("CurrentDate",new JavaCurrentDate());
+			/*runner.addFunction("Char",new JavaChar());*/
+			runner.addFunction("CompareNoCase",new CompareNoCase());
+			runner.addFunction("CompareNum",new CompareNum());
+			runner.addFunction("CompareNumNoCase",new CompareNumNoCase());
+			/*runner.addFunction("Convert",new JavaConvert());*/
+			runner.addFunction("Count",new Count());
+			/*runner.addFunction("CurrentDate",new JavaCurrentDate());
 			runner.addFunction("CurrentTime",new JavaCurrentTime());
 			runner.addFunction("CurrentTimeMS",new JavaCurrentTimeMS());
 			runner.addFunction("CurrentTimestamp",new JavaCurrentTimestamp());
@@ -76,15 +77,15 @@ public class FunctionUtil {
 			runner.addFunction("DateToString",new JavaDateToString());
 			runner.addFunction("DaysInMonth",new JavaDaysInMonth());
 			runner.addFunction("DaysInYear",new JavaDaysInYear());
-			runner.addFunction("DaysSinceFromDate",new JavaDaysSinceFromDate());
-			runner.addFunction("Dcount",new JavaDcount());
-			runner.addFunction("DecDate",new JavaDecDate());
-			runner.addFunction("DecimalToString",new JavaDecimalToString());
-			runner.addFunction("DecTime",new JavaDecTime());
+			runner.addFunction("DaysSinceFromDate",new JavaDaysSinceFromDate());*/
+			runner.addFunction("Dcount",new Dcount());
+			/*runner.addFunction("DecDate",new JavaDecDate());*/
+			runner.addFunction("DecimalToString",new DecimalToString());
+			/*runner.addFunction("DecTime",new JavaDecTime());
 			runner.addFunction("DecTimeStamp",new JavaDecTimeStamp());
-			runner.addFunction("DFloatToDecimal",new JavaDFloatToDecimal());
-			runner.addFunction("DownCase",new JavaDownCase());
-			runner.addFunction("DQuote",new JavaDQuote());
+			runner.addFunction("DFloatToDecimal",new JavaDFloatToDecimal());*/
+			runner.addFunction("DownCase",new DownCase());
+			/*runner.addFunction("DQuote",new JavaDQuote());
 			runner.addFunction("Ereplace",new JavaEreplace());
 			runner.addFunction("FileNorm",new JavaFileNorm());
 			runner.addFunction("HoursFromTime",new JavaHoursFromTime());
@@ -97,26 +98,27 @@ public class FunctionUtil {
 			runner.addFunction("MonthDayFromDate",new JavaMonthDayFromDate());
 			runner.addFunction("MonthFromDate",new JavaMonthFromDate());
 			runner.addFunction("NextWeekdayFromDate",new JavaNextWeekdayFromDate());
-			runner.addFunction("NullToEmpty",new JavaNullToEmpty());
-			runner.addFunction("Num",new JavaNum());
-			runner.addFunction("PadString",new JavaPadString());
-			runner.addFunction("PreviousWeekdayFromDate",new JavaPreviousWeekdayFromDate());
-			runner.addFunction("Right",new JavaRight());
-			runner.addFunction("SecondsFromTime",new JavaSecondsFromTime());
+			runner.addFunction("NullToEmpty",new JavaNullToEmpty());*/
+			runner.addFunction("Num",new Num());
+			runner.addFunction("PadString",new PadString());
+			/*runner.addFunction("PreviousWeekdayFromDate",new JavaPreviousWeekdayFromDate());*/
+			runner.addFunction("Right",new Right());
+			/*runner.addFunction("SecondsFromTime",new JavaSecondsFromTime());
 			runner.addFunction("SecondsSinceFromTimestamp",new JavaSecondsSinceFromTimestamp());
 			runner.addFunction("Seq",new JavaSeq());
-			runner.addFunction("SetNull",new JavaSetNull());
-			runner.addFunction("Space",new JavaSpace());
-			runner.addFunction("Squote",new JavaSquote());
+			runner.addFunction("SetNull",new JavaSetNull());*/
+			runner.addFunction("Space",new Space());
+			/*runner.addFunction("Squote",new JavaSquote());
 			runner.addFunction("Str",new JavaStr());
 			runner.addFunction("StrClnsGBK",new JavaStrClnsGBK());
 			runner.addFunction("StrClnsUTF8",new JavaStrClnsUTF8());
 			runner.addFunction("StrDate",new JavaStrDate());
 			runner.addFunction("StringToDate",new JavaStringToDate());
 			runner.addFunction("StringToTime",new JavaStringToTime());
-			runner.addFunction("StringToTimestamp",new JavaStringToTimestamp());
-			runner.addFunction("StripWhiteSpace",new JavaStripWhiteSpace());
-			runner.addFunction("StrNrNorm",new JavaStrNrNorm());
+			runner.addFunction("StringToTimestamp",new JavaStringToTimestamp());*/
+			runner.addFunction("StripWhiteSpace",new StripWhiteSpace());
+			runner.addFunction("CompactWhiteSpace",new CompactWhiteSpace());
+			/*runner.addFunction("StrNrNorm",new JavaStrNrNorm());
 			runner.addFunction("StrTime",new JavaStrTime());
 			runner.addFunction("StrTimeDec",new JavaStrTimeDec());
 			runner.addFunction("StrTimeStamp",new JavaStrTimeStamp());
@@ -135,9 +137,9 @@ public class FunctionUtil {
 			runner.addFunction("Trim",new JavaTrim());
 			runner.addFunction("TrimB",new JavaTrimB());
 			runner.addFunction("TrimF",new JavaTrimF());
-			runner.addFunction("TrimLeadingTrailing",new JavaTrimLeadingTrailing());
-			runner.addFunction("UpCase",new JavaUpCase());
-			runner.addFunction("WeekdayFromDate",new JavaWeekdayFromDate());
+			runner.addFunction("TrimLeadingTrailing",new JavaTrimLeadingTrailing());*/
+			runner.addFunction("UpCase",new UpCase());
+			/*runner.addFunction("WeekdayFromDate",new JavaWeekdayFromDate());
 			runner.addFunction("YeardayFromDate",new JavaYeardayFromDate());
 			runner.addFunction("YearFromDate",new JavaYearFromDate());
 			runner.addFunction("YearweekFromDate",new JavaYearweekFromDate());*/
