@@ -455,6 +455,7 @@ public class DatabaseMeta
         addExtraOption(mySQL, "useCursorFetch", "true");
         addExtraOption(mySQL, "characterEncoding", "UTF-8");
         addExtraOption(mySQL, "useUnicode", "true");
+        addExtraOption(mySQL, "autoReconnect", "true");
 
         String infoBright = infoBrightPlugin.getIds()[0];
 
