@@ -1174,6 +1174,14 @@
     <iconfile>ui/images/SPL.png</iconfile>
   </step>
 
+  <step id="ResumeSplitter">
+    <description>i18n:org.pentaho.di.trans.step:BaseStep.TypeLongDesc.SplitResumeFields</description>
+    <classname>org.pentaho.di.trans.steps.resumesplitter.ResumeSplitterMeta</classname>
+    <category>i18n:org.pentaho.di.trans.step:BaseStep.Category.Transform</category>
+    <tooltip>i18n:org.pentaho.di.trans.step:BaseStep.TypeTooltipDesc.SplitResumeFields</tooltip>
+    <iconfile>ui/images/SPL.png</iconfile>
+  </step>
+
   <step id="FixedInput">
     <description>i18n:org.pentaho.di.trans.step:BaseStep.TypeLongDesc.FixedInput</description>
     <classname>org.pentaho.di.trans.steps.fixedinput.FixedInputMeta</classname>

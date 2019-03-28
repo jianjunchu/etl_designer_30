@@ -409,7 +409,32 @@ public class BrowseController extends AbstractXulEventHandler implements IUISupp
               confirmBox.open();
               break;
             } else {
-              deleteContent(repoObject);
+              //deleteContent(repoObject);
+              confirmBox = (XulConfirmBox) document.createElement("confirmbox");//$NON-NLS-1$
+              confirmBox.setTitle(BaseMessages.getString(PKG, "BrowseController.DeleteFileWarningTitle")); //$NON-NLS-1$
+              confirmBox.setMessage(BaseMessages.getString(PKG, "BrowseController.DeleteFileWarningMessage")); //$NON-NLS-1$
+              confirmBox.setAcceptLabel(BaseMessages.getString(PKG, "Dialog.Ok")); //$NON-NLS-1$
+              confirmBox.setCancelLabel(BaseMessages.getString(PKG, "Dialog.Cancel")); //$NON-NLS-1$
+              confirmBox.addDialogCallback(new XulDialogCallback<Object>() {
+
+                public void onClose(XulComponent sender, Status returnCode, Object retVal) {
+                  if (returnCode == Status.ACCEPT) {
+                    try {
+                      deleteContent(repoObject);
+                    } catch (Exception e) {
+                      messageBox.setTitle(BaseMessages.getString(PKG, "Dialog.Error")); //$NON-NLS-1$
+                      messageBox.setAcceptLabel(BaseMessages.getString(PKG, "Dialog.Ok")); //$NON-NLS-1$
+                      messageBox.setMessage(BaseMessages.getString(PKG, e.getLocalizedMessage()));
+                      messageBox.open();
+                    }
+                  }
+                }
+
+                public void onError(XulComponent sender, Throwable t) {
+                  throw new RuntimeException(t);
+                }
+              });
+              confirmBox.open();
             }
           }
         }

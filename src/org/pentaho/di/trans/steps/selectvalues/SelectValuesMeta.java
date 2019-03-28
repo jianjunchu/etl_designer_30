@@ -138,7 +138,7 @@ public class SelectValuesMeta extends BaseStepMeta implements StepMetaInterface,
     }
     
     /**
-     * @return Returns the selectName.
+     * @return Returns the FunctionExpession.
      */
     public String[] getFunctionExpession()
     {
