@@ -68,8 +68,8 @@
 	  	<echo>Compiling Kettle CORE...</echo>
         <javac fork="true"
             destdir="${classes-core}"
-            target="5"
-            source="5"
+            target="1.7"
+            source="1.7"
             deprecation="true"
             debug="${debug}"
             optimize="${optimize}"
@@ -89,8 +89,8 @@
 	  	<echo>Compiling Kettle DB...</echo>
       <javac fork="true"
           destdir="${classes-db}"
-          target="6"
-          source="6"
+          target="1.7"
+          source="1.7"
           deprecation="true"
           debug="${debug}"
           optimize="${optimize}"
@@ -112,8 +112,8 @@
 	  	<echo>Compiling Kettle DB...</echo>
       <javac fork="true"
         destdir="${classes-dbdialog}"
-        target="6"
-        source="6"
+        target="1.7"
+        source="1.7"
         deprecation="true"
         debug="${debug}"
         optimize="${optimize}"
@@ -137,8 +137,8 @@
 	  	<echo>Compiling Kettle enum...</echo>
         <javac fork="true"
             destdir="${classes}"
-            target="6"
-            source="6"
+            target="1.7"
+            source="1.7"
             deprecation="true"
             debug="${debug}"
             optimize="${optimize}"
@@ -149,7 +149,7 @@
 
             <classpath id="cp-kettle">
                 <pathelement path="${classes-core}"/>
-	    		<pathelement path="${classes-db}"/>
+	    	<pathelement path="${classes-db}"/>
                 <fileset dir="${libext}" 		includes="*.jar *.zip"/>
                 <fileset dir="${libext}/"	    includes="**/*.jar *.zip"/>
             </classpath>
@@ -160,8 +160,8 @@
 	  	<echo>Compiling Kettle engine...</echo>
         <javac fork="true"
             destdir="${classes}"
-            target="6"
-            source="6"
+            target="1.7"
+            source="1.7"
             deprecation="true"
             debug="${debug}"
             optimize="${optimize}"
@@ -183,8 +183,8 @@
 	  	<echo>Compiling Kettle UI...</echo>
 	    <javac 
 	    	   destdir="${classes-ui}"
-	    	   target="6"
-	    	   source="6"
+	    	   target="1.7"
+	    	   source="1.7"
 	           deprecation="true"
 	    	   debug="${debug}"
                optimize="${optimize}"
@@ -227,8 +227,8 @@
 		    <javac fork="true"
 		    	   srcdir="${test}" 
 		    	   destdir="${testClasses}"
-		    	   target="6"
-		    	   source="6"
+		    	   target="1.7"
+		    	   source="1.7"
 		           deprecation="true"
 		    	   debug="true"
 	        	   includeantruntime="false"
@@ -299,7 +299,7 @@
       <javadoc 
 	      	destdir="${api}" 
 	      	access="public" 
-	      	source="1.5" 
+	      	source="1.7" 
 	      	use="true" 
 	      	notree="false" 
 	      	nonavbar="false" 
@@ -1286,8 +1286,8 @@
 	      		<mkdir dir="src-plugins/@{plugin}/bin/classes"/>
 			    <javac 
 			    	   destdir="src-plugins/@{plugin}/bin/classes"
-			    	   target="5"
-			    	   source="5"
+			    	   target="1.7"
+			    	   source="1.7"
 			           deprecation="true"
 			    	   debug="${debug}"
 			    	   memorymaximumsize="256M"
@@ -1383,8 +1383,8 @@
 	      		<mkdir dir="src-plugins/@{plugin}/bin/test-classes"/>
 			    <javac 
 			    	   destdir="src-plugins/@{plugin}/bin/test-classes"
-			    	   target="5"
-			    	   source="5"
+			    	   target="1.7"
+			    	   source="1.7"
 			           deprecation="true"
 			    	   debug="${debug}"
 			    	   memorymaximumsize="256M"
