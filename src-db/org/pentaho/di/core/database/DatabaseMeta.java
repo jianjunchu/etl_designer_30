@@ -41,6 +41,7 @@ import org.pentaho.di.core.RowMetaAndData;
 import org.pentaho.di.core.encryption.Encr;
 import org.pentaho.di.core.exception.KettleDatabaseException;
 import org.pentaho.di.core.exception.KettlePluginException;
+import org.pentaho.di.core.exception.KettleValueException;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.logging.LogChannel;
 import org.pentaho.di.core.plugins.DatabasePluginType;
@@ -2650,4 +2651,8 @@ public class DatabaseMeta
         return databaseInterface.getValueFromResultSet(rs, val, i);
     }
 
+    @Override
+    public String fieldSubstitute( String aString, RowMetaInterface rowMeta, Object[] rowData ) throws KettleValueException {
+        return variables.fieldSubstitute( aString, rowMeta, rowData );
+    }
 }

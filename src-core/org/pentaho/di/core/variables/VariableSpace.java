@@ -22,6 +22,9 @@
 
 package org.pentaho.di.core.variables;
 
+import org.pentaho.di.core.exception.KettleValueException;
+import org.pentaho.di.core.row.RowMetaInterface;
+
 import java.util.Map;
 
 
@@ -151,4 +154,22 @@ public interface VariableSpace
      * @param prop Properties object containing key-value pairs.
      */
     void injectVariables(Map<String, String> prop);
+
+    /**
+     * Substitutes field values in <code>aString</code>. Field values are of the form "?{<field name>}". The values are
+     * retrieved from the specified row. Please note that the getString() method is used to convert to a String, for all
+     * values in the row.
+     *
+     * @param aString
+     *          the string on which to apply the substitution.
+     * @param rowMeta
+     *          The row metadata to use.
+     * @param rowData
+     *          The row data to use
+     *
+     * @return the string with the substitution applied.
+     * @throws KettleValueException
+     *           In case there is a String conversion error
+     */
+    public String fieldSubstitute(String aString, RowMetaInterface rowMeta, Object[] rowData ) throws KettleValueException;
 }

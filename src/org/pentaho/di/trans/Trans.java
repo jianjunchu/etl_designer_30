@@ -30,10 +30,7 @@ import org.pentaho.di.core.*;
 import org.pentaho.di.core.database.Database;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.database.map.DatabaseConnectionMap;
-import org.pentaho.di.core.exception.KettleDatabaseException;
-import org.pentaho.di.core.exception.KettleException;
-import org.pentaho.di.core.exception.KettleFileException;
-import org.pentaho.di.core.exception.KettleTransException;
+import org.pentaho.di.core.exception.*;
 import org.pentaho.di.core.logging.*;
 import org.pentaho.di.core.parameters.DuplicateParamException;
 import org.pentaho.di.core.parameters.NamedParams;
@@ -94,6 +91,11 @@ public class Trans implements VariableSpace, NamedParams, HasLogChannelInterface
 	private LogLevel logLevel = LogLevel.BASIC;
 	private String containerObjectId;
 	private int logCommitSize=10;
+
+	/**
+	 * save all step thread in a list
+	 */
+	ArrayList<Thread> threadList=new ArrayList<>();
 	
 	/**
 	 * The transformation metadata to execute
@@ -939,6 +941,10 @@ public class Trans implements VariableSpace, NamedParams, HasLogChannelInterface
 	        	Thread thread = new Thread(runThread);
 	        	thread.setName(getName()+" - "+combi.stepname);
 	        	thread.start();
+
+	        	//add to thread list 2019
+
+				threadList.add(thread);
 	        }
 	        break;
 	    
@@ -1319,6 +1325,36 @@ public class Trans implements VariableSpace, NamedParams, HasLogChannelInterface
 		return false;
 	}
 
+	/**
+	 * Ask all steps to stop running(interrupt all thread)
+	 */
+	public void stopAllForcely()
+	{
+		if (steps==null) return;
+
+		//log.logDetailed("DIS: Checking wether of not ["+sname+"]."+cnr+" has started!");
+		//log.logDetailed("DIS: hasStepStarted() looking in "+threads.size()+" threads");
+
+		for (Thread t:threadList)
+		{
+			//t.interrupt();
+			try {
+				t.stop();
+			}catch (Throwable e){
+				log.logBasic(e.getMessage());
+			}
+		}
+
+		//if it is stopped it is not paused
+		paused.set(false);
+		stopped.set(true);
+
+		// Fire the stopped listener...
+		//
+		for (TransStoppedListener listener : transStoppedListeners) {
+			listener.transStopped(this);
+		}
+	}
 	//
 	// Ask all steps to stop running.
 	//
@@ -1361,6 +1397,7 @@ public class Trans implements VariableSpace, NamedParams, HasLogChannelInterface
 		  listener.transStopped(this);
 		}
 	}
+
 
 	public int nrSteps()
 	{
@@ -2825,10 +2862,9 @@ public class Trans implements VariableSpace, NamedParams, HasLogChannelInterface
 	    a cleanup on those transformations to release sockets, etc.<br>
 	    <br>
 	    
-	   @param logSubject the subject to use for logging
+	   @param log the subject to use for logging
 	   @param transSplitter the transformation splitter object
-	   @param parentJob the parent job when executed in a job, otherwise just set to null
-	   @param sleepTimeSeconds the sleep time in seconds in between slave transformation status polling
+	   @param parentJob the parent job when executed in a job, otherwise just set to nulls
 	   @return the number of errors encountered
 	*/
 	public static final long monitorClusteredTransformation(LogChannelInterface log, TransSplitter transSplitter, Job parentJob)
@@ -2848,7 +2884,7 @@ public class Trans implements VariableSpace, NamedParams, HasLogChannelInterface
    * a cleanup on those transformations to release sockets, etc.<br>
    * <br>
    * 
-   * @param logSubject
+   * @param log
    *          the subject to use for logging
    * @param transSplitter
    *          the transformation splitter object
@@ -3708,4 +3744,9 @@ public class Trans implements VariableSpace, NamedParams, HasLogChannelInterface
   public PrintWriter getServletPrintWriter() {
     return servletPrintWriter;
   }
+
+	@Override
+	public String fieldSubstitute( String aString, RowMetaInterface rowMeta, Object[] rowData ) throws KettleValueException {
+		return variables.fieldSubstitute( aString, rowMeta, rowData );
+	}
 }

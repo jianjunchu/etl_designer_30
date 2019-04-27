@@ -3073,9 +3073,9 @@ public class TransGraph extends AbstractGraph implements XulEventHandler, Redraw
     pauseResume();
   }
 
-  public void stopTransformation() {
-    stop();
-  }
+  public void stopTransformation() { stop(); }
+
+  public void stopTransformationForcely() { stopForcely(); }
 
   public void previewFile() {
     spoon.previewFile();
@@ -3562,6 +3562,22 @@ public class TransGraph extends AbstractGraph implements XulEventHandler, Redraw
     if (running && !halting) {
       halting = true;
       trans.stopAll();
+      log.logMinimal(BaseMessages.getString(PKG, "TransLog.Log.ProcessingOfTransformationStopped")); //$NON-NLS-1$
+
+      running = false;
+      initialized = false;
+      halted = false;
+      halting = false;
+
+      setControlStates();
+
+      transMeta.setInternalKettleVariables(); // set the original vars back as they may be changed by a mapping
+    }
+  }
+  public void stopForcely() {
+    if (running && !halting) {
+      halting = true;
+      trans.stopAllForcely();
       log.logMinimal(BaseMessages.getString(PKG, "TransLog.Log.ProcessingOfTransformationStopped")); //$NON-NLS-1$
 
       running = false;
@@ -4334,8 +4350,8 @@ public class TransGraph extends AbstractGraph implements XulEventHandler, Redraw
   
   /**
    * The longer the hop, the higher the force 
-   * @param stepMeta
    * @param hopMeta
+   * @param locations
    * @return
    */
   private Force getHookeAttraction(TransHopMeta hopMeta, Map<StepMeta, StepLocation> locations) {

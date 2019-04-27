@@ -1031,9 +1031,7 @@ public class TextFileOutputMeta extends BaseStepMeta  implements StepMetaInterfa
                 v.setGroupingSymbol(field.getGroupingSymbol());
                 v.setCurrencySymbol(field.getCurrencySymbol());
                 v.setOutputPaddingEnabled( isPadded() );
-                //Jason 201611 zhongpin
-                v.setTrimType(ValueMetaInterface.TRIM_TYPE_BOTH);
-                //v.setTrimType(field.getTrimType());
+                v.setTrimType(field.getTrimType());
                 if ( ! Const.isEmpty(getEncoding()) )
                 {
             		v.setStringEncoding(getEncoding());

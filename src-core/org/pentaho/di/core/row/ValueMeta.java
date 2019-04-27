@@ -57,8 +57,9 @@ public class ValueMeta implements ValueMetaInterface
 {
 	private static Class<?> PKG = Const.class; // for i18n purposes, needed by Translator2!!   $NON-NLS-1$
 
-    public static final String DEFAULT_DATE_FORMAT_MASK = "yyyy/MM/dd HH:mm:ss.SSS";
-    
+    //public static final String DEFAULT_DATE_FORMAT_MASK = "yyyy/MM/dd HH:mm:ss.SSS";
+
+    public static final String DEFAULT_DATE_FORMAT_MASK = Const.NVL(System.getProperty(Const.KETTLE_DEFAULT_DATE_FORMAT_MASK, "yyyy-MM-dd HH:mm:ss.SSS"), "yyyy-MM-dd HH:mm:ss.SSS");
 	public static final String XML_META_TAG = "value-meta";
 	public static final String XML_DATA_TAG = "value-data";
 	

@@ -44,10 +44,7 @@ import org.pentaho.di.core.SQLStatement;
 import org.pentaho.di.core.changed.ChangedFlag;
 import org.pentaho.di.core.database.Database;
 import org.pentaho.di.core.database.DatabaseMeta;
-import org.pentaho.di.core.exception.KettleDatabaseException;
-import org.pentaho.di.core.exception.KettleException;
-import org.pentaho.di.core.exception.KettleFileException;
-import org.pentaho.di.core.exception.KettleXMLException;
+import org.pentaho.di.core.exception.*;
 import org.pentaho.di.core.gui.OverwritePrompter;
 import org.pentaho.di.core.gui.Point;
 import org.pentaho.di.core.gui.UndoInterface;
@@ -2834,4 +2831,9 @@ public class JobMeta extends ChangedFlag implements Cloneable, Comparable<JobMet
   public void setRepository(Repository repository) {
     this.repository = repository;
   }
+
+	@Override
+	public String fieldSubstitute( String aString, RowMetaInterface rowMeta, Object[] rowData ) throws KettleValueException {
+		return variables.fieldSubstitute( aString, rowMeta, rowData );
+	}
 }

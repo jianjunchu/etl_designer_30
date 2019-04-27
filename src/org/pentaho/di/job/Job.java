@@ -65,6 +65,7 @@ import org.pentaho.di.core.parameters.DuplicateParamException;
 import org.pentaho.di.core.parameters.NamedParams;
 import org.pentaho.di.core.parameters.NamedParamsDefault;
 import org.pentaho.di.core.parameters.UnknownParamException;
+import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMeta;
 import org.pentaho.di.core.util.EnvUtil;
 import org.pentaho.di.core.variables.VariableSpace;
@@ -136,6 +137,9 @@ public class Job extends Thread implements VariableSpace, NamedParams, HasLogCha
 	private AtomicBoolean active;
 
 	private AtomicBoolean stopped;
+
+    private AtomicBoolean stoppedForcely;
+
 	//Add by jyhe
 	private AtomicBoolean paused;
     
@@ -199,6 +203,7 @@ public class Job extends Thread implements VariableSpace, NamedParams, HasLogCha
 
     active = new AtomicBoolean(false);
     stopped = new AtomicBoolean(false);
+    stoppedForcely = new AtomicBoolean(false);
     paused=new AtomicBoolean(false);
     jobTracker = new JobTracker(jobMeta);
     jobEntryResults = new ArrayList<JobEntryResult>();
@@ -304,7 +309,8 @@ public class Job extends Thread implements VariableSpace, NamedParams, HasLogCha
 		try
 		{
 			stopped=new AtomicBoolean(false);
-			finished=new AtomicBoolean(false);
+            stoppedForcely=new AtomicBoolean(false);
+            finished=new AtomicBoolean(false);
             initialized = new AtomicBoolean(true);
             paused = new AtomicBoolean(false);
     
@@ -335,6 +341,7 @@ public class Job extends Thread implements VariableSpace, NamedParams, HasLogCha
             active.set(false);
             finished.set(true);
             stopped.set(false);
+            stoppedForcely.set(false);
             paused.set(false);
 		}
 		finally
@@ -361,7 +368,8 @@ public class Job extends Thread implements VariableSpace, NamedParams, HasLogCha
     {
 		finished.set(false);
 		stopped.set(false);
-		paused.set(false);
+        stoppedForcely.set(false);
+        paused.set(false);
 
         log.logMinimal(BaseMessages.getString(PKG, "Job.Comment.JobStarted"));
 
@@ -1074,6 +1082,12 @@ public class Job extends Thread implements VariableSpace, NamedParams, HasLogCha
 	{
 		stopped.set(true);
 	}
+
+    // Stop all activity!
+    public void stopAllForcely()
+    {
+        stoppedForcely.set(true);
+    }
 	
 	public void setStopped(boolean stopped)
 	{
@@ -1087,6 +1101,16 @@ public class Job extends Thread implements VariableSpace, NamedParams, HasLogCha
 	{
 		return stopped.get();
 	}
+
+
+    /**
+     * @return Returns the stopped status of this Job...
+     */
+    public boolean isStoppedForcely()
+    {
+        return stoppedForcely.get();
+    }
+
 	
 	/**
 	 * @return Returns the startDate.
@@ -1747,4 +1771,9 @@ public class Job extends Thread implements VariableSpace, NamedParams, HasLogCha
 	{
 		return paused.get();
 	}
+
+    @Override
+    public String fieldSubstitute(String aString, RowMetaInterface rowMeta, Object[] rowData ) throws KettleValueException {
+        return variables.fieldSubstitute( aString, rowMeta, rowData );
+    }
 }

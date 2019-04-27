@@ -108,6 +108,12 @@
 	</kettle-variable>
 
 	<kettle-variable>
+		<description>System wide flag to set the default Date format</description>
+		<variable>KETTLE_DEFAULT_DATE_FORMAT_MASK</variable>
+		<default-value>yyyy-MM-dd HH:mm:ss.SSS</default-value>
+	</kettle-variable>
+
+	<kettle-variable>
 		<description>The maximum number of log lines that are kept internally by Kettle. Set to 0 to keep all rows (default)</description>
 		<variable>KETTLE_MAX_LOG_SIZE_IN_LINES</variable>
 		<default-value>5000</default-value>

@@ -2773,7 +2773,13 @@ public class BaseStep implements VariableSpace, StepInterface, LoggingObjectInte
 	public String[] environmentSubstitute(String aString[]) 
 	{
 		return variables.environmentSubstitute(aString);
-	}		
+	}
+
+
+    public String fieldSubstitute( String aString, RowMetaInterface rowMeta, Object[] rowData )
+            throws KettleValueException {
+        return variables.fieldSubstitute( aString, rowMeta, rowData );
+    }
 
 	public VariableSpace getParentVariableSpace() 
 	{

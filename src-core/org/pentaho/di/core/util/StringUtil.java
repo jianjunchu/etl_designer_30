@@ -36,6 +36,7 @@ import java.util.Map;
 
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleValueException;
+import org.pentaho.di.core.row.RowMetaInterface;
 
 /**
  * A collection of utilities to manipulate strings.
@@ -54,6 +55,10 @@ public class StringUtil
 	
 	public static final String HEX_OPEN = "$[";
 	public static final String HEX_CLOSE = "]";
+
+	public static final String FIELD_OPEN = "?{";
+
+	public static final String FIELD_CLOSE = "}";
   
     public static final String CRLF = "\r\n"; //$NON-NLS-1$
 
@@ -602,4 +607,28 @@ public class StringUtil
 	    
 	    return variable;
     }
+
+	/**
+	 * Substitutes field values in <code>aString</code>. Field values are of the form "?{<field name>}". The values are
+	 * retrieved from the specified row. Please note that the getString() method is used to convert to a String, for all
+	 * values in the row.
+	 *
+	 * @param aString
+	 *          the string on which to apply the substitution.
+	 * @param rowMeta
+	 *          The row metadata to use.
+	 * @param rowData
+	 *          The row data to use
+	 *
+	 * @return the string with the substitution applied.
+	 * @throws KettleValueException
+	 *           In case there is a String conversion error
+	 */
+	public static String substituteField(String aString, RowMetaInterface rowMeta, Object[] rowData ) throws KettleValueException {
+		Map<String, String> variables = new HashMap<String, String>();
+		for ( int i = 0; i < rowMeta.size(); i++ ) {
+			variables.put( rowMeta.getValueMeta( i ).getName(), rowMeta.getString( rowData, i ) );
+		}
+		return substitute( aString, variables, FIELD_OPEN, FIELD_CLOSE );
+	}
 }

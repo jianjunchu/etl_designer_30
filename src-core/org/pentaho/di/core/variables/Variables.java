@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.exception.KettleValueException;
+import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMeta;
 import org.pentaho.di.core.util.StringUtil;
 import org.pentaho.di.version.BuildVersion;
@@ -132,6 +134,32 @@ public class Variables implements VariableSpace
 			list.add(name);
 		}
 		return (String[])list.toArray(new String[list.size()]);
+	}
+
+	/**
+	 * Substitutes field values in <code>aString</code>. Field values are of the form "?{<field name>}". The values are
+	 * retrieved from the specified row. Please note that the getString() method is used to convert to a String, for all
+	 * values in the row.
+	 *
+	 * @param aString
+	 *          the string on which to apply the substitution.
+	 * @param rowMeta
+	 *          The row metadata to use.
+	 * @param rowData
+	 *          The row data to use
+	 *
+	 * @return the string with the substitution applied.
+	 * @throws KettleValueException
+	 *           In case there is a String conversion error
+	 */
+	@Override
+	public String fieldSubstitute(String aString, RowMetaInterface rowMeta, Object[] rowData )
+			throws KettleValueException {
+		if ( aString == null || aString.length() == 0 ) {
+			return aString;
+		}
+
+		return StringUtil.substituteField( aString, rowMeta, rowData );
 	}
 
 	public void setVariable(String variableName, String variableValue) 

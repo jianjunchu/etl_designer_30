@@ -34,6 +34,7 @@ import org.pentaho.di.core.Const;
 import org.pentaho.di.core.SQLStatement;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.exception.KettleValueException;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.logging.DefaultLogLevel;
 import org.pentaho.di.core.logging.LogChannel;
@@ -44,6 +45,7 @@ import org.pentaho.di.core.logging.LoggingObjectType;
 import org.pentaho.di.core.plugins.JobEntryPluginType;
 import org.pentaho.di.core.plugins.PluginInterface;
 import org.pentaho.di.core.plugins.PluginRegistry;
+import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMeta;
 import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.core.variables.Variables;
@@ -598,5 +600,8 @@ public class JobEntryBase implements Cloneable, VariableSpace, CheckResultSource
    */
   public void lookupRepositoryReferences(Repository repository) throws KettleException {
   }
-  
+  @Override
+  public String fieldSubstitute(String aString, RowMetaInterface rowMeta, Object[] rowData ) throws KettleValueException {
+    return variables.fieldSubstitute( aString, rowMeta, rowData );
+  }
 }

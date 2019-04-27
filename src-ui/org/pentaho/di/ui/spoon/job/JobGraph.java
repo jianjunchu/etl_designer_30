@@ -3243,12 +3243,22 @@ public static void copyInternalJobVariables(JobMeta sourceJobMeta, TransMeta tar
 	  if (job != null && job.isActive() && job.isInitialized()) {
 	    job.stopAll();
 	    job.waitUntilFinished(5000); // wait until everything is stopped, maximum 5 seconds...
-	    
+
 	    log.logMinimal(BaseMessages.getString(PKG, "JobLog.Log.JobWasStopped")); //$NON-NLS-1$
 	  }
 	  setControlStates();
   }
-  
+
+    public synchronized void stopJobForcely() {
+        if (job != null && job.isActive() && job.isInitialized()) {
+            job.stopAllForcely();
+            job.waitUntilFinished(5000); // wait until everything is stopped, maximum 5 seconds...
+
+            log.logMinimal(BaseMessages.getString(PKG, "JobLog.Log.JobWasStopped")); //$NON-NLS-1$
+        }
+        setControlStates();
+    }
+
   private boolean controlDisposed(XulToolbarbutton button) {
 	  if (button.getManagedObject() instanceof Widget) {
 		  Widget widget = (Widget) button.getManagedObject();

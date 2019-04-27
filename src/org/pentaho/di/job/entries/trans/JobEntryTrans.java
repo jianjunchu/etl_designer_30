@@ -1032,11 +1032,12 @@ public class JobEntryTrans extends JobEntryBase implements Cloneable, JobEntryIn
                     //
                     trans.setJobStartDate( rootJob.getStartDate() );
                     trans.setJobEndDate( rootJob.getEndDate() );
-                    
+
                     try {
             			// Start execution...
                     	//
                         int count=0;
+
                         while(count==0 ||(count<=this.getErrorRetryTimes() && trans.getErrors()!=0)) {
 
                             if(count>0)
@@ -1045,27 +1046,47 @@ public class JobEntryTrans extends JobEntryBase implements Cloneable, JobEntryIn
                                 try {
                                     Thread.sleep(5000);// wait for 5s if error occured
                                 } catch (InterruptedException e) {
+                                    e.printStackTrace();
                                 }
                             }
-                            count++;
-                            try {
-                                trans.execute(args);
-                                // Wait until we're done with it...
-                                //
-                                while (!trans.isFinished() && !parentJob.isStopped() && trans.getErrors() == 0) {
+                            final String[] argsF = args;
+                            final int countF = count++;
+
+                            Thread thread = new Thread(){
+                                public void run()
+                                {
                                     try {
-                                        Thread.sleep(0, 500);
-                                    } catch (InterruptedException e) {
+                                        trans.execute(argsF);
+                                    } catch (KettleException e) {
+                                        if(countF==getErrorRetryTimes())
+                                        {
+                                            logError(BaseMessages.getString(PKG, "JobTrans.Error.UnablePrepareExec"), e);
+                                            result.setNrErrors(1);
+                                        }
                                     }
                                 }
-                            } catch (KettleException e) {
-                                if(count==this.getErrorRetryTimes())
-                                {
-                                    logError(BaseMessages.getString(PKG, "JobTrans.Error.UnablePrepareExec"), e);
-                                    result.setNrErrors(1);
-                                    throw e;
+                            };
+                            thread.start();
+                            // Wait until we're done with it...
+                            //
+                            while (!trans.isFinished() && !parentJob.isStopped() && !parentJob.isStoppedForcely() && trans.getErrors() == 0) {
+                                try {
+                                    Thread.sleep(0, 500);
+                                } catch (InterruptedException e) {
                                 }
                             }
+                            if (parentJob.isStopped() || trans.getErrors() != 0)
+                            {
+                                trans.stopAll();
+                                trans.waitUntilFinished();
+                                result.setNrErrors(1);
+                            }
+                            if (parentJob.isStoppedForcely()) //job was stoped forcely
+                            {
+                                trans.stopAllForcely();
+                                result.setNrErrors(1);
+                            }
+
                         }
 
 //                        trans.execute(args);
@@ -1077,12 +1098,7 @@ public class JobEntryTrans extends JobEntryBase implements Cloneable, JobEntryIn
 //                            } catch (InterruptedException e) {
 //                            }
 
-        				if (parentJob.isStopped() || trans.getErrors() != 0)
-        				{
-        					trans.stopAll();
-        					trans.waitUntilFinished();
-                            result.setNrErrors(1);
-        				}
+
         				Result newResult = trans.getResult();
 
                         result.clear(); // clear only the numbers, NOT the files or rows.

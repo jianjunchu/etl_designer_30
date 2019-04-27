@@ -72,7 +72,7 @@ public class Const
   /**
    * Version number
    */
-  public static final String VERSION = "V3.4.2";
+  public static final String VERSION = "V3.4.3";
 
   /**
    * Release Type
@@ -602,6 +602,11 @@ public class Const
 	 * Otherwise they are not.
 	 */
 	public static final String KETTLE_EMPTY_STRING_DIFFERS_FROM_NULL = "KETTLE_EMPTY_STRING_DIFFERS_FROM_NULL";
+
+	/**
+	 * System wide flag to set the default Date format
+	 */
+	public static final String KETTLE_DEFAULT_DATE_FORMAT_MASK = "KETTLE_DEFAULT_DATE_FORMAT_MASK";
 
 	/**
 	 * System wide flag to set the maximum number of log lines that are kept internally by Kettle.

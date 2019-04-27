@@ -5298,4 +5298,9 @@ public class Database implements VariableSpace, LoggingObjectInterface
   public void setNrExecutedCommits(int nrExecutedCommits) {
     this.nrExecutedCommits = nrExecutedCommits;
   }
+
+    @Override
+    public String fieldSubstitute( String aString, RowMetaInterface rowMeta, Object[] rowData ) throws KettleValueException {
+        return variables.fieldSubstitute( aString, rowMeta, rowData );
+    }
 }
