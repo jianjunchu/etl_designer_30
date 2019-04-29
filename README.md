@@ -9,7 +9,7 @@ https://github.com/jianjunchu/etl_designer_30
 
 
 傲飞 Kettle 设计器的版本说明：
-   Version 3.4.3   发布时间：2019-04-25
+   Version 3.4.3   发布时间：2019-04-25  下载： https://pan.baidu.com/s/1JhFuQ8OuvAMvV8iWKMsewQ
       1. 增加强行停止功能，通过杀掉步骤线程的方式，强行停止正在运行的转换或作业。
       2. 增加系统级别的日期格式变量 KETTLE_DEFAULT_DATE_FORMAT_MASK，默认日期格式: yyyy-MM-dd HH:mm:ss
       
