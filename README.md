@@ -1,6 +1,6 @@
 # auphi_designer
 
-傲飞Kettle 设计器设计器是在 Kettle 5.0 基础上，定制开发的一款设计器。
+傲飞Kettle 设计器设计器是在 Kettle 5.0 基础上，定制开发的一款设计器，代码地址：https://github.com/jianjunchu/etl_designer_30。
 （根据新版本 Kettle 8.x 改造的傲飞Kettle 设计器请参考：https://github.com/jianjunchu/pentaho-kettle ）
 
 傲飞 Kettle 设计器可以独立运行，也可以结合傲飞数据整合平台使用。
