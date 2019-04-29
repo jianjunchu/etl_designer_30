@@ -1,8 +1,6 @@
 # auphi_designer
 
-傲飞Kettle 设计器设计器是在 Kettle 5.0 基础上，定制开发的一款设计器，代码地址：https://github.com/jianjunchu/etl_designer_30。
-（根据新版本 Kettle 8.x 改造的傲飞Kettle 设计器请参考：https://github.com/jianjunchu/pentaho-kettle ）
-
+傲飞Kettle 设计器 3.x 是在 Kettle 5.0 基础上，定制开发的一款设计器.
 傲飞 Kettle 设计器可以独立运行，也可以结合傲飞数据整合平台使用。
 设计器设计的 ETL 作业或转换可以发布到傲飞数据整合平台，由傲飞数据整合平台调度、监控、管理 ETL作业。
 
@@ -28,8 +26,14 @@ https://github.com/jianjunchu/etl_designer_30
    另外定制开发了 Oracle CDC 增量抽取插件，Oracle 触发器增量抽取插件， 等插件。 
       
    
-   傲飞数据整合平台技术支持： 
-                 QQ群：493062264
-                 邮箱：support@pentahochina.com
+其他版本傲飞Kettle 设计器说明：
+1. 根据新版本 Kettle 8.x 改造的傲飞Kettle 设计器请参考：https://github.com/jianjunchu/pentaho-kettle
+2. 傲飞Kettle 云设计器Demo： http://cloud.doetl.com
+
+
+北京傲飞商智软件有限公司
+技术支持： 
+      QQ群：493062264
+      邮箱：support@pentahochina.com
    
    
