@@ -16,11 +16,17 @@ https://github.com/jianjunchu/etl_designer_30
       2. 增加系统级别的日期格式变量 KETTLE_DEFAULT_DATE_FORMAT_MASK，默认日期格式: yyyy-MM-dd HH:mm:ss
       
    Version 3.4.2  发布时间：2019-01-25
+   
       1. 字段选择步骤里增加函数和表达式功能。
+   
       2. 增加函数接口，支持用户自定义开发函数插件。
+      
       3. 增加DB2 批量加载步骤。
+      
       4. 日志表增加记录变量功能。
+      
       5. 文本文件输出步骤，增加按日期完成落地文件的分区功能。
+      
       6. bug 修订。
       
    历史版本功能：
