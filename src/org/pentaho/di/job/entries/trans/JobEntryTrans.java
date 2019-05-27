@@ -1061,7 +1061,7 @@ public class JobEntryTrans extends JobEntryBase implements Cloneable, JobEntryIn
                                         if(countF==getErrorRetryTimes())
                                         {
                                             logError(BaseMessages.getString(PKG, "JobTrans.Error.UnablePrepareExec"), e);
-                                            result.setNrErrors(1);
+                                            //result.setNrErrors(1);
                                         }
                                     }
                                 }
