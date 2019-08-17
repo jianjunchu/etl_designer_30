@@ -9,6 +9,11 @@ https://github.com/jianjunchu/etl_designer_30
 
 
 傲飞 Kettle 设计器的版本说明：
+   Version 4.0.0   发布时间：2019-05-25  下载： https://pan.baidu.com/s/1K5MgLv1pyr4aWfHoG4p0QA
+
+      1.  设计器可以和新管理平台连接。新管理平台使用 vue 架构，前后台分离，增加了 Web 设计器（没有大数据相关组件，主要面向小企业应用）
+      2.  其他bug 修改。
+
    Version 3.4.3   发布时间：2019-04-25  下载： https://pan.baidu.com/s/1JhFuQ8OuvAMvV8iWKMsewQ
    
       1. 增加强行停止功能，通过杀掉步骤线程的方式，强行停止正在运行的转换或作业。
