@@ -25,13 +25,7 @@ package org.pentaho.di.repository.kdr.delegates;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet; 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.Counter;
@@ -173,6 +167,20 @@ public class KettleDatabaseRepositoryConnectionDelegate extends KettleDatabaseRe
 		{
 			throw new KettleException("Error connecting to the repository!", e);
 		}
+
+		Timer timer = new Timer();
+		TimerTask task = new TimerTask() {
+			public void run() {
+				try {
+					if(database.getConnection()!=null)
+						database.execStatements("select 1;");
+					System.out.println(Calendar.getInstance().getTime()+" testconnection");
+				} catch (KettleDatabaseException e) {
+					e.printStackTrace();
+				}
+			}
+		};
+		timer.schedule(task, 60*1000,60*1000);
 	}
 
     /**
@@ -1701,8 +1709,7 @@ public class KettleDatabaseRepositoryConnectionDelegate extends KettleDatabaseRe
 
 	public RowMetaAndData getOneRow(String tablename, String keyfield, ObjectId id) throws KettleException
 	{
-	  String sql = "SELECT * FROM " + tablename + " WHERE " + keyfield + " = ?"; 
-
+	  String sql = "SELECT * FROM " + tablename + " WHERE " + keyfield + " = ?";
       // Get the prepared statement
       //
       PreparedStatement ps = sqlMap.get(sql);
@@ -1710,7 +1717,7 @@ public class KettleDatabaseRepositoryConnectionDelegate extends KettleDatabaseRe
         ps = database.prepareSQL(sql);
         sqlMap.put(sql, ps);
       }
-      
+
       // Assemble the parameter (if any)
       //
       RowMetaInterface parameterMeta = new RowMeta();
@@ -1722,11 +1729,19 @@ public class KettleDatabaseRepositoryConnectionDelegate extends KettleDatabaseRe
       try {
         resultSet = database.openQuery(ps, parameterMeta, parameterData);
         Object[] result = database.getRow(resultSet);
-        if (result==null) return new RowMetaAndData(database.getReturnRowMeta(), RowDataUtil.allocateRowData(database.getReturnRowMeta().size()));
+        if (result==null)
+		{
+			log.logBasic("getOneRow: result=null, "+"sql="+sql+" , parameter="+id);
+			return new RowMetaAndData(database.getReturnRowMeta(), RowDataUtil.allocateRowData(database.getReturnRowMeta().size()));
+		}
         return new RowMetaAndData(database.getReturnRowMeta(), result);
       } catch(KettleException e) {
+      	e.printStackTrace();
         throw e;
-      } finally {
+      } catch(Exception e) {
+		  e.printStackTrace();
+		  throw e;
+	  }finally {
         if (resultSet!=null) database.closeQuery(resultSet);
       }
 	}

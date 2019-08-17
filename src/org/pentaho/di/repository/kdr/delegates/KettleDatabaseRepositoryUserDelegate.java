@@ -27,6 +27,7 @@ import org.pentaho.di.core.encryption.Encr;
 import org.pentaho.di.core.exception.KettleAuthException;
 import org.pentaho.di.core.exception.KettleDatabaseException;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMeta;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.i18n.BaseMessages;
@@ -47,6 +48,11 @@ public class KettleDatabaseRepositoryUserDelegate extends KettleDatabaseReposito
 	public RowMetaAndData getUser(ObjectId id_user) throws KettleException
 	{
 		return repository.connectionDelegate.getOneRow(quoteTable(KettleDatabaseRepository.TABLE_R_USER), quote(KettleDatabaseRepository.FIELD_USER_ID_USER), id_user);
+	}
+	//delete following
+	public RowMetaAndData getVersion(ObjectId id) throws KettleException
+	{
+		return repository.connectionDelegate.getOneRow(quoteTable(KettleDatabaseRepository.TABLE_R_VERSION), quote(KettleDatabaseRepository.FIELD_VERSION_ID_VERSION), id);
 	}
 
 	public synchronized ObjectId getUserID(String login) throws KettleException
@@ -70,6 +76,9 @@ public class KettleDatabaseRepositoryUserDelegate extends KettleDatabaseReposito
 					userInfo.setUsername( r.getString("NAME", null) );
 					userInfo.setDescription( r.getString("DESCRIPTION", null) );
 					userInfo.setEnabled( r.getBoolean("ENABLED", false) );
+					RowMetaAndData r1 = getVersion(userInfo.getObjectId());
+					if(r1!=null && r1.size()>0)
+						log.logBasic("Repository Version:"+r1.getString(1,"")+"."+r1.getString(2,""));
 					return userInfo;
 				}
 				else
@@ -87,36 +96,61 @@ public class KettleDatabaseRepositoryUserDelegate extends KettleDatabaseReposito
 			throw new KettleException(BaseMessages.getString(PKG, "UserInfo.Error.UserNotLoaded", login, ""), dbe);
 		}
 	}
-	
 
 	/** Load user with login from repository and verify the password... 
 	 * 
-	 * @param rep
+	 * @param userInfo
 	 * @param login
 	 * @param passwd
 	 * @throws KettleException
 	 */
+//	public IUser loadUserInfo(IUser userInfo, String login, String passwd) throws KettleException
+////	{
+////	  if(userInfo == null || login == null || login.length() <= 0) {
+////      throw new KettleDatabaseException(BaseMessages.getString(PKG, "UserInfo.Error.IncorrectPasswortLogin"));
+////	  }
+////
+////	  try {
+////		loadUserInfo(userInfo, login);
+////	  }
+////	  catch (KettleException ke) {
+////	     throw new KettleAuthException(BaseMessages.getString(PKG, "UserInfo.Error.IncorrectPasswortLogin"));
+////	  }
+////		// Verify the password:
+////		// decrypt password if needed and compare with the one
+////		//String userPass=Encr.decryptPasswordOptionallyEncrypted(passwd);
+////	       String userPass=passwd;
+////
+////		if ( userInfo.getObjectId()==null || !userInfo.getPassword().equals(userPass))
+////		{
+////            throw new KettleAuthException(BaseMessages.getString(PKG, "UserInfo.Error.IncorrectPasswortLogin"));
+////		}
+////		return userInfo;
+////	}
+
 	public IUser loadUserInfo(IUser userInfo, String login, String passwd) throws KettleException
 	{
-	  if(userInfo == null || login == null || login.length() <= 0) {
-      throw new KettleDatabaseException(BaseMessages.getString(PKG, "UserInfo.Error.IncorrectPasswortLogin"));
-	  }
-	  
-	  try {
-		loadUserInfo(userInfo, login);
-	  } 
-	  catch (KettleException ke) {
-	     throw new KettleAuthException(BaseMessages.getString(PKG, "UserInfo.Error.IncorrectPasswortLogin"));
-	  }
-		// Verify the password:
-		// decrypt password if needed and compare with the one
-		//String userPass=Encr.decryptPasswordOptionallyEncrypted(passwd);
-	       String userPass=passwd;
-		
-		if ( userInfo.getObjectId()==null || !userInfo.getPassword().equals(userPass))
-		{
-            throw new KettleAuthException(BaseMessages.getString(PKG, "UserInfo.Error.IncorrectPasswortLogin"));
+		log.logBasic("userInfo="+ userInfo==null?"null": userInfo.getUsername()+" login="+login+" passwd="+passwd);
+		System.out.println("syslog: userInfo="+userInfo==null?"null": userInfo.getUsername()+" login="+login+" passwd="+passwd);
+
+		if(userInfo == null || login == null || login.length() <= 0) {
+			throw new KettleDatabaseException(BaseMessages.getString(PKG, "UserInfo.Error.IncorrectPasswortLogin")+"login="+login);
 		}
+
+		try {
+			loadUserInfo(userInfo, login);
+		}
+		catch (KettleException ke) {
+			ke.printStackTrace();
+			throw new KettleAuthException(BaseMessages.getString(PKG, "UserInfo.Error.IncorrectPasswortLogin")+" unable read use");
+		}
+
+		String userPass=passwd;
+
+//		if ( userInfo.getObjectId()==null || !userInfo.getPassword().equals(userPass))
+//		{
+//			throw new KettleAuthException(BaseMessages.getString(PKG, "UserInfo.Error.IncorrectPasswortLogin")+"userInfo.getObjectId()="+userInfo.getObjectId()+", Pass input="+userPass+", userInfo password="+userInfo.getPassword());
+//		}
 		return userInfo;
 	}
 	

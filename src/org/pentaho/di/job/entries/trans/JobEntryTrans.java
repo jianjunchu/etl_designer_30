@@ -354,7 +354,11 @@ public class JobEntryTrans extends JobEntryBase implements Cloneable, JobEntryIn
         waitingToFinish = "Y".equalsIgnoreCase(wait);
 
       followingAbortRemotely = "Y".equalsIgnoreCase(XMLHandler.getTagValue(entrynode, "follow_abort_remote"));
-      errorRetryTimes = new Integer(XMLHandler.getTagValue(entrynode, "error_retry_times")).intValue();
+       String errorRetryTimesStr  = XMLHandler.getTagValue(entrynode, "error_retry_times");//jason
+       if(errorRetryTimesStr==null)
+           errorRetryTimes =0;
+       else
+           errorRetryTimes = new Integer(errorRetryTimesStr).intValue();
 
 
       // How many arguments?

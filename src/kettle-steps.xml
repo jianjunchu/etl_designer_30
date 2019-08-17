@@ -1030,6 +1030,14 @@
     <iconfile>ui/images/TFI.png</iconfile>
   </step>
 
+  <step id="WordInput">
+    <description>i18n:org.pentaho.di.trans.step:BaseStep.TypeLongDesc.WordInput</description>
+    <classname>org.pentaho.di.trans.steps.wordinput.WordInputMeta</classname>
+    <category>i18n:org.pentaho.di.trans.step:BaseStep.Category.Input</category>
+    <tooltip>i18n:org.pentaho.di.trans.step:BaseStep.TypeTooltipDesc.WordInput</tooltip>
+    <iconfile>ui/images/WDI.png</iconfile>
+  </step>
+
     <step id="ParallelGzipCsvInput">
     <description>i18n:org.pentaho.di.trans.step:BaseStep.TypeLongDesc.ParallelGzipCsvInput</description>
     <classname>org.pentaho.di.trans.steps.parallelgzipcsv.ParGzipCsvInputMeta</classname>

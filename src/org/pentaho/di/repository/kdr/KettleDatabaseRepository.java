@@ -185,7 +185,9 @@ public class KettleDatabaseRepository extends KettleDatabaseRepositoryBase imple
 	 * @throws KettleException in case there is a general unexpected error or if we're already connected
 	 */
 	public void connect(String username, String password, boolean upgrade) throws KettleException {
-	  // first disconnect if already connected
+		log.logBasic("upgrade="+upgrade+" username="+username);
+
+		// first disconnect if already connected
 	  connectionDelegate.connect(upgrade, upgrade);
 		try {
 		  IUser userinfo = userDelegate.loadUserInfo(new UserInfo(), username, password);

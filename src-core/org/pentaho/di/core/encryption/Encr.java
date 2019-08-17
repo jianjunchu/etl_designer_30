@@ -194,6 +194,13 @@ public class Encr
 			System.out.println(obfuscated);
 			System.exit(0);
 			
+		}else if(Const.trim(option).substring(1).equalsIgnoreCase("deob")) {
+			// Jetty password obfuscation
+			//
+			String obfuscated = Encr.decryptPassword(password);
+			System.out.println(obfuscated);
+			System.exit(0);
+
 		} else {
 			// Unknown option, print usage
 			//

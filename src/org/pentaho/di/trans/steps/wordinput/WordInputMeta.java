@@ -20,7 +20,7 @@
  *
  ******************************************************************************/
 
-package org.pentaho.di.trans.steps.csvinput;
+package org.pentaho.di.trans.steps.wordinput;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,9 +71,9 @@ import org.w3c.dom.Node;
  * @version 3.0
  */
 
-public class CsvInputMeta extends BaseStepMeta implements StepMetaInterface, InputFileMetaInterface, StepMetaInjectionInterface
+public class WordInputMeta extends BaseStepMeta implements StepMetaInterface, StepMetaInjectionInterface
 {
-	private static Class<?> PKG = CsvInput.class; // for i18n purposes, needed by Translator2!!   $NON-NLS-1$
+	private static Class<?> PKG = org.pentaho.di.trans.steps.csvinput.CsvInput.class; // for i18n purposes, needed by Translator2!!   $NON-NLS-1$
 	
 	private String filename;
 	
@@ -85,24 +85,16 @@ public class CsvInputMeta extends BaseStepMeta implements StepMetaInterface, Inp
 
 	private boolean headerPresent;
 
-	private String delimiter;
-	private String enclosure;
+	private String startRowIndex;
 
-	private String bufferSize;
-	
-	private boolean lazyConversionActive;
-	
+	private String tableNr;
+
 	private TextFileInputField[] inputFields;
 	
 	private boolean isaddresult;
-	
-	private boolean runningInParallel;
-	
-	private String encoding;
-	
-	private boolean newlinePossibleInFields;
-	
-	public CsvInputMeta()
+	private int nrHeaderLines =1; //head rows, default 1 row
+
+	public WordInputMeta()
 	{
 		super(); // allocate BaseStepMeta
 		allocate(0);
@@ -121,14 +113,12 @@ public class CsvInputMeta extends BaseStepMeta implements StepMetaInterface, Inp
 	}
 
 	public void setDefault() {
-		delimiter = ","  ;
-		enclosure = "\""  ;
+		startRowIndex = "0"  ;
 		headerPresent = true;
-		lazyConversionActive=true;
 		isaddresult=false;
-		bufferSize="50000";
+		tableNr="0";
 	}
-	
+
 	private void readData(Node stepnode) throws KettleXMLException
 	{
 		try
@@ -137,25 +127,11 @@ public class CsvInputMeta extends BaseStepMeta implements StepMetaInterface, Inp
 			filenameField = XMLHandler.getTagValue(stepnode, getXmlCode("FILENAME_FIELD"));
 			rowNumField = XMLHandler.getTagValue(stepnode, getXmlCode("ROW_NUM_FIELD"));
 			includingFilename = "Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, getXmlCode("INCLUDE_FILENAME")));
-			delimiter = XMLHandler.getTagValue(stepnode, getXmlCode("DELIMITER"));
-			enclosure = XMLHandler.getTagValue(stepnode, getXmlCode("ENCLOSURE"));
-			bufferSize  = XMLHandler.getTagValue(stepnode, getXmlCode("BUFFERSIZE"));
+			startRowIndex = XMLHandler.getTagValue(stepnode, getXmlCode("START_ROW_INDEX"));
+			tableNr  = XMLHandler.getTagValue(stepnode, getXmlCode("TABLE_NR"));
 			headerPresent = "Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, getXmlCode("HEADER_PRESENT")));
-			lazyConversionActive= "Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, getXmlCode("LAZY_CONVERSION")));
 			isaddresult= "Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, getXmlCode("ADD_FILENAME_RESULT")));
-			runningInParallel = "Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, getXmlCode("PARALLEL")));
-			String nlp = XMLHandler.getTagValue(stepnode, getXmlCode("NEWLINE_POSSIBLE"));
-			if (Const.isEmpty(nlp)) {
-			  if (runningInParallel) {
-			    newlinePossibleInFields=false;
-			  } else {
-			    newlinePossibleInFields=true;
-			  }
-			} else {
-			  newlinePossibleInFields = "Y".equalsIgnoreCase(nlp);
-			}
-			encoding = XMLHandler.getTagValue(stepnode, getXmlCode("ENCODING"));
-			
+
 			Node fields = XMLHandler.getSubNode(stepnode, getXmlCode("FIELDS"));
 			int nrfields = XMLHandler.countNodes(fields, getXmlCode("FIELD"));
 			
@@ -196,15 +172,10 @@ public class CsvInputMeta extends BaseStepMeta implements StepMetaInterface, Inp
 		retval.append("    ").append(XMLHandler.addTagValue(getXmlCode("FILENAME_FIELD"), filenameField));
 		retval.append("    ").append(XMLHandler.addTagValue(getXmlCode("ROW_NUM_FIELD"), rowNumField));
 		retval.append("    ").append(XMLHandler.addTagValue(getXmlCode("INCLUDE_FILENAME"), includingFilename));
-		retval.append("    ").append(XMLHandler.addTagValue(getXmlCode("DELIMITER"), delimiter));
-		retval.append("    ").append(XMLHandler.addTagValue(getXmlCode("ENCLOSURE"), enclosure));
+		retval.append("    ").append(XMLHandler.addTagValue(getXmlCode("START_ROW_INDEX"), startRowIndex));
 		retval.append("    ").append(XMLHandler.addTagValue(getXmlCode("HEADER_PRESENT"), headerPresent));
-		retval.append("    ").append(XMLHandler.addTagValue(getXmlCode("BUFFERSIZE"), bufferSize));
-		retval.append("    ").append(XMLHandler.addTagValue(getXmlCode("LAZY_CONVERSION"), lazyConversionActive));
+		retval.append("    ").append(XMLHandler.addTagValue(getXmlCode("TABLE_NR"), tableNr));
 		retval.append("    ").append(XMLHandler.addTagValue(getXmlCode("ADD_FILENAME_RESULT"), isaddresult));
-		retval.append("    ").append(XMLHandler.addTagValue(getXmlCode("PARALLEL"), runningInParallel));
-    retval.append("    ").append(XMLHandler.addTagValue(getXmlCode("NEWLINE_POSSIBLE"), newlinePossibleInFields));
-		retval.append("    ").append(XMLHandler.addTagValue(getXmlCode("ENCODING"), encoding));
 
 		retval.append("    ").append(XMLHandler.openTag(getXmlCode("FIELDS"))).append(Const.CR);
 		for (int i = 0; i < inputFields.length; i++)
@@ -237,16 +208,11 @@ public class CsvInputMeta extends BaseStepMeta implements StepMetaInterface, Inp
 			filenameField = rep.getStepAttributeString(id_step, getRepCode("FILENAME_FIELD"));
 			rowNumField = rep.getStepAttributeString(id_step, getRepCode("ROW_NUM_FIELD"));
 			includingFilename = rep.getStepAttributeBoolean(id_step, getRepCode("INCLUDE_FILENAME"));
-			delimiter = rep.getStepAttributeString(id_step, getRepCode("DELIMITER"));
-			enclosure = rep.getStepAttributeString(id_step, getRepCode("ENCLOSURE"));
+			startRowIndex = rep.getStepAttributeString(id_step, getRepCode("START_ROW_INDEX"));
 			headerPresent = rep.getStepAttributeBoolean(id_step, getRepCode("HEADER_PRESENT"));
-			bufferSize = rep.getStepAttributeString(id_step, getRepCode("BUFFERSIZE"));
-			lazyConversionActive = rep.getStepAttributeBoolean(id_step, getRepCode("LAZY_CONVERSION"));
+			tableNr = rep.getStepAttributeString(id_step, getRepCode("TABLE_NR"));
 			isaddresult = rep.getStepAttributeBoolean(id_step, getRepCode("ADD_FILENAME_RESULT"));
-			runningInParallel = rep.getStepAttributeBoolean(id_step, getRepCode("PARALLEL"));
-      newlinePossibleInFields = rep.getStepAttributeBoolean(id_step, 0, getRepCode("NEWLINE_POSSIBLE"), !runningInParallel);
-			encoding = rep.getStepAttributeString(id_step, getRepCode("ENCODING"));
-			
+
 			int nrfields = rep.countNrStepAttributes(id_step, getRepCode("FIELD_NAME"));
 
 			allocate(nrfields);
@@ -280,15 +246,10 @@ public class CsvInputMeta extends BaseStepMeta implements StepMetaInterface, Inp
 			rep.saveStepAttribute(id_transformation, id_step, getRepCode("FILENAME_FIELD"), filenameField);
 			rep.saveStepAttribute(id_transformation, id_step, getRepCode("ROW_NUM_FIELD"), rowNumField);
 			rep.saveStepAttribute(id_transformation, id_step, getRepCode("INCLUDE_FILENAME"), includingFilename);
-			rep.saveStepAttribute(id_transformation, id_step, getRepCode("DELIMITER"), delimiter);
-			rep.saveStepAttribute(id_transformation, id_step, getRepCode("ENCLOSURE"), enclosure);
-			rep.saveStepAttribute(id_transformation, id_step, getRepCode("BUFFERSIZE"), bufferSize);
+			rep.saveStepAttribute(id_transformation, id_step, getRepCode("START_ROW_INDEX"), startRowIndex);
+			rep.saveStepAttribute(id_transformation, id_step, getRepCode("TABLE_NR"), tableNr);
 			rep.saveStepAttribute(id_transformation, id_step, getRepCode("HEADER_PRESENT"), headerPresent);
-			rep.saveStepAttribute(id_transformation, id_step, getRepCode("LAZY_CONVERSION"), lazyConversionActive);
 			rep.saveStepAttribute(id_transformation, id_step, getRepCode("ADD_FILENAME_RESULT"), isaddresult);
-			rep.saveStepAttribute(id_transformation, id_step, getRepCode("PARALLEL"), runningInParallel);
-      rep.saveStepAttribute(id_transformation, id_step, getRepCode("NEWLINE_POSSIBLE"), newlinePossibleInFields);
-			rep.saveStepAttribute(id_transformation, id_step, getRepCode("ENCODING"), encoding);
 
 			for (int i = 0; i < inputFields.length; i++)
 			{
@@ -327,9 +288,6 @@ public class CsvInputMeta extends BaseStepMeta implements StepMetaInterface, Inp
 			valueMeta.setGroupingSymbol( field.getGroupSymbol() );
 			valueMeta.setCurrencySymbol( field.getCurrencySymbol() );
 			valueMeta.setTrimType( field.getTrimType() );
-			if (lazyConversionActive) valueMeta.setStorageType(ValueMetaInterface.STORAGE_TYPE_BINARY_STRING);
-			valueMeta.setStringEncoding(space.environmentSubstitute(encoding));
-			
 			// In case we want to convert Strings...
 			// Using a copy of the valueMeta object means that the inner and outer representation format is the same.
 			// Preview will show the data the same way as we read it.
@@ -349,10 +307,6 @@ public class CsvInputMeta extends BaseStepMeta implements StepMetaInterface, Inp
 		if (!Const.isEmpty(filenameField) && includingFilename) {
 			ValueMetaInterface filenameMeta = new ValueMeta(filenameField, ValueMetaInterface.TYPE_STRING);
 			filenameMeta.setOrigin(origin);
-			if (lazyConversionActive) {
-				filenameMeta.setStorageType(ValueMetaInterface.STORAGE_TYPE_BINARY_STRING);
-				filenameMeta.setStorageMetadata(new ValueMeta(filenameField, ValueMetaInterface.TYPE_STRING));
-			}
 			rowMeta.addValueMeta(filenameMeta);
 		}
 		
@@ -394,26 +348,26 @@ public class CsvInputMeta extends BaseStepMeta implements StepMetaInterface, Inp
 	
 	public StepInterface getStep(StepMeta stepMeta, StepDataInterface stepDataInterface, int cnr, TransMeta tr, Trans trans)
 	{
-		return new CsvInput(stepMeta, stepDataInterface, cnr, tr, trans);
+		return new WordInput(stepMeta, stepDataInterface, cnr, tr, trans);
 	}
 	
 	public StepDataInterface getStepData()
 	{
-		return new CsvInputData();
+		return new WordInputData();
 	}
 
 	/**
 	 * @return the delimiter
 	 */
-	public String getDelimiter() {
-		return delimiter;
+	public String getStartRowIndex() {
+		return startRowIndex;
 	}
 
 	/**
-	 * @param delimiter the delimiter to set
+	 * @param index the index of start row
 	 */
-	public void setDelimiter(String delimiter) {
-		this.delimiter = delimiter;
+	public void setStartRowIndex(String index) {
+		this.startRowIndex = index;
 	}
 
 	/**
@@ -431,32 +385,19 @@ public class CsvInputMeta extends BaseStepMeta implements StepMetaInterface, Inp
 	}
 
 	/**
-	 * @return the bufferSize
+	 * @return the table nr
 	 */
-	public String getBufferSize() {
-		return bufferSize;
+	public String getTableNr() {
+		return tableNr;
 	}
 
 	/**
-	 * @param bufferSize the bufferSize to set
+	 * @param tableNr the table nr to set
 	 */
-	public void setBufferSize(String bufferSize) {
-		this.bufferSize = bufferSize;
+	public void setTableNr(String tableNr) {
+		this.tableNr = tableNr;
 	}
 
-	/**
-	 * @return true if lazy conversion is turned on: conversions are delayed as long as possible, perhaps to never occur at all.
-	 */
-	public boolean isLazyConversionActive() {
-		return lazyConversionActive;
-	}
-
-	/**
-	 * @param lazyConversionActive true if lazy conversion is to be turned on: conversions are delayed as long as possible, perhaps to never occur at all.
-	 */
-	public void setLazyConversionActive(boolean lazyConversionActive) {
-		this.lazyConversionActive = lazyConversionActive;
-	}
 
 	/**
 	 * @return the headerPresent
@@ -471,21 +412,6 @@ public class CsvInputMeta extends BaseStepMeta implements StepMetaInterface, Inp
 	public void setHeaderPresent(boolean headerPresent) {
 		this.headerPresent = headerPresent;
 	}
-
-	/**
-	 * @return the enclosure
-	 */
-	public String getEnclosure() {
-		return enclosure;
-	}
-
-	/**
-	 * @param enclosure the enclosure to set
-	 */
-	public void setEnclosure(String enclosure) {
-		this.enclosure = enclosure;
-	}
-
 
     @Override
 	public List<ResourceReference> getResourceDependencies(TransMeta transMeta, StepMeta stepInfo) {
@@ -526,7 +452,7 @@ public class CsvInputMeta extends BaseStepMeta implements StepMetaInterface, Inp
 	}
 
 	public int getNrHeaderLines() {
-		return 1;
+		return nrHeaderLines;
 	}
 
 	public boolean hasHeader() {
@@ -553,9 +479,9 @@ public class CsvInputMeta extends BaseStepMeta implements StepMetaInterface, Inp
 		return "CSV";
 	}
 
-	public String getSeparator() {
-		return delimiter;
-	}
+//	public String getSeparator() {
+//		return startRowIndex;
+//	}
 
 	public boolean includeFilename() {
 		return false;
@@ -632,34 +558,6 @@ public class CsvInputMeta extends BaseStepMeta implements StepMetaInterface, Inp
     }
 
 	/**
-	 * @return the runningInParallel
-	 */
-	public boolean isRunningInParallel() {
-		return runningInParallel;
-	}
-
-	/**
-	 * @param runningInParallel the runningInParallel to set
-	 */
-	public void setRunningInParallel(boolean runningInParallel) {
-		this.runningInParallel = runningInParallel;
-	}
-
-	/**
-	 * @return the encoding
-	 */
-	public String getEncoding() {
-		return encoding;
-	}
-
-	/**
-	 * @param encoding the encoding to set
-	 */
-	public void setEncoding(String encoding) {
-		this.encoding = encoding;
-	}
-	
-	/**
 	 * Since the exported transformation that runs this will reside in a ZIP file, we can't reference files relatively.
 	 * So what this does is turn the name of files into absolute paths OR it simply includes the resource in the ZIP file.
 	 * For now, we'll simply turn it into an absolute path and pray that the file is on a shared drive or something like that.
@@ -714,14 +612,9 @@ public class CsvInputMeta extends BaseStepMeta implements StepMetaInterface, Inp
           if (attr.getKey().equals("FILENAME_FIELD")) { filenameField = (String) entry.getValue(); } else
           if (attr.getKey().equals("ROW_NUM_FIELD")) { rowNumField = (String) entry.getValue(); } else
           if (attr.getKey().equals("HEADER_PRESENT")) { headerPresent = (Boolean) entry.getValue(); } else
-          if (attr.getKey().equals("DELIMITER")) { delimiter = (String) entry.getValue(); } else
-          if (attr.getKey().equals("ENCLOSURE")) { enclosure = (String) entry.getValue(); } else
-          if (attr.getKey().equals("BUFFERSIZE")) { bufferSize = (String) entry.getValue(); } else
-          if (attr.getKey().equals("LAZY_CONVERSION")) { lazyConversionActive = (Boolean) entry.getValue(); } else
-          if (attr.getKey().equals("PARALLEL")) { runningInParallel = (Boolean) entry.getValue(); } else
-          if (attr.getKey().equals("NEWLINE_POSSIBLE")) { newlinePossibleInFields = (Boolean) entry.getValue(); } else
-          if (attr.getKey().equals("ADD_FILENAME_RESULT")) { isaddresult = (Boolean) entry.getValue(); } else
-          if (attr.getKey().equals("ENCODING")) { encoding = (String) entry.getValue(); } else
+          if (attr.getKey().equals("START_ROW_INDEX")) { startRowIndex = (String) entry.getValue();} else
+          if (attr.getKey().equals("TABLE_NR")) { tableNr = (String) entry.getValue(); } else
+          if (attr.getKey().equals("ADD_FILENAME_RESULT")) { isaddresult = (Boolean) entry.getValue(); }  else
           { 
             throw new RuntimeException("Unhandled metadata injection of attribute: "+attr.toString()+" - "+attr.getDescription());
           }
@@ -770,20 +663,5 @@ public class CsvInputMeta extends BaseStepMeta implements StepMetaInterface, Inp
     public List<StepInjectionMetaEntry> getStepInjectionMetadataEntries() throws KettleException {
       return getStepInjectionMetadataEntries(PKG);
     }
-
-    /**
-     * @return the newlinePossibleInFields
-     */
-    public boolean isNewlinePossibleInFields() {
-      return newlinePossibleInFields;
-    }
-
-    /**
-     * @param newlinePossibleInFields the newlinePossibleInFields to set
-     */
-    public void setNewlinePossibleInFields(boolean newlinePossibleInFields) {
-      this.newlinePossibleInFields = newlinePossibleInFields;
-    }
-
 
 }

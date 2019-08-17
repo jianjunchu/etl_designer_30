@@ -848,14 +848,17 @@ public class BaseStepDialog extends Dialog {
     	checkPriviledges(shell);
     }
     public static  void checkPriviledges(Shell shell){
-			if(!PriviledgeType.hasPriviledge(KettleDatabaseRepositoryMeta.priviledge, PriviledgeType.ModifyFile)){
-				Control[] control = shell.getChildren();
-				for(Control cn : control){
-					disableItems(cn);				
-				}
-
-			}
-	
+      System.out.println("enable rights");
+      //kdi_t_priviledge 表里的 operation_id 和 resource_id 好像是写反了，导致 kdi_t_roles 表里的用户的权限值不正确（KettleDatabaseRepositoryMeta.priviledge）。
+      //先临时注释掉下面的权限验证代码，需要更改 kdi_t_priviledge 表。
+      //或者使用 sql 临时解决： update kdi_t_role set C_PRIVILEDGES=2 where C_ROLE_NAME='角色名'
+//			if(!PriviledgeType.hasPriviledge(KettleDatabaseRepositoryMeta.priviledge, PriviledgeType.ModifyFile)){
+//				Control[] control = shell.getChildren();
+//				for(Control cn : control){
+//					disableItems(cn);
+//				}
+//
+//			}
 }
 /**
  * add by cli

@@ -72,7 +72,7 @@ public class Const
   /**
    * Version number
    */
-  public static final String VERSION = "V4.0.0";
+  public static final String VERSION = "V3.4.3";
 
   /**
    * Release Type
@@ -2585,5 +2585,18 @@ public class Const
 			 valueToPad = valueToPad+filler;
 		  }
 		  return valueToPad;
+	  }
+
+	/**
+	 * java -cp .:./kettle-core.jar org.pentaho.di.core.Const -v
+	 * @param args
+	 */
+	  public static void main(String[] args)
+	  {
+	  	if(args[0]!=null && (args[0].equalsIgnoreCase("-v")))
+		{
+
+			System.out.println(VERSION);
+		}
 	  }
 }
