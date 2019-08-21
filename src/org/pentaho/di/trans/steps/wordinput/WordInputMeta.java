@@ -94,6 +94,8 @@ public class WordInputMeta extends BaseStepMeta implements StepMetaInterface, St
 	private boolean isaddresult;
 	private int nrHeaderLines =1; //head rows, default 1 row
 
+    private boolean extractTable = false;
+
 	public WordInputMeta()
 	{
 		super(); // allocate BaseStepMeta
@@ -272,7 +274,7 @@ public class WordInputMeta extends BaseStepMeta implements StepMetaInterface, St
 		}
 	}
 	
-	public void getFields(RowMetaInterface rowMeta, String origin, RowMetaInterface[] info, StepMeta nextStep, VariableSpace space) throws KettleStepException
+	public void getTableFields(RowMetaInterface rowMeta, String origin, RowMetaInterface[] info, StepMeta nextStep, VariableSpace space) throws KettleStepException
 	{
 		rowMeta.clear(); // Start with a clean slate, eats the input
 		
@@ -317,6 +319,29 @@ public class WordInputMeta extends BaseStepMeta implements StepMetaInterface, St
 			rowMeta.addValueMeta(rowNumMeta);
 		}
 		
+	}
+
+	public void getFixedFields(RowMetaInterface rowMeta, String origin, RowMetaInterface[] info, StepMeta nextStep, VariableSpace space) throws KettleStepException
+	{
+		rowMeta.clear(); // Start with a clean slate, eats the input
+
+		if (!Const.isEmpty(filenameField) && includingFilename) {
+			ValueMetaInterface filenameMeta = new ValueMeta(filenameField, ValueMetaInterface.TYPE_STRING);
+			filenameMeta.setOrigin(origin);
+			rowMeta.addValueMeta(filenameMeta);
+		}
+
+		if (!Const.isEmpty(rowNumField)) {
+			ValueMetaInterface rowNumMeta = new ValueMeta(rowNumField, ValueMetaInterface.TYPE_INTEGER);
+			rowNumMeta.setLength(10);
+			rowNumMeta.setOrigin(origin);
+			rowMeta.addValueMeta(rowNumMeta);
+		}
+
+		ValueMetaInterface jsonContentMeta = new ValueMeta(filenameField, ValueMetaInterface.TYPE_STRING);
+		jsonContentMeta.setOrigin(origin);
+		rowMeta.addValueMeta(jsonContentMeta);
+
 	}
 	
 	public void check(List<CheckResultInterface> remarks, TransMeta transMeta, StepMeta stepinfo, RowMetaInterface prev, String input[], String output[], RowMetaInterface info)
@@ -664,4 +689,7 @@ public class WordInputMeta extends BaseStepMeta implements StepMetaInterface, St
       return getStepInjectionMetadataEntries(PKG);
     }
 
+    public boolean extractTable() {
+        return extractTable;
+    }
 }
