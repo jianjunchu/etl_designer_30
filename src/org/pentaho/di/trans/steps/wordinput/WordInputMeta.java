@@ -59,7 +59,6 @@ import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInjectionInterface;
 import org.pentaho.di.trans.step.StepMetaInterface;
-import org.pentaho.di.trans.steps.textfileinput.InputFileMetaInterface;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
 import org.w3c.dom.Node;
@@ -94,7 +93,15 @@ public class WordInputMeta extends BaseStepMeta implements StepMetaInterface, St
 	private boolean isaddresult;
 	private int nrHeaderLines =1; //head rows, default 1 row
 
-    private boolean extractTable = false;
+	public boolean isExtractSpecifiedTable() {
+		return extractSpecifiedTable;
+	}
+
+	public void setExtractSpecifiedTable(boolean extractSpecifiedTable) {
+		this.extractSpecifiedTable = extractSpecifiedTable;
+	}
+
+	private boolean extractSpecifiedTable = false;
 
 	public WordInputMeta()
 	{
@@ -324,21 +331,21 @@ public class WordInputMeta extends BaseStepMeta implements StepMetaInterface, St
 	public void getFixedFields(RowMetaInterface rowMeta, String origin, RowMetaInterface[] info, StepMeta nextStep, VariableSpace space) throws KettleStepException
 	{
 		rowMeta.clear(); // Start with a clean slate, eats the input
+//
+//		if (!Const.isEmpty(filenameField) && includingFilename) {
+//			ValueMetaInterface filenameMeta = new ValueMeta(filenameField, ValueMetaInterface.TYPE_STRING);
+//			filenameMeta.setOrigin(origin);
+//			rowMeta.addValueMeta(filenameMeta);
+//		}
+//
+//		if (!Const.isEmpty(rowNumField)) {
+//			ValueMetaInterface rowNumMeta = new ValueMeta(rowNumField, ValueMetaInterface.TYPE_INTEGER);
+//			rowNumMeta.setLength(10);
+//			rowNumMeta.setOrigin(origin);
+//			rowMeta.addValueMeta(rowNumMeta);
+//		}
 
-		if (!Const.isEmpty(filenameField) && includingFilename) {
-			ValueMetaInterface filenameMeta = new ValueMeta(filenameField, ValueMetaInterface.TYPE_STRING);
-			filenameMeta.setOrigin(origin);
-			rowMeta.addValueMeta(filenameMeta);
-		}
-
-		if (!Const.isEmpty(rowNumField)) {
-			ValueMetaInterface rowNumMeta = new ValueMeta(rowNumField, ValueMetaInterface.TYPE_INTEGER);
-			rowNumMeta.setLength(10);
-			rowNumMeta.setOrigin(origin);
-			rowMeta.addValueMeta(rowNumMeta);
-		}
-
-		ValueMetaInterface jsonContentMeta = new ValueMeta(filenameField, ValueMetaInterface.TYPE_STRING);
+		ValueMetaInterface jsonContentMeta = new ValueMeta("content", ValueMetaInterface.TYPE_STRING);
 		jsonContentMeta.setOrigin(origin);
 		rowMeta.addValueMeta(jsonContentMeta);
 
@@ -690,6 +697,6 @@ public class WordInputMeta extends BaseStepMeta implements StepMetaInterface, St
     }
 
     public boolean extractTable() {
-        return extractTable;
+        return extractSpecifiedTable;
     }
 }

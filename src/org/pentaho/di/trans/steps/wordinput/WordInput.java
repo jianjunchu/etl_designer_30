@@ -314,8 +314,8 @@ public class WordInput extends BaseStep implements StepInterface
 //				if ( (!data.parallel) || // Standard flat file : skip header
 //					(data.parallel && data.bytesToSkipInFirstFile<=0)
 //					) {
-					readOneRow(false); // skip this row.
-					logBasic(BaseMessages.getString(PKG, "WordInput.Log.HeaderRowSkipped", data.filenames[data.filenr-1])); //$NON-NLS-1$
+//					readOneRow(false); // skip this row.
+//					logBasic(BaseMessages.getString(PKG, "WordInput.Log.HeaderRowSkipped", data.filenames[data.filenr-1])); //$NON-NLS-1$
 //				}
 //			}
 
@@ -434,7 +434,7 @@ public class WordInput extends BaseStep implements StepInterface
 				}
 				result.put(table_obj);
 			}
-			outputRowData[2] = result;
+			outputRowData[0] = result;
 		}else if(fileName!= null && fileName.endsWith(".doc")){
 
 			File fdoc = new File("C:/Users/Administrator/Desktop/wordImport/POITest/src/resources/" + fileName);

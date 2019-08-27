@@ -76,6 +76,7 @@ public class WordInputDialog extends BaseStepDialog implements StepDialogInterfa
 	private TextVar      wFilename;
 	private CCombo       wFilenameField;
 	private Button       wbbFilename; // Browse for a file
+	private Button       wExtractSpecifiedTable;
 	private Button       wIncludeFilename;
 	private TextVar      wRowNumField;
 	private Button       wbStartRowIndex;
@@ -235,6 +236,25 @@ public class WordInputDialog extends BaseStepDialog implements StepDialogInterfa
 			wFilename.setLayoutData(fdFilename);
 			lastControl = wFilename;
 		}
+
+		//wExtractSpecifiedTable
+		Label wlExtractSpecTable = new Label(shell, SWT.RIGHT);
+		wlExtractSpecTable.setText(BaseMessages.getString(PKG, inputMeta.getDescription("EXTRACT_SPEC_TABLE"))); //$NON-NLS-1$
+		props.setLook(wlExtractSpecTable);
+		FormData fdlExtractSpecTable = new FormData();
+		fdlExtractSpecTable.top  = new FormAttachment(lastControl, margin);
+		fdlExtractSpecTable.left = new FormAttachment(0, 0);
+		fdlExtractSpecTable.right= new FormAttachment(middle, -margin);
+		wlExtractSpecTable.setLayoutData(fdlExtractSpecTable);
+		wExtractSpecifiedTable = new Button(shell, SWT.CHECK);
+		props.setLook(wExtractSpecifiedTable);
+		wExtractSpecifiedTable.addSelectionListener(lsDef);
+		FormData fdExtractSpecTable = new FormData();
+		fdExtractSpecTable.top  = new FormAttachment(lastControl, margin);
+		fdExtractSpecTable.left = new FormAttachment(middle, 0);
+		fdExtractSpecTable.right= new FormAttachment(100, 0);
+		wExtractSpecifiedTable.setLayoutData(fdExtractSpecTable);
+		lastControl = wExtractSpecifiedTable;
 
 		// tableNr
 		//
@@ -504,6 +524,7 @@ public class WordInputDialog extends BaseStepDialog implements StepDialogInterfa
 		wHeaderPresent.setSelection(inputMeta.isHeaderPresent());
 		wRowNumField.setText(Const.NVL(inputMeta.getRowNumField(), ""));
 		wAddResult.setSelection(inputMeta.isAddResultFile());
+		wExtractSpecifiedTable.setSelection(inputMeta.isExtractSpecifiedTable());
 		for (int i=0;i<inputMeta.getInputFields().length;i++) {
 			TextFileInputField field = inputMeta.getInputFields()[i];
 			
@@ -547,6 +568,7 @@ public class WordInputDialog extends BaseStepDialog implements StepDialogInterfa
 		inputMeta.setHeaderPresent(wHeaderPresent.getSelection());
 		inputMeta.setRowNumField(wRowNumField.getText());
 		inputMeta.setAddResultFile( wAddResult.getSelection() );
+		inputMeta.setExtractSpecifiedTable(wExtractSpecifiedTable.getSelection());
 		
     	int nrNonEmptyFields = wFields.nrNonEmpty(); 
     	inputMeta.allocate(nrNonEmptyFields);
