@@ -177,6 +177,7 @@ public class KettleDatabaseRepositoryConnectionDelegate extends KettleDatabaseRe
 					System.out.println(Calendar.getInstance().getTime()+" testconnection");
 				} catch (KettleDatabaseException e) {
 					e.printStackTrace();
+					timer.cancel();
 				}
 			}
 		};

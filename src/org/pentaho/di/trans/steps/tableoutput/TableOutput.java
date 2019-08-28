@@ -262,17 +262,22 @@ public class TableOutput extends BaseStep implements StepInterface
         }
         
     	//Create Table Add By JYHE START
-//      if(data.tablesqlfirst&&meta.createTable())
-        if(data.tablesqlfirst) // for both create table and alter table. so don't check whether table is exist.
+      if(data.tablesqlfirst&&meta.createTable())
+//        if(data.tablesqlfirst) // for both create table and alter table. so don't check whether table is exist.
         {
         	data.tablesqlfirst=false;
-        	if(!data.db.checkTableExists(tableName))
+
+
+            String schemaTable= meta.getDatabaseMeta().getQuotedSchemaTableCombination(environmentSubstitute(meta.getSchemaName()), environmentSubstitute(tableName));
+
+
+            if(!data.db.checkTableExists(schemaTable))
         	{
         		String sqlScript="";
         		if(data.databaseMeta.getDatabaseTypeDesc().equals("MYSQL"))
-        			sqlScript = data.db.getDDL(tableName,rowMeta,null, false, null, true).replace(";", "")+"DEFAULT CHARSET=utf8;";  
+        			sqlScript = data.db.getDDL(schemaTable,rowMeta,null, false, null, true).replace(";", "")+"DEFAULT CHARSET=utf8;";
         		else
-        			sqlScript = data.db.getDDL(tableName,rowMeta,null, false, null, true);  
+        			sqlScript = data.db.getDDL(schemaTable,rowMeta,null, false, null, true);
         		
         		if(sqlScript!=null && sqlScript.length()>0)
     			try{
@@ -347,6 +352,7 @@ public class TableOutput extends BaseStep implements StepInterface
 		                insertStatement.clearBatch();
 					}
 					catch(BatchUpdateException ex) {
+					    ex.printStackTrace();
 						//xnren start print error log
 						//20151221
 						logError("Because of an error, this step can't continue: ", ex);
@@ -367,12 +373,14 @@ public class TableOutput extends BaseStep implements StepInterface
 			            kdbe.setExceptionsList(exceptions);
 					    throw kdbe;
 					}
-					catch(SQLException ex) 
+					catch(SQLException ex)
 					{
+					    ex.printStackTrace();
 						throw new KettleDatabaseException("Error inserting row", ex);
 					}
 					catch(Exception ex)
 					{
+                        ex.printStackTrace();
 						throw new KettleDatabaseException("Unexpected error inserting row", ex);
 					}
 				}
@@ -659,7 +667,7 @@ public class TableOutput extends BaseStep implements StepInterface
             if(meta.getSchemaName()==null || meta.getSchemaName().length()==0)
             	tableName= meta.getTablename();
             else
-            	tableName= meta.getSchemaName()+"."+meta.getTablename();
+                tableName= meta.getDatabaseMeta().getQuotedSchemaTableCombination(environmentSubstitute(meta.getSchemaName()), environmentSubstitute(meta.getTablename()));
             
             if(data.db.checkTableExists(environmentSubstitute(tableName)))//jason 2014
             {
