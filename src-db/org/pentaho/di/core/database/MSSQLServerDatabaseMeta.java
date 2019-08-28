@@ -267,7 +267,12 @@ public class MSSQLServerDatabaseMeta extends BaseDatabaseMeta implements Databas
 				//	Maybe use some default DB String length in case length<=0
 				if (length>0)
 				{
-					retval+="VARCHAR("+length+")";	
+					if(v.getOriginalColumnTypeName().equalsIgnoreCase("nvarchar"))
+						retval+="NVARCHAR("+length+")";
+					else if(v.getOriginalColumnTypeName().equalsIgnoreCase("nchar"))
+						retval+="NCHAR("+length+")";
+					else
+						retval+="VARCHAR("+length+")";
 				}
 				else
 				{

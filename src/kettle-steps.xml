@@ -1038,6 +1038,15 @@
     <iconfile>ui/images/WDI.png</iconfile>
   </step>
 
+
+  <step id="PDFInput">
+    <description>i18n:org.pentaho.di.trans.step:BaseStep.TypeLongDesc.PDFInput</description>
+    <classname>org.pentaho.di.trans.steps.pdfreader.PDFFileReaderMeta</classname>
+    <category>i18n:org.pentaho.di.trans.step:BaseStep.Category.Input</category>
+    <tooltip>i18n:org.pentaho.di.trans.step:BaseStep.TypeTooltipDesc.PDFInput</tooltip>
+    <iconfile>ui/images/PFR.png</iconfile>
+  </step>
+
     <step id="ParallelGzipCsvInput">
     <description>i18n:org.pentaho.di.trans.step:BaseStep.TypeLongDesc.ParallelGzipCsvInput</description>
     <classname>org.pentaho.di.trans.steps.parallelgzipcsv.ParGzipCsvInputMeta</classname>
