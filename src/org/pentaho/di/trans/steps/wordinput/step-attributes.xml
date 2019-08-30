@@ -8,6 +8,7 @@
   <attribute id="HEADER_PRESENT"> <xmlcode>header</xmlcode>  <repcode/> <description>WordInputDialog.HeaderPresent.Label</description> <tooltip/> <valuetype>Boolean</valuetype> <parentid/></attribute>
   <attribute id="START_ROW_INDEX"> <xmlcode>separator</xmlcode>  <repcode/> <description>WordInputDialog.Delimiter.Label</description> <tooltip/> <valuetype>String</valuetype> <parentid/></attribute>
   <attribute id="TABLE_NR"> <xmlcode>buffer_size</xmlcode>  <repcode/> <description>WordInputDialog.BufferSize.Label</description> <tooltip/> <valuetype>String</valuetype> <parentid/></attribute>
+  <attribute id="EXTRACT_SPEC_TABLE"> <xmlcode>extract_spec_table</xmlcode>  <repcode/> <description>WordInputDialog.extractSpecTable.Label</description> <tooltip/> <valuetype>String</valuetype> <parentid/></attribute>
   <attribute id="LAZY_CONVERSION"> <xmlcode>lazy_conversion</xmlcode>  <repcode/> <description>WordInputDialog.LazyConversion.Label</description> <tooltip/> <valuetype>Boolean</valuetype> <parentid/></attribute>
   <attribute id="ADD_FILENAME_RESULT"> <xmlcode>add_filename_result</xmlcode>  <repcode/> <description>WordInputDialog.AddResult.Label</description> <tooltip>WordInputDialog.AddResult.Tooltip</tooltip> <valuetype>Boolean</valuetype> <parentid/></attribute>
 

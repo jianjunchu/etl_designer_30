@@ -284,6 +284,15 @@ public class MSSQLServerDatabaseMeta extends BaseDatabaseMeta implements Databas
 				retval+="TEXT"; // Up to 2bilion characters.
 			}
 			break;
+		case ValueMetaInterface.TYPE_BINARY:
+			if(v.getOriginalColumnTypeName().equalsIgnoreCase("image"))
+				retval+="IMAGE";
+			else
+			if (length>0) {
+				retval += "VARBINARY("+length+")";
+			}else
+				retval += "VARBINARY(1000)";
+			break;
 		default:
 			retval+=" UNKNOWN";
 			break;
@@ -295,7 +304,7 @@ public class MSSQLServerDatabaseMeta extends BaseDatabaseMeta implements Databas
 	}
 	
   /**
-   * @param the schema name to search in or null if you want to search the whole DB
+   * @param schemaName schema name to search in or null if you want to search the whole DB
    * @return The SQL on this database to get a list of stored procedures.
    */
   public String getSQLListOfProcedures(String schemaName)
@@ -385,7 +394,7 @@ public class MSSQLServerDatabaseMeta extends BaseDatabaseMeta implements Databas
      * @param database a connected database
      * @param schemaName
      * @param tableName
-     * @param idxFields
+     * @param idx_fields
      * @return true if the index exists, false if it doesn't.
      * @throws KettleException
      */
