@@ -34,6 +34,7 @@ import org.pentaho.di.core.Counter;
 import org.pentaho.di.core.KettleAttributeInterface;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.exception.KettlePluginException;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.row.RowMetaInterface;
@@ -61,8 +62,11 @@ import org.pentaho.di.trans.step.StepMetaInjectionInterface;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
+import org.pentaho.metastore.api.IMetaStore;
 import org.w3c.dom.Node;
-
+//import org.pentaho.di.core.row.value.ValueMetaFactory;
+//import org.pentaho.di.core.exception.KettlePluginException;
+//import org.pentaho.di.core.row.value.ValueMetaString;
 
 /**
  * @since 2007-07-05
@@ -92,6 +96,9 @@ public class WordInputMeta extends BaseStepMeta implements StepMetaInterface, St
 	
 	private boolean isaddresult;
 	private int nrHeaderLines =1; //head rows, default 1 row
+
+	private static final String JSON_FIELD_NAME = "content";
+
 
 	public boolean isExtractSpecifiedTable() {
 		return extractSpecifiedTable;
@@ -140,7 +147,7 @@ public class WordInputMeta extends BaseStepMeta implements StepMetaInterface, St
 			tableNr  = XMLHandler.getTagValue(stepnode, getXmlCode("TABLE_NR"));
 			headerPresent = "Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, getXmlCode("HEADER_PRESENT")));
 			isaddresult= "Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, getXmlCode("ADD_FILENAME_RESULT")));
-
+			extractSpecifiedTable = "Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, getXmlCode("EXTRACT_SPEC_TABLE")));
 			Node fields = XMLHandler.getSubNode(stepnode, getXmlCode("FIELDS"));
 			int nrfields = XMLHandler.countNodes(fields, getXmlCode("FIELD"));
 			
@@ -183,6 +190,7 @@ public class WordInputMeta extends BaseStepMeta implements StepMetaInterface, St
 		retval.append("    ").append(XMLHandler.addTagValue(getXmlCode("INCLUDE_FILENAME"), includingFilename));
 		retval.append("    ").append(XMLHandler.addTagValue(getXmlCode("START_ROW_INDEX"), startRowIndex));
 		retval.append("    ").append(XMLHandler.addTagValue(getXmlCode("HEADER_PRESENT"), headerPresent));
+		retval.append("    ").append(XMLHandler.addTagValue(getXmlCode("EXTRACT_SPEC_TABLE"), tableNr));
 		retval.append("    ").append(XMLHandler.addTagValue(getXmlCode("TABLE_NR"), tableNr));
 		retval.append("    ").append(XMLHandler.addTagValue(getXmlCode("ADD_FILENAME_RESULT"), isaddresult));
 
@@ -221,6 +229,8 @@ public class WordInputMeta extends BaseStepMeta implements StepMetaInterface, St
 			headerPresent = rep.getStepAttributeBoolean(id_step, getRepCode("HEADER_PRESENT"));
 			tableNr = rep.getStepAttributeString(id_step, getRepCode("TABLE_NR"));
 			isaddresult = rep.getStepAttributeBoolean(id_step, getRepCode("ADD_FILENAME_RESULT"));
+			extractSpecifiedTable = rep.getStepAttributeBoolean(id_step, getRepCode("EXTRACT_SPEC_TABLE"));
+
 
 			int nrfields = rep.countNrStepAttributes(id_step, getRepCode("FIELD_NAME"));
 
@@ -258,6 +268,7 @@ public class WordInputMeta extends BaseStepMeta implements StepMetaInterface, St
 			rep.saveStepAttribute(id_transformation, id_step, getRepCode("START_ROW_INDEX"), startRowIndex);
 			rep.saveStepAttribute(id_transformation, id_step, getRepCode("TABLE_NR"), tableNr);
 			rep.saveStepAttribute(id_transformation, id_step, getRepCode("HEADER_PRESENT"), headerPresent);
+			rep.saveStepAttribute(id_transformation, id_step, getRepCode("EXTRACT_SPEC_TABLE"), extractSpecifiedTable);
 			rep.saveStepAttribute(id_transformation, id_step, getRepCode("ADD_FILENAME_RESULT"), isaddresult);
 
 			for (int i = 0; i < inputFields.length; i++)
@@ -328,6 +339,43 @@ public class WordInputMeta extends BaseStepMeta implements StepMetaInterface, St
 		
 	}
 
+	@Override
+	public void getFields( RowMetaInterface r, String origin, RowMetaInterface[] info, StepMeta nextStep,
+						   VariableSpace space ) {
+
+		// clear the output
+		r.clear();
+		// append the outputFields to the output
+		if(this.isExtractSpecifiedTable()) {
+			for (int i = 0; i < inputFields.length; i++) {
+				ValueMetaInterface v;
+				try {
+					  v = new ValueMeta(inputFields[i].getName(), inputFields[i].getType());
+//					v = ValueMetaFactory.createValueMeta(inputFields[i].getName(), inputFields[i].getType());
+				} catch (Exception e) {
+					v = new ValueMeta(inputFields[i].getName());
+				}
+				// that would influence the output
+				// v.setConversionMask(conversionMask[i]);
+				v.setOrigin(origin);
+				r.addValueMeta(v);
+			}
+		}else
+		{
+			ValueMetaInterface v;
+			try {
+				v = new ValueMeta(JSON_FIELD_NAME, ValueMetaInterface.TYPE_STRING);
+			} catch (Exception e) {
+				v = new ValueMeta(JSON_FIELD_NAME);
+	//			v = new ValueMetaString(JSON_FIELD_NAME);
+			}
+			// that would influence the output
+			// v.setConversionMask(conversionMask[i]);
+			v.setOrigin(origin);
+			r.addValueMeta(v);
+		}
+
+	}
 	public void getFixedFields(RowMetaInterface rowMeta, String origin, RowMetaInterface[] info, StepMeta nextStep, VariableSpace space) throws KettleStepException
 	{
 		rowMeta.clear(); // Start with a clean slate, eats the input

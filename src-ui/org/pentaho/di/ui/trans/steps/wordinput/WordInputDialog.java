@@ -248,7 +248,7 @@ public class WordInputDialog extends BaseStepDialog implements StepDialogInterfa
 		wlExtractSpecTable.setLayoutData(fdlExtractSpecTable);
 		wExtractSpecifiedTable = new Button(shell, SWT.CHECK);
 		props.setLook(wExtractSpecifiedTable);
-		wExtractSpecifiedTable.addSelectionListener(lsDef);
+		//wExtractSpecifiedTable.addSelectionListener(lsDef);
 		FormData fdExtractSpecTable = new FormData();
 		fdExtractSpecTable.top  = new FormAttachment(lastControl, margin);
 		fdExtractSpecTable.left = new FormAttachment(middle, 0);

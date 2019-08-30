@@ -746,7 +746,7 @@ public class Database implements VariableSpace, LoggingObjectInterface
     /**
      * Prepare inserting values into a table, using the fields & values in a Row
      * @param rowMeta The row metadata to determine which values need to be inserted
-     * @param table The name of the table in which we want to insert rows
+     * @param tableName The name of the table in which we want to insert rows
      * @throws KettleDatabaseException if something went wrong.
      */
     public void prepareInsert(RowMetaInterface rowMeta, String tableName) throws KettleDatabaseException
@@ -1565,7 +1565,6 @@ public class Database implements VariableSpace, LoggingObjectInterface
 	 * 
 	 * @param ps The prepared statement to empty and close.
 	 * @param batch true if you are using batch processing (typically true for this method)
-	 * @param psBatchCounter The number of rows on the batch queue
 	 * @throws KettleDatabaseException
 	 * 
 	 * @deprecated use emptyAndCommit() instead (pass in the number of rows left in the batch)
@@ -2193,7 +2192,7 @@ public class Database implements VariableSpace, LoggingObjectInterface
 	
 	/**
 	 * Check if an index on certain fields in a table exists.
-	 * @param tablename The table on which the index is checked
+	 * @param schemaName The table on which the index is checked
 	 * @param idx_fields The fields on which the indexe is checked
 	 * @return True if the index exists
 	 */
@@ -2525,7 +2524,7 @@ public class Database implements VariableSpace, LoggingObjectInterface
 
 	/**
 	 * Build the row using ResultSetMetaData rsmd
-     * @param rm The resultset metadata to inquire
+     * @param rs The resultset metadata to inquire
      * @param ignoreLength true if you want to ignore the length (workaround for MySQL bug/problem)
      * @param lazyConversion true if lazy conversion needs to be enabled where possible
 	 */
@@ -2747,7 +2746,8 @@ public class Database implements VariableSpace, LoggingObjectInterface
         case java.sql.Types.VARCHAR: 
         case java.sql.Types.LONGVARCHAR:  // Character Large Object
             valtype=ValueMetaInterface.TYPE_STRING;
-            if (!ignoreLength) length=rm.getColumnDisplaySize(index);
+
+            if (!ignoreLength)  length=rm.getColumnDisplaySize(index);
             break;
             
         case java.sql.Types.CLOB:  
@@ -2942,6 +2942,8 @@ public class Database implements VariableSpace, LoggingObjectInterface
         // get & store more result set meta data for later use
         int originalColumnType=rm.getColumnType(index);
         String originalColumnTypeName=rm.getColumnTypeName(index);
+//        if(originalColumnTypeName.equalsIgnoreCase("nvarchar")||originalColumnTypeName.equalsIgnoreCase("nchar"))
+//            length=length*2;
         int originalPrecision=-1;
         if (!ignoreLength) rm.getPrecision(index); // Throws exception on MySQL
         int originalScale=rm.getScale(index);
@@ -5011,7 +5013,7 @@ public class Database implements VariableSpace, LoggingObjectInterface
 	/**
 	 * Return SQL TRUNCATE statement for a Table
 	 * @param schema The schema
-	 * @param tableNameWithSchema The table to create
+	 * @param tablename The table to create
 	 * @throws KettleDatabaseException
 	 */
 	public String getDDLTruncateTable(String schema, String tablename) throws KettleDatabaseException
