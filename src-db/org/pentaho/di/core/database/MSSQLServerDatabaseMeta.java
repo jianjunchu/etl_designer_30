@@ -285,7 +285,7 @@ public class MSSQLServerDatabaseMeta extends BaseDatabaseMeta implements Databas
 			}
 			break;
 		case ValueMetaInterface.TYPE_BINARY:
-			if(v.getOriginalColumnTypeName().equalsIgnoreCase("image"))
+			if(v.getOriginalColumnTypeName()!=null && v.getOriginalColumnTypeName().equalsIgnoreCase("image"))
 				retval+="IMAGE";
 			else
 			if (length>0) {
