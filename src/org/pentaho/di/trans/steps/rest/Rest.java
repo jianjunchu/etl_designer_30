@@ -28,6 +28,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
+import com.sun.jersey.api.uri.UriComponent;
 import com.sun.jersey.client.apache.ApacheHttpClient;
 import com.sun.jersey.client.apache.config.ApacheHttpClientConfig;
 import com.sun.jersey.client.apache.config.DefaultApacheHttpClientConfig;
@@ -122,15 +123,13 @@ public class Rest extends BaseStep implements StepInterface
 		
 			if(data.useParams) {
 				// Add parameters
-				MultivaluedMapImpl queryParams = new MultivaluedMapImpl();
-				for(int i=0; i<data.nrParams; i++) {
-					String value = data.inputRowMeta.getString(rowData, data.indexOfParamFields[i]);
-					//queryParams.add(data.paramNames[i], value);
-					webResource.queryParam(data.paramNames[i], value);
-					if(isDebug()) logDebug(BaseMessages.getString(PKG, "Rest.Log.parameterValue",data.paramNames[i],value));
+				for ( int i = 0; i < data.nrParams; i++ ) {
+					String value = data.inputRowMeta.getString( rowData, data.indexOfParamFields[i] );
+					if ( isDebug() ) {
+						logDebug( BaseMessages.getString( PKG, "Rest.Log.queryParameterValue", data.paramNames[i], value ) );
+					}
+					webResource = webResource.queryParams( createMultivalueMap( data.paramNames[i], value ) );
 				}
-
-				//.queryParams(queryParams);
 			}
 
 			ClientResponse response=null;
@@ -493,5 +492,10 @@ public class Rest extends BaseStep implements StepInterface
 	 
 	    super.dispose(smi, sdi);
 	}
-
+	/* for unit test*/
+	MultivaluedMapImpl createMultivalueMap( String paramName, String paramValue ) {
+		MultivaluedMapImpl queryParams = new MultivaluedMapImpl();
+		queryParams.add( paramName, UriComponent.encode( paramValue, UriComponent.Type.QUERY_PARAM ) );
+		return queryParams;
+	}
 }
