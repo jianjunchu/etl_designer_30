@@ -23,24 +23,6 @@
 package org.pentaho.di.trans.steps.rest;
 
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManagerFactory;
-import javax.ws.rs.core.MediaType;
-
-import org.apache.commons.httpclient.auth.AuthScope;
-
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
@@ -51,8 +33,7 @@ import com.sun.jersey.client.apache.config.ApacheHttpClientConfig;
 import com.sun.jersey.client.apache.config.DefaultApacheHttpClientConfig;
 import com.sun.jersey.client.urlconnection.HTTPSProperties;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
-
-
+import org.apache.commons.httpclient.auth.AuthScope;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.encryption.Encr;
 import org.pentaho.di.core.exception.KettleException;
@@ -60,11 +41,21 @@ import org.pentaho.di.core.row.RowDataUtil;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
-import org.pentaho.di.trans.step.BaseStep;
-import org.pentaho.di.trans.step.StepDataInterface;
-import org.pentaho.di.trans.step.StepInterface;
-import org.pentaho.di.trans.step.StepMeta;
-import org.pentaho.di.trans.step.StepMetaInterface;
+import org.pentaho.di.trans.step.*;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManagerFactory;
+import javax.ws.rs.core.MediaType;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 
 
 /**
@@ -131,13 +122,15 @@ public class Rest extends BaseStep implements StepInterface
 		
 			if(data.useParams) {
 				// Add parameters
+				MultivaluedMapImpl queryParams = new MultivaluedMapImpl();
 				for(int i=0; i<data.nrParams; i++) {
-					MultivaluedMapImpl queryParams = new MultivaluedMapImpl();
 					String value = data.inputRowMeta.getString(rowData, data.indexOfParamFields[i]);
-					queryParams.add(data.paramNames[i], value);
-	        		if(isDebug()) logDebug(BaseMessages.getString(PKG, "Rest.Log.parameterValue",data.paramNames[i],value));
-					webResource.queryParams(queryParams);
+					//queryParams.add(data.paramNames[i], value);
+					webResource.queryParam(data.paramNames[i], value);
+					if(isDebug()) logDebug(BaseMessages.getString(PKG, "Rest.Log.parameterValue",data.paramNames[i],value));
 				}
+
+				//.queryParams(queryParams);
 			}
 
 			ClientResponse response=null;
@@ -436,7 +429,7 @@ public class Rest extends BaseStep implements StepInterface
 			data.resultFieldName=environmentSubstitute(meta.getFieldName());
 			data.resultCodeFieldName=environmentSubstitute(meta.getResultCodeFieldName());
 			data.resultResponseFieldName=environmentSubstitute(meta.getResponseTimeFieldName());
-			
+			data.nrParams=meta.getParameterField().length;
 			
 			// get authentication settings once
 			data.realProxyHost=environmentSubstitute(meta.getProxyHost());
