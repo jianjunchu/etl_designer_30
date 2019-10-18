@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import mondrian.olap.Util;
 import org.apache.commons.vfs.FileObject;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
@@ -258,8 +259,9 @@ public class MetaInjectDialog extends BaseStepDialog implements StepDialogInterf
     wFilename.setLayoutData(fdFilename);
     wFilename.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent e) {
-        specificationMethod = ObjectLocationSpecificationMethod.FILENAME;
-        setRadioButtons();
+        if(!Util.isEmpty(wFilename.getText()))
+        {specificationMethod = ObjectLocationSpecificationMethod.FILENAME;
+        setRadioButtons();}
       }
     });
 

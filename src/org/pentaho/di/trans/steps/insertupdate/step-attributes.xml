@@ -1,0 +1,17 @@
+<attributes>  
+
+  <!-- Top level attributes -->
+  <attribute id="tableName"> <xmlcode>table</xmlcode> <repcode/> <description>InsertUpdateDialog.TargetTable.Label</description> <tooltip/> <valuetype>String</valuetype> <parentid/> </attribute>
+  <attribute id="schemaName"> <xmlcode>schema</xmlcode> <repcode/> <description>InsertUpdateDialog.TargetSchema.Label</description> <tooltip/> <valuetype>String</valuetype> <parentid/></attribute>
+  <attribute id="connection"> <xmlcode>connection</xmlcode>  <repcode/> <description>InsertUpdateDialog.Connection.Label</description> <tooltip/> <valuetype>Integer</valuetype> <parentid/></attribute>
+  <!-- The fields grid defining all CSV Input fields -->
+  <attribute id="FIELDS"> <xmlcode>fields</xmlcode>  <repcode/> <description>InsertUpdateDialog.Keys.Label</description> <tooltip/> ValueMetaInterface.TYPE_NONE <parentid/> </attribute>
+
+  <!-- The definition of a single CSV input field -->
+  <attribute id="FIELD"> <xmlcode>key</xmlcode>  <repcode/> <description>InsertUpdateDialog.Keys.Label</description> <tooltip/> ValueMetaInterface.TYPE_NONE <parentid>FIELDS</parentid> </attribute>
+
+  <attribute id="FIELD_NAME"> <xmlcode>field</xmlcode>  <repcode>field</repcode> <description>InsertUpdateDialog.ColumnInfo.TableField</description> <tooltip/> <valuetype>String</valuetype> <parentid>FIELD</parentid> </attribute>
+  <attribute id="FIELD_CONDITION"> <xmlcode>condition</xmlcode>  <repcode>condition</repcode> <description>InsertUpdateDialog.ColumnInfo.Comparator</description> <tooltip/> <valuetype>String</valuetype> <parentid>FIELD</parentid> </attribute>
+  <attribute id="FIELD_STREAM_NAME1"> <xmlcode>name</xmlcode>  <repcode>name</repcode> <description>InsertUpdateDialog.ColumnInfo.StreamField1</description> <tooltip/> <valuetype>String</valuetype> <parentid>FIELD</parentid> </attribute>
+  <attribute id="FIELD_STREAM_NAME2"> <xmlcode>name2</xmlcode>  <repcode>name2</repcode> <description>InsertUpdateDialog.ColumnInfo.StreamField2</description> <tooltip/> <valuetype>String</valuetype> <parentid>FIELD</parentid> </attribute>
+</attributes>

@@ -25,11 +25,7 @@ package org.pentaho.di.trans.steps.insertupdate;
 import java.util.List;
 import java.util.Map;
 
-import org.pentaho.di.core.CheckResult;
-import org.pentaho.di.core.CheckResultInterface;
-import org.pentaho.di.core.Const;
-import org.pentaho.di.core.Counter;
-import org.pentaho.di.core.SQLStatement;
+import org.pentaho.di.core.*;
 import org.pentaho.di.core.database.Database;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
@@ -41,24 +37,21 @@ import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.i18n.BaseMessages;
+import org.pentaho.di.repository.LongObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.shared.SharedObjectInterface;
 import org.pentaho.di.trans.DatabaseImpact;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
-import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.StepDataInterface;
-import org.pentaho.di.trans.step.StepInterface;
-import org.pentaho.di.trans.step.StepMeta;
-import org.pentaho.di.trans.step.StepMetaInterface;
+import org.pentaho.di.trans.step.*;
 import org.w3c.dom.Node;
 
 /*
  * Created on 26-apr-2003
  *
  */
-public class InsertUpdateMeta extends BaseStepMeta implements StepMetaInterface
+public class InsertUpdateMeta extends BaseStepMeta implements StepMetaInterface, StepMetaInjectionInterface
 {
 	private static Class<?> PKG = InsertUpdateMeta.class; // for i18n purposes, needed by Translator2!!   $NON-NLS-1$
 
@@ -274,6 +267,14 @@ public class InsertUpdateMeta extends BaseStepMeta implements StepMetaInterface
 		update       = new Boolean[nrvalues];
 	}
 
+	public void allocateKeys(int nrkeys)
+	{
+		keyLookup    = new String[nrkeys];
+		keyCondition = new String[nrkeys];
+		keyStream    = new String[nrkeys];
+		keyStream2   = new String[nrkeys];
+	}
+
 	public Object clone()
 	{
 		InsertUpdateMeta retval = (InsertUpdateMeta)super.clone();
@@ -324,11 +325,11 @@ public class InsertUpdateMeta extends BaseStepMeta implements StepMetaInterface
 			for (int i=0;i<nrkeys;i++)
 			{
 				Node knode = XMLHandler.getSubNodeByNr(lookup, "key", i); //$NON-NLS-1$
-				
-				keyStream       [i] = XMLHandler.getTagValue(knode, "name"); //$NON-NLS-1$
+
 				keyLookup       [i] = XMLHandler.getTagValue(knode, "field"); //$NON-NLS-1$
 				keyCondition    [i] = XMLHandler.getTagValue(knode, "condition"); //$NON-NLS-1$
 				if (keyCondition[i]==null) keyCondition[i]="="; //$NON-NLS-1$
+				keyStream       [i] = XMLHandler.getTagValue(knode, "name"); //$NON-NLS-1$
 				keyStream2      [i] = XMLHandler.getTagValue(knode, "name2"); //$NON-NLS-1$
 			}
 	
@@ -960,4 +961,65 @@ public class InsertUpdateMeta extends BaseStepMeta implements StepMetaInterface
     {
         return true;
     }
+
+
+	public void injectStepMetadataEntries(List<StepInjectionMetaEntry> metadata)  throws KettleException {
+		for (StepInjectionMetaEntry entry : metadata) {
+			KettleAttributeInterface attr = findAttribute(entry.getKey());
+
+			// Set top level attributes...
+			if (entry.getValueType() != ValueMetaInterface.TYPE_NONE) {
+				if (attr.getKey().equals("connection")) {
+					ObjectId conId = new LongObjectId(new Integer(entry.getValue().toString()).intValue());
+					if (this.getParentStepMeta().getParentTransMeta().getRepository() != null)
+						this.databaseMeta = this.getParentStepMeta().getParentTransMeta().getRepository().loadDatabaseMeta(conId, null);
+				} else if (attr.getKey().equals("tableName")) {
+					this.tableName = (String) entry.getValue();
+				} else if (attr.getKey().equals("schemaName")) {
+					this.schemaName = (String) entry.getValue();
+				}else {
+					throw new RuntimeException("Unhandled metadata injection of attribute: " + attr.getKey() + " - " + attr.getDescription());
+				}
+			} else {
+				  if (attr.getKey().equals("FIELDS")) {
+
+					List<StepInjectionMetaEntry> inputFieldEntries = entry.getDetails();
+					allocateKeys(inputFieldEntries.size());
+					for (int row = 0; row < inputFieldEntries.size(); row++) {
+						StepInjectionMetaEntry inputFieldEntry = inputFieldEntries.get(row);
+						List<StepInjectionMetaEntry> fieldAttributes = inputFieldEntry.getDetails();
+
+						for (int i = 0; i < fieldAttributes.size(); i++) {
+							StepInjectionMetaEntry fieldAttribute = fieldAttributes.get(i);
+							KettleAttributeInterface fieldAttr = findAttribute(fieldAttribute.getKey());
+							String attributeValue = (String) fieldAttribute.getValue();
+							if (fieldAttr.getKey().equals("FIELD_NAME")) {
+								keyLookup[row] = attributeValue;
+							} else if (fieldAttr.getKey().equals("FIELD_CONDITION")) {
+								keyCondition[row] = attributeValue;
+							} else if (fieldAttr.getKey().equals("FIELD_STREAM_NAME1")) {
+								keyStream[row] = (attributeValue == null ? "-1" : attributeValue);
+							} else if (fieldAttr.getKey().equals("FIELD_STREAM_NAME2")) {
+								keyStream2[row] = (attributeValue == null ? "-1" : attributeValue);
+							} else {
+								throw new RuntimeException("Unhandled metadata injection of attribute: " + fieldAttr.toString() + " - " + fieldAttr.getDescription());
+							}
+
+						}
+					}
+				}
+			}
+		}
+	}
+	/**
+	 * Describe the metadata attributes that can be injected into this step metadata object.
+	 * @throws KettleException
+	 */
+	public List<StepInjectionMetaEntry> getStepInjectionMetadataEntries() throws KettleException {
+		return getStepInjectionMetadataEntries(PKG);
+	}
+
+	public StepMetaInjectionInterface getStepMetaInjectionInterface() {
+		return this;
+	}
 }

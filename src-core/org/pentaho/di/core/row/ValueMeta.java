@@ -1515,7 +1515,16 @@ public class ValueMeta implements ValueMetaInterface
 	        case TYPE_INTEGER:
 	            switch(storageType)
 	            {
-	            case STORAGE_TYPE_NORMAL:         return new Double( ((Long)object).doubleValue() );
+	            case STORAGE_TYPE_NORMAL:
+	                if(object instanceof Integer)
+                            return new Double( ((Integer)object).doubleValue() );
+	                else if(object instanceof Double)
+                        return (Double)object;
+                    else if(object instanceof Long)
+                        return new Double( ((Long)object).doubleValue() );
+                    else if(object instanceof BigDecimal)
+                        return new Double( ((BigDecimal)object).doubleValue() );
+                    else throw new KettleValueException(toString()+" : Unknown supported data type to Number: "+type);
 	            case STORAGE_TYPE_BINARY_STRING:  return new Double( ((Long)convertBinaryStringToNativeType((byte[])object)).doubleValue() );
 	            case STORAGE_TYPE_INDEXED:        return new Double( ((Long)index[((Integer)object).intValue()]).doubleValue() );
 	            default: throw new KettleValueException(toString()+" : Unknown storage type "+storageType+" specified.");

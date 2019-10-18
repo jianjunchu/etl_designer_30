@@ -131,7 +131,8 @@ public class InsertUpdate extends BaseStep implements StepInterface
                 boolean update = false;
                 for (int i=0;i<data.valuenrs.length;i++)
                 {
-            		if ( meta.getUpdate()[i].booleanValue() ) 
+            		//if ( meta.getUpdate()[i].booleanValue() )
+                    if ( meta.getUpdate()== null ||meta.getUpdate().length==0|| meta.getUpdate()[i].booleanValue() )
             		{
                         ValueMetaInterface valueMeta = rowMeta.getValueMeta( data.valuenrs[i] );
                         ValueMetaInterface retMeta = data.db.getReturnRowMeta().getValueMeta(i);
@@ -152,7 +153,7 @@ public class InsertUpdate extends BaseStep implements StepInterface
                     int j = 0;
                     for (int i=0;i<data.valuenrs.length;i++)
                     {
-                		if( meta.getUpdate()[i].booleanValue() ) 
+                		if( meta.getUpdate()== null ||meta.getUpdate().length==0|| meta.getUpdate()[i].booleanValue() )
                 		{
                             updateRow[j] = row[ data.valuenrs[i] ]; // the setters
                             j++;
@@ -249,22 +250,32 @@ public class InsertUpdate extends BaseStep implements StepInterface
             
             // Cache the position of the compare fields in Row row
             //
-            data.valuenrs = new int[meta.getUpdateLookup().length];
-            for (int i=0;i<meta.getUpdateLookup().length;i++)
-            {
-                data.valuenrs[i]=getInputRowMeta().indexOfValue(meta.getUpdateStream()[i]);
-                if (data.valuenrs[i]<0)  // couldn't find field!
-                {
-                    throw new KettleStepException(BaseMessages.getString(PKG, "InsertUpdate.Exception.FieldRequired",meta.getUpdateStream()[i])); //$NON-NLS-1$ //$NON-NLS-2$
+
+            if(meta.getUpdateLookup()!=null && meta.getUpdateLookup().length>0) {
+                data.valuenrs = new int[meta.getUpdateLookup().length];
+                for (int i = 0; i < meta.getUpdateLookup().length; i++) {
+                    data.valuenrs[i] = getInputRowMeta().indexOfValue(meta.getUpdateStream()[i]);
+                    if (data.valuenrs[i] < 0)  // couldn't find field!
+                    {
+                        throw new KettleStepException(BaseMessages.getString(PKG, "InsertUpdate.Exception.FieldRequired", meta.getUpdateStream()[i])); //$NON-NLS-1$ //$NON-NLS-2$
+                    }
+                    if (log.isDebug())
+                        logDebug(BaseMessages.getString(PKG, "InsertUpdate.Log.FieldHasDataNumbers", meta.getUpdateStream()[i]) + data.valuenrs[i]); //$NON-NLS-1$ //$NON-NLS-2$
                 }
-                if (log.isDebug()) logDebug(BaseMessages.getString(PKG, "InsertUpdate.Log.FieldHasDataNumbers",meta.getUpdateStream()[i])+data.valuenrs[i]); //$NON-NLS-1$ //$NON-NLS-2$
+            }else
+            {
+                data.valuenrs = new int[getInputRowMeta().size()];
+                for (int i = 0; i < getInputRowMeta().size(); i++) {
+                    data.valuenrs[i] = i;
+                }
             }
-            
+
             setLookup(getInputRowMeta());
             
             data.insertRowMeta = new RowMeta();
             
             // Insert the update fields: just names.  Type doesn't matter!
+            if(meta.getUpdateLookup()!=null && meta.getUpdateLookup().length>0)
             for (int i=0;i<meta.getUpdateLookup().length;i++) 
             {
                 ValueMetaInterface insValue = data.insertRowMeta.searchValueMeta( meta.getUpdateLookup()[i]); 
@@ -279,6 +290,9 @@ public class InsertUpdate extends BaseStep implements StepInterface
                 {
                     throw new KettleStepException("The same column can't be inserted into the target row twice: "+insValue.getName()); // TODO i18n
                 }
+            }else
+            {
+                data.insertRowMeta = getInputRowMeta();
             }
             data.db.prepareInsert(data.insertRowMeta, environmentSubstitute(meta.getSchemaName()), 
             		                                  environmentSubstitute(meta.getTableName()));
@@ -286,9 +300,16 @@ public class InsertUpdate extends BaseStep implements StepInterface
             if (!meta.isUpdateBypassed())
             {
                 List<String> updateColumns = new ArrayList<String>();
-                for(int i=0;i<meta.getUpdate().length;i++) {
-                    if(meta.getUpdate()[i].booleanValue()) {
-                        updateColumns.add(meta.getUpdateLookup()[i]);
+                if(meta.getUpdate()!=null && meta.getUpdate().length>0)
+                    for(int i=0;i<meta.getUpdate().length;i++) {
+                        if(meta.getUpdate()[i].booleanValue()) {
+                            updateColumns.add(meta.getUpdateLookup()[i]);
+                        }
+                }
+                else
+                {
+                    for(int i=0;i<getInputRowMeta().size();i++) {
+                            updateColumns.add(getInputRowMeta().getValueMeta(i).getName());
                     }
                 }
                 prepareUpdate(getInputRowMeta());
@@ -336,12 +357,19 @@ public class InsertUpdate extends BaseStep implements StepInterface
         DatabaseMeta databaseMeta = meta.getDatabaseMeta();
         
         String sql = "SELECT ";
-
-        for (int i = 0; i < meta.getUpdateLookup().length; i++)
-        {
-            if (i != 0) sql += ", ";
+        if(meta.getUpdateLookup()!=null && meta.getUpdateLookup().length>0) {
+            for (int i = 0; i < meta.getUpdateLookup().length; i++) {
+             if (i != 0) sql += ", ";
             sql += databaseMeta.quoteField(meta.getUpdateLookup()[i]);
-            data.lookupReturnRowMeta.addValueMeta( rowMeta.searchValueMeta(meta.getUpdateStream()[i]).clone() );
+            data.lookupReturnRowMeta.addValueMeta(rowMeta.searchValueMeta(meta.getUpdateStream()[i]).clone());
+            }
+        }else
+        {
+            for (int i = 0; i < rowMeta.getValueMetaList().size(); i++) {
+                if (i != 0) sql += ", ";
+                sql += databaseMeta.quoteField(rowMeta.getValueMetaList().get(i).getName());
+                data.lookupReturnRowMeta.addValueMeta(rowMeta.getValueMetaList().get(i).clone());
+            }
         }
 
         sql += " FROM " + data.schemaTable + " WHERE ";
@@ -414,19 +442,28 @@ public class InsertUpdate extends BaseStep implements StepInterface
         sql += "SET ";
         
         boolean comma=false;
-        
-        for (int i=0;i<meta.getUpdateLookup().length;i++)
-        {
-    		if ( meta.getUpdate()[i].booleanValue() ) {
-                if (comma) sql+= ",   ";
-                else comma=true;
-                
-                sql += databaseMeta.quoteField(meta.getUpdateLookup()[i]);
-                sql += " = ?" + Const.CR;
-                data.updateParameterRowMeta.addValueMeta( rowMeta.searchValueMeta(meta.getUpdateStream()[i]).clone() );
-    		}
-        }
+        if(meta.getUpdateLookup()!=null && meta.getUpdateLookup().length>0) {
+            for (int i = 0; i < meta.getUpdateLookup().length; i++) {
+                if (meta.getUpdate()[i].booleanValue()) {
+                    if (comma) sql += ",   ";
+                    else comma = true;
 
+                    sql += databaseMeta.quoteField(meta.getUpdateLookup()[i]);
+                    sql += " = ?" + Const.CR;
+                    data.updateParameterRowMeta.addValueMeta(rowMeta.searchValueMeta(meta.getUpdateStream()[i]).clone());
+                }
+            }
+        }else
+        {
+            for (int i = 0; i < data.insertRowMeta.getFieldNames().length; i++) {//not set updatelookup fields
+                    if (comma) sql += ",   ";
+                    else comma = true;
+
+                    sql += databaseMeta.quoteField(data.insertRowMeta.getFieldNames()[i]);
+                    sql += " = ?" + Const.CR;
+                    data.updateParameterRowMeta.addValueMeta(data.insertRowMeta.getValueMeta(i).clone());
+            }
+        }
         sql += "WHERE ";
 
         for (int i=0;i<meta.getKeyLookup().length;i++)
