@@ -1687,8 +1687,7 @@ public abstract class BaseDatabaseMeta implements Cloneable
 
       c = all.charAt(to);
 
-      //Separator from ";" to "#" modified by jyhe
-      //change from "#" to ";" modified by jjchu
+
       if (c == ';' || to >= length - 1) // end of statement
       {
         if (to >= length - 1)

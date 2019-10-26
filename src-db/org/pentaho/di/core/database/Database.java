@@ -84,6 +84,7 @@ import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.ObjectRevision;
 import org.pentaho.di.repository.RepositoryDirectory;
+import sun.reflect.annotation.ExceptionProxy;
 
 
 /**
@@ -1946,8 +1947,10 @@ public class Database implements VariableSpace, LoggingObjectInterface
             // MySQL Hack only. It seems too much for the cursor type of operation on MySQL, to have another cursor opened
             // to get the length of a String field.  So, on MySQL, we ingore the length of Strings in result rows.
             // 
-			rowMeta = getRowInfo(res.getMetaData(), databaseMeta.getDatabaseInterface() instanceof MySQLDatabaseMeta, lazyConversion);
-		}
+			//rowMeta = getRowInfo(res.getMetaData(), databaseMeta.getDatabaseInterface() instanceof MySQLDatabaseMeta, lazyConversion);
+            rowMeta = getRowInfo(res.getMetaData(), false, lazyConversion);//dont ignore length jason
+
+        }
 		catch(SQLException ex)
 		{
 			// log.logError("ERROR executing ["+sql+"]");
@@ -2303,16 +2306,16 @@ public class Database implements VariableSpace, LoggingObjectInterface
 		DBCacheEntry entry=null;
 		
 		// Check the cache first!
-		//
-		if (dbcache!=null)
-		{
-			entry = new DBCacheEntry(databaseMeta.getName(), sql);
-			fields = dbcache.get(entry);
-			if (fields!=null) 
-			{
-				return fields;
-			} 
-		}
+		//don't use dbcache for
+//		if (dbcache!=null)
+//		{
+//			entry = new DBCacheEntry(databaseMeta.getName(), sql);
+//			fields = dbcache.get(entry);
+//			if (fields!=null)
+//			{
+//				return fields;
+//			}
+//		}
 		if (connection==null) return null; // Cache test without connect.
 
 		// No cache entry found 
@@ -2746,8 +2749,14 @@ public class Database implements VariableSpace, LoggingObjectInterface
         case java.sql.Types.VARCHAR: 
         case java.sql.Types.LONGVARCHAR:  // Character Large Object
             valtype=ValueMetaInterface.TYPE_STRING;
-
-            if (!ignoreLength)  length=rm.getColumnDisplaySize(index);
+            if (!ignoreLength)  {
+                try {
+                    length = rm.getColumnDisplaySize(index);
+                }catch(Exception e){
+                    e.printStackTrace();
+                    length = -1;
+                }
+            }
             break;
             
         case java.sql.Types.CLOB:  

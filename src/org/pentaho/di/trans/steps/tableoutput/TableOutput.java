@@ -65,38 +65,38 @@ public class TableOutput extends BaseStep implements StepInterface
 
 	private TableOutputMeta meta;
 	private TableOutputData data;
-		
+
 	public TableOutput(StepMeta stepMeta, StepDataInterface stepDataInterface, int copyNr, TransMeta transMeta, Trans trans)
 	{
 		super(stepMeta, stepDataInterface, copyNr, transMeta, trans);
 	}
-	
+
 	public boolean processRow(StepMetaInterface smi, StepDataInterface sdi) throws KettleException
 	{
 		meta=(TableOutputMeta)smi;
 		data=(TableOutputData)sdi;
-	
+
 		Object[] r=getRow();    // this also waits for a previous step to be finished.
 		if (r==null)  // no more input to be expected...
 		{
 			return false;
 		}
-        
+
         if (first)
         {
             first=false;
             data.outputRowMeta = getInputRowMeta().clone();
             meta.getFields(data.outputRowMeta, getStepname(), null, null, this);
-              
+
             if ( ! meta.specifyFields() )  {
             	// Just take the input row
             	data.insertRowMeta = getInputRowMeta().clone();
             }
             else  {
-            	
+
             	data.insertRowMeta = new RowMeta();
-            	
-            	// 
+
+            	//
             	// Cache the position of the compare fields in Row row
             	//
             	data.valuenrs = new int[meta.getFieldDatabase().length];
@@ -109,9 +109,9 @@ public class TableOutput extends BaseStep implements StepInterface
             		}
             	}
 
-        	    for (int i=0;i<meta.getFieldDatabase().length;i++) 
+        	    for (int i=0;i<meta.getFieldDatabase().length;i++)
         	    {
-        	 	    ValueMetaInterface insValue = getInputRowMeta().searchValueMeta( meta.getFieldStream()[i]); 
+        	 	    ValueMetaInterface insValue = getInputRowMeta().searchValueMeta( meta.getFieldStream()[i]);
         		    if ( insValue != null )
         		    {
         			    ValueMetaInterface insertValue = insValue.clone();
@@ -119,12 +119,59 @@ public class TableOutput extends BaseStep implements StepInterface
         			    data.insertRowMeta.addValueMeta( insertValue );
         		    }
         		    else  {
-        			    throw new KettleStepException(BaseMessages.getString(PKG, "TableOutput.Exception.FailedToFindField", meta.getFieldStream()[i])); //$NON-NLS-1$ 
+        			    throw new KettleStepException(BaseMessages.getString(PKG, "TableOutput.Exception.FailedToFindField", meta.getFieldStream()[i])); //$NON-NLS-1$
         			}
-        	    }            	
+        	    }
             }
+
+
+            //Create Table Add By JYHE START
+            if(data.tablesqlfirst&&meta.createTable())
+//        if(data.tablesqlfirst) // for both create table and alter table. so don't check whether table is exist.
+            {
+                data.tablesqlfirst=false;
+
+
+                String schemaTable= meta.getDatabaseMeta().getQuotedSchemaTableCombination(environmentSubstitute(meta.getSchemaName()), environmentSubstitute(data.tableName));
+
+                if(!data.db.checkTableExists(schemaTable))
+                {
+                    String sqlScript="";
+                    if(data.databaseMeta.getDatabaseTypeDesc().equals("MYSQL"))
+                        sqlScript = data.db.getDDL(schemaTable,getInputRowMeta(),null, false, null, true).replace(";", "")+"DEFAULT CHARSET=utf8;";
+                    else
+                        sqlScript = data.db.getDDL(schemaTable,getInputRowMeta(),null, false, null, true);
+
+                    if(sqlScript!=null && sqlScript.length()>0)
+                        try{
+                            if(log.isBasic()) logBasic("CREATE TABLE DDL ["+sqlScript+"]");
+                            execsqlscript(sqlScript);
+                        }catch (Exception ex)
+                        {
+                            ex.printStackTrace();
+                        }
+                }else
+                {
+                    String sqlScript="";
+                    if(data.databaseMeta.getDatabaseTypeDesc().equals("MYSQL"))
+                        sqlScript = data.db.getDDL(schemaTable,getInputRowMeta(),null, false, null, true);
+                    else
+                        sqlScript = data.db.getDDL(schemaTable,getInputRowMeta(),null, false, null, true);
+
+                    if(sqlScript!=null && sqlScript.length()>0)
+                        try{
+                            if(log.isBasic()) logBasic("ALTER TABLE DDL ["+sqlScript+"]");
+                            execsqlscript(sqlScript);
+                        }catch (Exception ex)
+                        {
+                            ex.printStackTrace();
+                        }
+                }
+            }
+
+
         }
-        
+
 		try
 		{
 			Object[] outputRowData = writeToTable(getInputRowMeta(), r);
@@ -133,8 +180,8 @@ public class TableOutput extends BaseStep implements StepInterface
                 putRow(data.outputRowMeta, outputRowData); // in case we want it go further...
                 incrementLinesOutput();
             }
-            
-            if (checkFeedback(getLinesRead())) 
+
+            if (checkFeedback(getLinesRead()))
             {
             	if(log.isBasic()) logBasic("linenr "+getLinesRead()); //$NON-NLS-1$
             }
@@ -146,26 +193,26 @@ public class TableOutput extends BaseStep implements StepInterface
 			stopAll();
 			setOutputDone();  // signal end to receiver(s)
 			return false;
-		}		
-		
+		}
+
 		return true;
 	}
 
 	private Object[] writeToTable(RowMetaInterface rowMeta, Object[] r) throws KettleException
 	{
-        
-		if (r==null) // Stop: last line or error encountered 
+
+		if (r==null) // Stop: last line or error encountered
 		{
 			if (log.isDetailed()) logDetailed("Last line inserted: stop");
 			return null;
 		}
 
         PreparedStatement insertStatement = null;
-        Object[] insertRowData; 
+        Object[] insertRowData;
         Object[] outputRowData = r;
-        
+
         String tableName = null;
-        
+
         boolean sendToErrorRow=false;
         String errorMessage = null;
         boolean rowIsSafe = false;
@@ -173,7 +220,7 @@ public class TableOutput extends BaseStep implements StepInterface
         List<Exception> exceptionsList = null;
         boolean batchProblem = false;
         Object generatedKey = null;
-        
+
         if ( meta.isTableNameInField() )
         {
             // Cache the position of the table name field
@@ -199,13 +246,13 @@ public class TableOutput extends BaseStep implements StepInterface
             	//
             	insertRowData = RowDataUtil.removeItem(rowMeta.cloneRow(r), data.indexOfTableNameField);
             }
-            else 
+            else
             {
                 insertRowData = r;
             }
         }
         else
-        if (  meta.isPartitioningEnabled() && 
+        if (  meta.isPartitioningEnabled() &&
             ( meta.isPartitioningDaily() || meta.isPartitioningMonthly()) &&
             ( meta.getPartitioningField()!=null && meta.getPartitioningField().length()>0 )
            )
@@ -228,14 +275,14 @@ public class TableOutput extends BaseStep implements StepInterface
                     data.dateFormater = new SimpleDateFormat("yyyyMM");
                 }
             }
-            
+
             ValueMetaInterface partitioningValue = rowMeta.getValueMeta(data.indexOfPartitioningField);
             if (!partitioningValue.isDate() || r[data.indexOfPartitioningField]==null)
             {
                 throw new KettleStepException("Sorry, the partitioning field needs to contain a data value and can't be empty!");
             }
-            
-            Object partitioningValueData = rowMeta.getDate(r, data.indexOfPartitioningField); 
+
+            Object partitioningValueData = rowMeta.getDate(r, data.indexOfPartitioningField);
             tableName=environmentSubstitute(meta.getTablename())+"_"+data.dateFormater.format((Date)partitioningValueData);
             insertRowData = r;
         }
@@ -244,7 +291,7 @@ public class TableOutput extends BaseStep implements StepInterface
             tableName  = data.tableName;
             insertRowData = r;
         }
-        
+
         if ( meta.specifyFields() )  {
         	//
 			// The values to insert are those in the fields sections
@@ -253,60 +300,28 @@ public class TableOutput extends BaseStep implements StepInterface
             for (int idx=0;idx<data.valuenrs.length;idx++)
             {
                 insertRowData[idx] = r[ data.valuenrs[idx] ];
-            }           
+            }
         }
-        
+
         if (Const.isEmpty(tableName))
         {
             throw new KettleStepException("The tablename is not defined (empty)");
         }
-        
-    	//Create Table Add By JYHE START
-      if(data.tablesqlfirst&&meta.createTable())
-//        if(data.tablesqlfirst) // for both create table and alter table. so don't check whether table is exist.
-        {
-        	data.tablesqlfirst=false;
 
 
-            String schemaTable= meta.getDatabaseMeta().getQuotedSchemaTableCombination(environmentSubstitute(meta.getSchemaName()), environmentSubstitute(tableName));
 
-
-            if(!data.db.checkTableExists(schemaTable))
-        	{
-        		String sqlScript="";
-        		if(data.databaseMeta.getDatabaseTypeDesc().equals("MYSQL"))
-        			sqlScript = data.db.getDDL(schemaTable,rowMeta,null, false, null, true).replace(";", "")+"DEFAULT CHARSET=utf8;";
-        		else
-        			sqlScript = data.db.getDDL(schemaTable,rowMeta,null, false, null, true);
-        		
-        		if(sqlScript!=null && sqlScript.length()>0)
-    			try{
-    				if(log.isBasic()) logBasic("create table sqlScript= "+sqlScript); 
-    				execsqlscript(sqlScript);
-    			}catch (Exception ex)
-    			{
-    				ex.printStackTrace();
-    			}
-        	}
-        }else
-        {
-        	//System.out.println("don't create table!");
-        }
-        
-      //Create Table Add By JYHE END
-       
         insertStatement = (PreparedStatement) data.preparedStatements.get(tableName);
         if (insertStatement==null)
         {
             String sql = data.db.getInsertStatement(
-            		              environmentSubstitute(meta.getSchemaName()), 
+            		              environmentSubstitute(meta.getSchemaName()),
             		              tableName,
                                   data.insertRowMeta);
             if (log.isDetailed()) logDetailed("Prepared statement : "+sql);
             insertStatement = data.db.prepareSQL(sql, meta.isReturningGeneratedKeys());
             data.preparedStatements.put(tableName, insertStatement);
         }
-        
+
 		try
 		{
 			// For PG & GP, we add a savepoint before the row.
@@ -320,8 +335,8 @@ public class TableOutput extends BaseStep implements StepInterface
 			if (log.isRowLevel()) {
 				logRowlevel("Written row: "+data.insertRowMeta.getString(insertRowData));
 			}
-			
-			// Get a commit counter per prepared statement to keep track of separate tables, etc. 
+
+			// Get a commit counter per prepared statement to keep track of separate tables, etc.
 		    //
 			Integer commitCounter = data.commitCounterMap.get(tableName);
 		    if (commitCounter==null) {
@@ -332,17 +347,17 @@ public class TableOutput extends BaseStep implements StepInterface
 		    data.commitCounterMap.put(tableName, Integer.valueOf(commitCounter.intValue()));
 
 		    // Release the savepoint if needed
-		    //	    
+		    //
 			if (data.useSafePoints) {
 	          if (data.releaseSavepoint) {
 	             data.db.releaseSavepoint(data.savepoint);
 	          }
 			}
-			
+
 			// Perform a commit if needed
 			//
-			
-			if ((data.commitSize>0) && ((commitCounter%data.commitSize)==0)) 
+
+			if ((data.commitSize>0) && ((commitCounter%data.commitSize)==0))
 			{
 				if (data.batchMode)
 				{
@@ -361,15 +376,15 @@ public class TableOutput extends BaseStep implements StepInterface
 						KettleDatabaseBatchException kdbe = new KettleDatabaseBatchException("Error updating batch", ex);
 					    kdbe.setUpdateCounts(ex.getUpdateCounts());
 			            List<Exception> exceptions = new ArrayList<Exception>();
-			            
+
 			            // 'seed' the loop with the root exception
 			            SQLException nextException = ex;
-			            do 
+			            do
 			            {
 			                exceptions.add(nextException);
 			                // while current exception has next exception, add to list
-			            } 
-			            while ((nextException = nextException.getNextException())!=null);            
+			            }
+			            while ((nextException = nextException.getNextException())!=null);
 			            kdbe.setExceptionsList(exceptions);
 					    throw kdbe;
 					}
@@ -427,7 +442,7 @@ public class TableOutput extends BaseStep implements StepInterface
             sendToErrorRow = true;
             updateCounts = be.getUpdateCounts();
             exceptionsList = be.getExceptionsList();
-            
+
             if (getStepMeta().isDoingErrorHandling())
             {
                 data.db.clearBatch(insertStatement);
@@ -455,7 +470,7 @@ public class TableOutput extends BaseStep implements StepInterface
     			if (log.isRowLevel()) {
     				logRowlevel("Written row to error handling : "+getInputRowMeta().getString(r));
     			}
-    			
+
             	if (data.useSafePoints) {
             		data.db.rollback(data.savepoint);
             		if (data.releaseSavepoint) {
@@ -463,7 +478,7 @@ public class TableOutput extends BaseStep implements StepInterface
             		}
             		// data.db.commit(true); // force a commit on the connection too.
             	}
-            	
+
                 sendToErrorRow = true;
                 errorMessage = dbe.toString();
             }
@@ -490,16 +505,16 @@ public class TableOutput extends BaseStep implements StepInterface
     		    }
             }
 		}
-        
+
         // We need to add a key
         if (generatedKey!=null)
         {
             outputRowData = RowDataUtil.addValueData(outputRowData, rowMeta.size(), generatedKey);
         }
-		
+
         if (data.batchMode)
         {
-            if (sendToErrorRow) 
+            if (sendToErrorRow)
             {
                 if (batchProblem)
                 {
@@ -519,7 +534,7 @@ public class TableOutput extends BaseStep implements StepInterface
             {
                 data.batchBuffer.add(outputRowData);
                 outputRowData=null;
-                
+
                 if (rowIsSafe) // A commit was done and the rows are all safe (no error)
                 {
                     for (int i=0;i<data.batchBuffer.size();i++)
@@ -541,10 +556,10 @@ public class TableOutput extends BaseStep implements StepInterface
                 outputRowData=null;
             }
         }
-        
+
 		return outputRowData;
 	}
-	
+
 	private void processBatchException(String errorMessage, int[] updateCounts, List<Exception> exceptionsList) throws KettleException
     {
         // There was an error with the commit
@@ -586,7 +601,7 @@ public class TableOutput extends BaseStep implements StepInterface
                 putError(data.outputRowMeta, row, 1L, errorMessage, null, "TOP0003");
             }
         }
-        
+
         // Clear the buffer afterwards...
         data.batchBuffer.clear();
     }
@@ -594,7 +609,7 @@ public class TableOutput extends BaseStep implements StepInterface
     public boolean init(StepMetaInterface smi, StepDataInterface sdi) {
       meta = (TableOutputMeta) smi;
       data = (TableOutputData) sdi;
-  
+
       if (super.init(smi, sdi)) {
         try {
           data.commitSize = Integer.parseInt(environmentSubstitute(meta.getCommitSize()));
@@ -607,20 +622,20 @@ public class TableOutput extends BaseStep implements StepInterface
           // For these situations we can use savepoints to help out.
           //
           data.useSafePoints = data.databaseMeta.getDatabaseInterface().useSafePoints() && getStepMeta().isDoingErrorHandling();
-  
+
           // Get the boolean that indicates whether or not we can/should release
           // savepoints during data load.
           //
           data.releaseSavepoint = dbInterface.releaseSavepoint();
-  
-          // Disable batch mode in case 
+
+          // Disable batch mode in case
           // - we use an unlimited commit size
           // - if we need to pick up auto-generated keys
           // - if you are running the transformation as a single database transaction (unique connections)
           // - if we are reverting to save-points
           //
-          data.batchMode = meta.useBatchUpdate() && 
-                            data.commitSize > 0 && 
+          data.batchMode = meta.useBatchUpdate() &&
+                            data.commitSize > 0 &&
                             !meta.isReturningGeneratedKeys() &&
                             !getTransMeta().isUsingUniqueConnections() &&
                             !data.useSafePoints
@@ -631,7 +646,7 @@ public class TableOutput extends BaseStep implements StepInterface
           if (getStepMeta().isDoingErrorHandling() && !dbInterface.supportsErrorHandlingOnBatchUpdates()) {
             log.logMinimal(BaseMessages.getString(PKG, "TableOutput.Warning.ErrorHandlingIsNotFullySupportedWithBatchProcessing"));
           }
-                            
+
           if (meta.getDatabaseMeta() == null) {
             throw new KettleException(BaseMessages.getString(PKG, "TableOutput.Exception.DatabaseNeedsToBeSelected"));
           }
@@ -641,7 +656,7 @@ public class TableOutput extends BaseStep implements StepInterface
           }
           data.db = new Database(this, meta.getDatabaseMeta());
           data.db.shareVariablesWith(this);
-  
+
           if (getTransMeta().isUsingUniqueConnections()) {
             synchronized (getTrans()) {
               data.db.connect(getTrans().getThreadName(), getPartitionID());
@@ -649,26 +664,26 @@ public class TableOutput extends BaseStep implements StepInterface
           } else {
             data.db.connect(getPartitionID());
           }
-  
+
           if (log.isBasic())
-            logBasic("Connected to database [" + meta.getDatabaseMeta() + "] (commit=" + data.commitSize + ")");
-  
+            logBasic("Connected to database [" + meta.getDatabaseMeta() +" ObjectNo:"+ meta.getDatabaseMeta().toString()+ "] (commit=" + data.commitSize + ")");
+
           // Postpone commit as long as possible. PDI-2091
           //
           if (data.commitSize == 0) {
             data.commitSize = Integer.MAX_VALUE;
           }
           data.db.setCommit(data.commitSize);
-  
+
           if (!meta.isPartitioningEnabled() && !meta.isTableNameInField()) {
             data.tableName = environmentSubstitute(meta.getTablename());
-  
+
             String tableName;
             if(meta.getSchemaName()==null || meta.getSchemaName().length()==0)
             	tableName= meta.getTablename();
             else
                 tableName= meta.getDatabaseMeta().getQuotedSchemaTableCombination(environmentSubstitute(meta.getSchemaName()), environmentSubstitute(meta.getTablename()));
-            
+
             if(data.db.checkTableExists(environmentSubstitute(tableName)))//jason 2014
             {
             	// Only the first one truncates in a non-partitioned step copy
@@ -678,7 +693,7 @@ public class TableOutput extends BaseStep implements StepInterface
 	            }
             }
           }
-  
+
           return true;
         } catch (KettleException e) {
           logError("An error occurred intialising this step: " + e.getMessage());
@@ -688,7 +703,7 @@ public class TableOutput extends BaseStep implements StepInterface
       }
       return false;
     }
-		
+
 	public void dispose(StepMetaInterface smi, StepDataInterface sdi)
 	{
 		meta=(TableOutputMeta)smi;
@@ -699,15 +714,15 @@ public class TableOutput extends BaseStep implements StepInterface
 			{
 	            for (String schemaTable : data.preparedStatements.keySet())
 	            {
-	            	// Get a commit counter per prepared statement to keep track of separate tables, etc. 
+	            	// Get a commit counter per prepared statement to keep track of separate tables, etc.
 	    		    //
 	    			Integer batchCounter = data.commitCounterMap.get(schemaTable);
 	    		    if (batchCounter==null) {
 	    		    	batchCounter = 0;
 	    		    }
-	    		    
+
 	    		    PreparedStatement insertStatement = data.preparedStatements.get(schemaTable);
-	    		    
+
 	                data.db.emptyAndCommit(insertStatement, data.batchMode, batchCounter);
 	            }
 	            for (int i=0;i<data.batchBuffer.size();i++)
@@ -717,7 +732,7 @@ public class TableOutput extends BaseStep implements StepInterface
 	                incrementLinesOutput();
 	            }
 	            // Clear the buffer
-	            data.batchBuffer.clear();            
+	            data.batchBuffer.clear();
 			}
 			catch(KettleDatabaseBatchException be)
 			{
@@ -753,7 +768,7 @@ public class TableOutput extends BaseStep implements StepInterface
 			finally
 	        {
 	            setOutputDone();
-	
+
 	            if (getErrors()>0)
 	            {
 	                try
@@ -765,73 +780,31 @@ public class TableOutput extends BaseStep implements StepInterface
 	                    logError("Unexpected error rolling back the database connection.", e);
 	                }
 	            }
-	            
+
 			    data.db.disconnect();
 	        }
             super.dispose(smi, sdi);
-        }        
-	}
-//ADD BY JYHE EXEC CREATE TABLE SQL	
-	private void execsqlscript(String sqlScript)
-	{
-		DatabaseMeta ci = data.databaseMeta;
-		if (ci==null) return;
-
-        StringBuffer message = new StringBuffer();
-
-		Database db = new Database(ci);
-        boolean first = true;
-        PartitionDatabaseMeta[] partitioningInformation = ci.getPartitioningInformation();
-        
-        for (int partitionNr=0;first || (partitioningInformation!=null && partitionNr<partitioningInformation.length) ; partitionNr++)
-        {
-            first = false;
-            String partitionId = null;
-            if (partitioningInformation!=null && partitioningInformation.length>0)
-            {
-                partitionId = partitioningInformation[partitionNr].getPartitionId();
-            }
-            try
-            {
-    			db.connect(partitionId);
-    			
-          // Multiple statements in the script need to be split into individual executable statements
-    			List<String> statements = ci.getDatabaseInterface().parseStatements(sqlScript + Const.CR);
-    			
-    	    int nrstats = 0;
-    			for(String sql : statements) {
-							log.logDetailed("launch DDL statement: "+Const.CR+sql);
-
-							// A DDL statement
-							nrstats++;
-							try
-							{
-							    log.logDetailed("Executing SQL: "+Const.CR+sql);
-								db.execStatement(sql);
-                                message.append(BaseMessages.getString(PKG, "SQLEditor.Log.SQLExecuted", sql));
-                                message.append(Const.CR);
-							}
-							catch(Exception dbe)
-							{
-                                String error = BaseMessages.getString(PKG, "SQLEditor.Log.SQLExecError", sql, dbe.toString());
-                                message.append(error).append(Const.CR);
-							}
-					}
-          message.append(BaseMessages.getString(PKG, "SQLEditor.Log.StatsExecuted", Integer.toString(nrstats)));
-          if (partitionId!=null)
-              message.append(BaseMessages.getString(PKG, "SQLEditor.Log.OnPartition", partitionId));
-          message.append(Const.CR);
-    		}
-    		catch(KettleDatabaseException dbe)
-    		{
-                String error = BaseMessages.getString(PKG, "SQLEditor.Error.CouldNotConnect.Message", (data.databaseMeta==null ? "" : data.databaseMeta.getName()), dbe.getMessage());
-                message.append(error).append(Const.CR);
-    		}
-    		finally
-    		{
-    			db.disconnect();
-    		}
         }
 	}
+    private void execsqlscript(String sqlScript) {
+        StringBuffer message = new StringBuffer();
+        // Multiple statements in the script need to be split into individual executable statements
+        List<String> statements = data.db.getDatabaseMeta().getDatabaseInterface().parseStatements(sqlScript + Const.CR);
+        int nrstats = 0;
+        for (String sql : statements) {
+            log.logDetailed("launch DDL statement: " + Const.CR + sql);
 
+            // A DDL statement
+            nrstats++;
+            try {
+                log.logDetailed("Executing SQL: " + Const.CR + sql);
+                data.db.execStatement(sql + ";");
+                message.append(BaseMessages.getString(PKG, "SQLEditor.Log.SQLExecuted", sql));
+                message.append(Const.CR);
+            } catch (Exception dbe) {
+                String error = BaseMessages.getString(PKG, "SQLEditor.Log.SQLExecError", sql, dbe.toString());
+                message.append(error).append(Const.CR);
+            }
+        }
+    }
 }
