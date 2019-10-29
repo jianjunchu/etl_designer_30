@@ -3508,13 +3508,13 @@ public class Database implements VariableSpace, LoggingObjectInterface
 	public String getCreateTableStatement(String tableName, RowMetaInterface fields, String tk, boolean use_autoinc, String pk, boolean semicolon)
 	{
 		StringBuilder retval = new StringBuilder("CREATE TABLE ");
-		
+
 		retval.append(tableName+Const.CR);
 		retval.append("(").append(Const.CR);
 		for (int i=0;i<fields.size();i++)
 		{
 			if (i>0) retval.append(", "); else retval.append("  ");
-			
+
 			ValueMetaInterface v=fields.getValueMeta(i);
 			retval.append(databaseMeta.getFieldDefinition(v, tk, pk, use_autoinc));
 		}
@@ -3527,7 +3527,7 @@ public class Database implements VariableSpace, LoggingObjectInterface
 				retval.append(", PRIMARY KEY (").append(tk).append(")").append(Const.CR);
 			}
 		}
-		
+
 		// Primary keys
 		if (pk!=null)
 		{
@@ -3537,37 +3537,37 @@ public class Database implements VariableSpace, LoggingObjectInterface
 			}
 		}
 		retval.append(")").append(Const.CR);
-				
+
 		retval.append(databaseMeta.getDatabaseInterface().getDataTablespaceDDL(variables, databaseMeta));
 
 		if (pk==null && tk==null && databaseMeta.getDatabaseInterface() instanceof NeoviewDatabaseMeta)
 		{
-			retval.append("NO PARTITION"); // use this as a default when no pk/tk is there, otherwise you get an error 
+			retval.append("NO PARTITION"); // use this as a default when no pk/tk is there, otherwise you get an error
 		}
-		
-		
+
+
 		if (semicolon) retval.append(";");
-		
+
 		// TODO: All this custom database code shouldn't really be in Database.java.  It should be in the DB implementations.
 		//
 		if (databaseMeta.getDatabaseInterface() instanceof VerticaDatabaseMeta)
 		{
 		    retval.append(Const.CR).append("CREATE PROJECTION ").append(tableName).append("_unseg_super").append(Const.CR);
-		    
+
 	        retval.append("(").append(Const.CR);
 	        for (int i=0;i<fields.size();i++)
 	        {
 	            if (i>0) retval.append(", "); else retval.append("  ");
-	            
+
 	            retval.append(fields.getValueMeta(i).getName()).append(Const.CR);
 	        }
             retval.append(")").append(Const.CR);
-            
+
             retval.append("AS SELECT").append(Const.CR);
             for (int i=0;i<fields.size();i++)
             {
                 if (i>0) retval.append(", "); else retval.append("  ");
-                
+
                 retval.append(fields.getValueMeta(i).getName()).append(Const.CR);
             }
             retval.append("FROM ").append(tableName).append(Const.CR);
@@ -3576,9 +3576,97 @@ public class Database implements VariableSpace, LoggingObjectInterface
             retval.append("UNSEGMENTED ALL NODES").append(Const.CR);
             retval.append(";");
 		}
-		
+
 		return retval.toString();
 	}
+
+
+//    /**
+//     * Generates SQL
+//     * @param tableName the table name or schema/table combination: this needs to be quoted properly in advance.
+//     * @param fields the fields
+//     * @param tk the name of the technical key field
+//     * @param use_autoinc true if we need to use auto-increment fields for a primary key
+//     * @param pk the name of the primary/technical key field
+//     * @param semicolon append semicolon to the statement
+//     * @param pkc primary key composite ( name of the key fields)
+//     * @return the SQL needed to create the specified table and fields.
+//     */
+//    public String getCreateTableStatement(String tableName, RowMetaInterface fields, String tk, boolean use_autoinc, String pk, boolean semicolon)
+//    {
+//        StringBuilder retval = new StringBuilder("CREATE TABLE ");
+//
+//        retval.append(tableName);
+//        retval.append("(");
+//        for (int i=0;i<fields.size();i++)
+//        {
+//            if (i>0) retval.append(", "); else retval.append("  ");
+//
+//            ValueMetaInterface v=fields.getValueMeta(i);
+//            retval.append(databaseMeta.getFieldDefinition(v, tk, pk, use_autoinc,true,false));
+//        }
+//        // At the end, before the closing of the statement, we might need to add some constraints...
+//        // Technical keys
+//        if (tk!=null)
+//        {
+//            if (databaseMeta.requiresCreateTablePrimaryKeyAppend())
+//            {
+//                retval.append(", PRIMARY KEY (").append(tk).append(")");
+//            }
+//        }
+//
+//        // Primary keys
+//        if (pk!=null)
+//        {
+//            if (databaseMeta.requiresCreateTablePrimaryKeyAppend())
+//            {
+//                retval.append(", PRIMARY KEY (").append(pk).append(")");
+//            }
+//        }
+//        retval.append(")");
+//
+//        retval.append(databaseMeta.getDatabaseInterface().getDataTablespaceDDL(variables, databaseMeta));
+//
+//        if (pk==null && tk==null && databaseMeta.getDatabaseInterface() instanceof NeoviewDatabaseMeta)
+//        {
+//            retval.append("NO PARTITION"); // use this as a default when no pk/tk is there, otherwise you get an error
+//        }
+//
+//
+//        if (semicolon) retval.append(";");
+//
+//        // TODO: All this custom database code shouldn't really be in Database.java.  It should be in the DB implementations.
+//        //
+//        if (databaseMeta.getDatabaseInterface() instanceof VerticaDatabaseMeta)
+//        {
+//            retval.append(Const.CR).append("CREATE PROJECTION ").append(tableName).append("_unseg_super").append(Const.CR);
+//
+//            retval.append("(").append(Const.CR);
+//            for (int i=0;i<fields.size();i++)
+//            {
+//                if (i>0) retval.append(", "); else retval.append("  ");
+//
+//                retval.append(fields.getValueMeta(i).getName()).append(Const.CR);
+//            }
+//            retval.append(")").append(Const.CR);
+//
+//            retval.append("AS SELECT").append(Const.CR);
+//            for (int i=0;i<fields.size();i++)
+//            {
+//                if (i>0) retval.append(", "); else retval.append("  ");
+//
+//                retval.append(fields.getValueMeta(i).getName()).append(Const.CR);
+//            }
+//            retval.append("FROM ").append(tableName).append(Const.CR);
+//            retval.append("-- Replace UNSEGMENTED with a hash segmentation for optimum performance").append(Const.CR);
+//            retval.append("--SEGMENTED BY HASH(X,Y,Z)").append(Const.CR);
+//            retval.append("UNSEGMENTED ALL NODES").append(Const.CR);
+//            retval.append(";");
+//        }
+//
+//        return retval.toString();
+//    }
+
 	public String getAlterTableStatement(String tableName, RowMetaInterface fields, String tk, boolean use_autoinc, String pk, boolean semicolon) throws KettleDatabaseException
 	{
 		String retval="";

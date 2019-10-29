@@ -798,12 +798,13 @@ public class TableOutput extends BaseStep implements StepInterface
             nrstats++;
             try {
                 log.logDetailed("Executing SQL: " + Const.CR + sql);
-                data.db.execStatement(sql + ";");
+                data.db.execStatement(sql);
                 message.append(BaseMessages.getString(PKG, "SQLEditor.Log.SQLExecuted", sql));
                 message.append(Const.CR);
             } catch (Exception dbe) {
                 String error = BaseMessages.getString(PKG, "SQLEditor.Log.SQLExecError", sql, dbe.toString());
                 message.append(error).append(Const.CR);
+                dbe.printStackTrace();
             }
         }
     }
