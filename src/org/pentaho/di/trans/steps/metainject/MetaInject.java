@@ -298,23 +298,26 @@ public class MetaInject extends BaseStep implements StepInterface {
     data = (MetaInjectData) sdi;
 
     if (super.init(smi, sdi)) {
-      try {
-        data.transMeta = MetaInjectMeta.loadTransformationMeta(meta, getTrans().getRepository(), this);
+      for(int i=0;i<10;i++) {
+        try {
+          data.transMeta = MetaInjectMeta.loadTransformationMeta(meta, getTrans().getRepository(), this);
 
-        // Get a mapping between the step name and the injection...
-        //
-        data.stepInjectionMap = new HashMap<String, StepMetaInjectionInterface>();
-        for (StepMeta stepMeta : data.transMeta.getUsedSteps()) {
-          StepMetaInjectionInterface injectionInterface = stepMeta.getStepMetaInterface().getStepMetaInjectionInterface();
-          if (injectionInterface != null) {
-            data.stepInjectionMap.put(stepMeta.getName(), injectionInterface);
+          // Get a mapping between the step name and the injection...
+          //
+          data.stepInjectionMap = new HashMap<String, StepMetaInjectionInterface>();
+          for (StepMeta stepMeta : data.transMeta.getUsedSteps()) {
+            StepMetaInjectionInterface injectionInterface = stepMeta.getStepMetaInterface().getStepMetaInjectionInterface();
+            if (injectionInterface != null) {
+              data.stepInjectionMap.put(stepMeta.getName(), injectionInterface);
+            }
           }
+
+          return true;
+        } catch (Exception e) {
+          logError(BaseMessages.getString(PKG, "MetaInject.UnableLoadTrans.Message",i), e); //$NON-NLS-1$
         }
-        
-        return true;
-      } catch (Exception e) {
-        logError(BaseMessages.getString(PKG, "MetaInject.UnableLoadTrans.Message"), e); //$NON-NLS-1$
-        return false;
+        try{
+        Thread.sleep(100);}catch(Exception e){}
       }
     }
 
