@@ -51,6 +51,7 @@ import org.pentaho.di.core.logging.LogChannel;
 import org.pentaho.di.core.row.ValueMeta;
 import org.pentaho.di.core.row.ValueMetaAndData;
 import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryBase;
 import org.pentaho.di.partition.PartitionSchema;
@@ -258,7 +259,26 @@ public class KettleDatabaseRepository extends KettleDatabaseRepositoryBase imple
     public TransMeta loadTransformation(String transname, RepositoryDirectoryInterface repdir, ProgressMonitorListener monitor, boolean setInternalVariables, String versionName) throws KettleException {
     	securityProvider.validateAction(RepositoryOperation.READ_TRANSFORMATION);
     	TransMeta transMeta = new TransMeta();
-    	return transDelegate.loadTransformation(transMeta, transname, repdir, monitor, setInternalVariables);
+
+		TransMeta resTransMeta;
+
+		for(int i = 0 ; i < 10 ; i++ ){
+
+			try {
+				resTransMeta = transDelegate.loadTransformation(transMeta, transname, repdir, monitor, setInternalVariables);
+				if(resTransMeta != null){
+					return resTransMeta;
+				}
+
+			}catch (KettleException e){
+
+			}
+			try{
+				Thread.sleep(100);}catch(Exception e){}
+		}
+
+		return transDelegate.loadTransformation(transMeta, transname, repdir, monitor, setInternalVariables);
+
 	}
         
 	public SharedObjects readTransSharedObjects(TransMeta transMeta) throws KettleException {
