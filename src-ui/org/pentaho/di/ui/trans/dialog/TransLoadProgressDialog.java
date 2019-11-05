@@ -117,7 +117,8 @@ public class TransLoadProgressDialog
 		}
 		catch (InvocationTargetException e)
 		{
-		   Spoon.getInstance().hideSplash();
+			e.printStackTrace();
+		   //Spoon.getInstance().hideSplash();
 			new ErrorDialog(shell, BaseMessages.getString(PKG, "TransLoadProgressDialog.ErrorLoadingTransformation.DialogTitle"), BaseMessages.getString(PKG, "TransLoadProgressDialog.ErrorLoadingTransformation.DialogMessage"), e); //$NON-NLS-1$ //$NON-NLS-2$
 			transInfo = null;
 		}
