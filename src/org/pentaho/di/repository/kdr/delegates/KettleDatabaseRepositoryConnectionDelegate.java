@@ -1728,7 +1728,8 @@ public class KettleDatabaseRepositoryConnectionDelegate extends KettleDatabaseRe
       
       ResultSet resultSet = null;
       try {
-        resultSet = database.openQuery(ps, parameterMeta, parameterData);
+		log.logDetailed("getOneRow, "+"sql="+sql+" , parameter="+id);
+		resultSet = database.openQuery(ps, parameterMeta, parameterData);
         Object[] result = database.getRow(resultSet);
         if (result==null)
 		{
