@@ -73,5 +73,9 @@
     <tooltip>PhoneMask</tooltip>
   </function>
 
-  
+  <function id="udf1">
+    <classname>com.aofei.udf.UDFReplace</classname>
+    <description>udf1</description>
+    <tooltip>udf1</tooltip>
+  </function>
 </functions>
