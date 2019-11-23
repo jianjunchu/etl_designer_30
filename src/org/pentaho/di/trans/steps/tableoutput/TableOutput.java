@@ -52,6 +52,7 @@ import org.pentaho.di.trans.step.StepDataInterface;
 import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
+import org.pentaho.di.ui.spoon.dialog.SearchFieldsProgressDialog;
 
 /**
  * Writes rows to a database table.
@@ -125,49 +126,48 @@ public class TableOutput extends BaseStep implements StepInterface
             }
 
 
-            //Create Table Add By JYHE START
-            if(data.tablesqlfirst&&meta.createTable())
-//        if(data.tablesqlfirst) // for both create table and alter table. so don't check whether table is exist.
-            {
-                data.tablesqlfirst=false;
-
-
-                String schemaTable= meta.getDatabaseMeta().getQuotedSchemaTableCombination(environmentSubstitute(meta.getSchemaName()), environmentSubstitute(data.tableName));
-
-                if(!data.db.checkTableExists(schemaTable))
-                {
-                    String sqlScript="";
-                    if(data.databaseMeta.getDatabaseTypeDesc().equals("MYSQL"))
-                        sqlScript = data.db.getDDL(schemaTable,getInputRowMeta(),null, false, null, true).replace(";", "")+"DEFAULT CHARSET=utf8;";
-                    else
-                        sqlScript = data.db.getDDL(schemaTable,getInputRowMeta(),null, false, null, true);
-
-                    if(sqlScript!=null && sqlScript.length()>0)
-                        try{
-                            if(log.isBasic()) logBasic("CREATE TABLE DDL ["+sqlScript+"]");
-                            execsqlscript(sqlScript);
-                        }catch (Exception ex)
-                        {
-                            ex.printStackTrace();
-                        }
-                }else
-                {
-                    String sqlScript="";
-                    if(data.databaseMeta.getDatabaseTypeDesc().equals("MYSQL"))
-                        sqlScript = data.db.getDDL(schemaTable,getInputRowMeta(),null, false, null, true);
-                    else
-                        sqlScript = data.db.getDDL(schemaTable,getInputRowMeta(),null, false, null, true);
-
-                    if(sqlScript!=null && sqlScript.length()>0)
-                        try{
-                            if(log.isBasic()) logBasic("ALTER TABLE DDL ["+sqlScript+"]");
-                            execsqlscript(sqlScript);
-                        }catch (Exception ex)
-                        {
-                            ex.printStackTrace();
-                        }
-                }
-            }
+//            //Create Table Add By JYHE START
+//            if(data.tablesqlfirst&&meta.createTable())
+//            {
+//                data.tablesqlfirst=false;
+//
+//
+//                String schemaTable= meta.getDatabaseMeta().getQuotedSchemaTableCombination(environmentSubstitute(meta.getSchemaName()), environmentSubstitute(data.tableName));
+//
+//                if(!data.db.checkTableExists(schemaTable))
+//                {
+//                    String sqlScript="";
+//                    if(data.databaseMeta.getDatabaseTypeDesc().equals("MYSQL"))
+//                        sqlScript = data.db.getDDL(schemaTable,getInputRowMeta(),null, false, null, true).replace(";", "")+"DEFAULT CHARSET=utf8;";
+//                    else
+//                        sqlScript = data.db.getDDL(schemaTable,getInputRowMeta(),null, false, null, true);
+//
+//                    if(sqlScript!=null && sqlScript.length()>0)
+//                        try{
+//                            if(log.isBasic()) logBasic("CREATE TABLE DDL ["+sqlScript+"]");
+//                            execsqlscript(sqlScript);
+//                        }catch (Exception ex)
+//                        {
+//                            ex.printStackTrace();
+//                        }
+//                }else
+//                {
+//                    String sqlScript="";
+//                    if(data.databaseMeta.getDatabaseTypeDesc().equals("MYSQL"))
+//                        sqlScript = data.db.getDDL(schemaTable,getInputRowMeta(),null, false, null, true);
+//                    else
+//                        sqlScript = data.db.getDDL(schemaTable,getInputRowMeta(),null, false, null, true);
+//
+//                    if(sqlScript!=null && sqlScript.length()>0)
+//                        try{
+//                            if(log.isBasic()) logBasic("ALTER TABLE DDL ["+sqlScript+"]");
+//                            execsqlscript(sqlScript);
+//                        }catch (Exception ex)
+//                        {
+//                            ex.printStackTrace();
+//                        }
+//                }
+//            }
 
 
         }
@@ -693,6 +693,53 @@ public class TableOutput extends BaseStep implements StepInterface
 	            }
             }
           }
+
+//create table in init stage:
+            if(data.tablesqlfirst&&meta.createTable())
+//        if(data.tablesqlfirst) // for both create table and alter table. so don't check whether table is exist.
+            {
+                data.tablesqlfirst=false;
+
+                String schemaTable= meta.getDatabaseMeta().getQuotedSchemaTableCombination(environmentSubstitute(meta.getSchemaName()), environmentSubstitute(data.tableName));
+                RowMetaInterface rmi = this.getTransMeta().getStepFields(this.getStepname());
+                if(!data.db.checkTableExists(schemaTable))
+                {
+                    String sqlScript="";
+                    if(data.databaseMeta.getDatabaseTypeDesc().equals("MYSQL")) {
+                        //SearchFieldsProgressDialog op = new SearchFieldsProgressDialog(this.getTransMeta(), this.getTransMeta().getStep(), true);
+                        sqlScript = data.db.getDDL(schemaTable, rmi, null, false, null, true).replace(";", "") + "DEFAULT CHARSET=utf8;";
+                    }
+                    else
+                        sqlScript = data.db.getDDL(schemaTable,rmi,null, false, null, true);
+
+                    if(sqlScript!=null && sqlScript.length()>0)
+                        try{
+                            if(log.isBasic()) logBasic("CREATE TABLE DDL ["+sqlScript+"]");
+                            execsqlscript(sqlScript);
+                        }catch (Exception ex)
+                        {
+                            ex.printStackTrace();
+                        }
+                }else
+                {
+                    String sqlScript="";
+                    if(data.databaseMeta.getDatabaseTypeDesc().equals("MYSQL")) {
+
+                        sqlScript = data.db.getDDL(schemaTable, rmi, null, false, null, true);
+                    }
+                    else
+                        sqlScript = data.db.getDDL(schemaTable,rmi,null, false, null, true);
+
+                    if(sqlScript!=null && sqlScript.length()>0)
+                        try{
+                            if(log.isBasic()) logBasic("ALTER TABLE DDL ["+sqlScript+"]");
+                            execsqlscript(sqlScript);
+                        }catch (Exception ex)
+                        {
+                            ex.printStackTrace();
+                        }
+                }
+            }
 
           return true;
         } catch (KettleException e) {
