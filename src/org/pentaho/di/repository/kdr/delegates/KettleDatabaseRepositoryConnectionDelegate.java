@@ -168,7 +168,7 @@ public class KettleDatabaseRepositoryConnectionDelegate extends KettleDatabaseRe
 			throw new KettleException("Error connecting to the repository!", e);
 		}
 
-		Timer timer = new Timer();
+		/*Timer timer = new Timer();
 		TimerTask task = new TimerTask() {
 			public void run() {
 				try {
@@ -181,7 +181,7 @@ public class KettleDatabaseRepositoryConnectionDelegate extends KettleDatabaseRe
 				}
 			}
 		};
-		timer.schedule(task, 60*1000,60*1000);
+		timer.schedule(task, 60*1000,60*1000);*/
 	}
 
     /**
