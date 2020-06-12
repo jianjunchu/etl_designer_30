@@ -250,6 +250,8 @@ public class HTTP extends BaseStep implements StepInterface
 	            String s = outputRowMeta.getString(row, data.argnrs[i]);
 	            if ( s != null )
 	            	s = URIUtil.encodeWithinQuery(s);
+	            else
+	            	s="";
 	            url.append(s);
 	        }
 	        
