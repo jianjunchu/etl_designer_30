@@ -1,39 +1,28 @@
 package com.aofei.obs;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
+import com.obs.services.ObsClient;
+import com.obs.services.model.PutObjectResult;
+import com.obs.services.model.ObsObject;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.LongAccumulator;
-import java.util.concurrent.atomic.LongAdder;
+import java.util.concurrent.*;
 
-import com.obs.services.ObsClient;
-import com.obs.services.model.PutObjectResult;
 
-public class PutFiles {
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 
-    private static String fileDir = "/mnt/kettle/photos/female";
+public class ReadFiles {
 
-//    private static String endPoint = "https://192.168.100.2";
-//    private static String ak = "C4C80CFCF75263EF0459";
-//    private static String sk = "wp/09DhY2qFAmvkWN9gPOrOvz5QAAAFt91Jj8lQg";
+    private static String fileDir = "";
 
-    private static String endPoint = "sjclobs.fgwpt.com";
-    private static String ak = "AC3C0C56748491C05D22";
-    private static String sk = "GONZaHvEcNg75v1vJrfWlY+XagwAAAFvdISRwNQY";
+    private static String endPoint = "";
+    private static String ak = "";
+    private static String sk = "";
 
     private static String bucketName;
     private static int maxValue;
@@ -81,7 +70,6 @@ public class PutFiles {
                         debug("bucketName="+bucketName);
                         debug("file="+file.getAbsolutePath());
                         PutObjectResult result = obsClient.putObject(bucketName, objectKey, file);
-//                        debug(objectKey+" Success!");
                         save2File(objectKey);
                         //debug(" start close obs client");
                         //obsClient.close();
@@ -100,198 +88,53 @@ public class PutFiles {
     }
 
     public static void main(String[] args) throws InterruptedException, ExecutionException {
-//    	putFiles( ak, sk, endPoint, bucketName,
-//		3,"",0,100,8);
         int copyCount = 1;
         fileDir = "E:\\felix\\demos\\test\\src\\main\\resources\\obsPutFileDir";
-        if (args.length == 4){
-            copyCount = Integer.parseInt(args[0]);
-            fileDir = args[1];
-            bucketName = args[2];
-            int threadNum = Integer.parseInt(args[3]);
-            //putFiles(copyCount,fileDir,bucketName,threadNum);
-        }
-        else if(args.length == 5){
-            copyCount = Integer.parseInt(args[0]);
-            fileDir = args[1];
-            int start = Integer.parseInt(args[2]);
-            int max = Integer.parseInt(args[3]);
-            int threadNum = Integer.parseInt(args[4]);
-            putFiles(copyCount,fileDir,start,max,threadNum);
-        }
-        else if(args.length == 6){
-            copyCount = Integer.parseInt(args[0]);
-            fileDir = args[1];
-            bucketName = args[2];
-            int start = Integer.parseInt(args[3]);
-            int max = Integer.parseInt(args[4]);
-            int threadNum = Integer.parseInt(args[5]);
-            putFiles(copyCount,fileDir,bucketName,start,max,threadNum);
-        }
-        else if(args.length == 9){
+        if(args.length == 5){
             String ak_= args[0];
             String sk_= args[1];
-            String endPoint_= args[2];
-            String bucketName_= args[3];
-            copyCount = Integer.parseInt(args[4]);
-            fileDir = args[5];
-            int start = Integer.parseInt(args[6]);
-            int max = Integer.parseInt(args[7]);
-            int threadNum = Integer.parseInt(args[8]);
-            putFiles(ak_, sk_, endPoint_, bucketName_,
-                    copyCount, fileDir, start, max, threadNum);
-        }
-        else if(args.length == 10){
-            String ak_= args[0];
-            String sk_= args[1];
-            String endPoint_= args[2];
-            String bucketName_= args[3];
-            copyCount = Integer.parseInt(args[4]);
-            fileDir = args[5];
-            int start = Integer.parseInt(args[6]);
-            int max = Integer.parseInt(args[7]);
-            int threadNum = Integer.parseInt(args[8]);
-            String sexFlag_ = args[9];
-            putFiles(ak_, sk_, endPoint_, bucketName_,
-                    copyCount, fileDir, start, max, threadNum,sexFlag_);
+            String endPoint= args[2];
+            String bucketName = args[3];
+            String objectKey=args[4];
+            try {
+                readFile(ak, sk, endPoint, bucketName, objectKey);
+            }catch(Exception ex){ex.printStackTrace();}
         }
     }
 
-//    /**
-//     * ∏¥÷∆±æµÿŒƒº˛µΩobs
-//     * @param copyCount ∏¥÷∆Œƒº˛µƒ¥Œ ˝
-//     * @param fileDir “™∏¥÷∆Œƒº˛µƒƒø¬º
-//     * @param bucketn obsÕ∞√˚≥∆
-//     * @param threadNum ‘À––œﬂ≥Ã ˝
-//     * @throws InterruptedException
-//     * @throws ExecutionException
-//     */
-//    public static void putFiles(int copyCount,String fileDir,String bucketn,int threadNum) throws InterruptedException, ExecutionException{
-//        long st=System.currentTimeMillis();
-//        System.out.println("start putFiles copyCount="+copyCount+",fileDir="+fileDir+",bucketn="+bucketn);
-//        bucketName  = bucketn;
-//        if (threadNum == 0){
-//            threadNum = 8;
-//        }
-//        File[] files = new File(fileDir).listFiles();
-//        System.out.println("total files:"+files.length);
-//        List<Future<String>> results = new ArrayList<Future<String>>();
-//        ExecutorService es = Executors.newFixedThreadPool(threadNum);
-//
-//        for(int i=0; i<files.length;i++)
-//            for(int j=0; j<copyCount;j++) {
-//                results.add(es.submit(new Task(files[i])));
-//            }
-//        es.shutdown();
-//        while(true) {
-//            try {
-//                if (es.isTerminated()) {
-//                    if(obsClient!=null)
-//                        obsClient.close();
-//                    long cost = System.currentTimeMillis() - st;
-//                    System.out.println("put files cost=" + cost + "ms");
-//                    if(fileWriter!=null)
-//                        fileWriter.close();
-//                    break;
-//                }
-//                Thread.sleep(1000);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        System.out.println("end putFiles");
-//    }
 
-    /**
-     * ∏¥÷∆±æµÿŒƒº˛µΩobs
-     * @param copyCount ∏¥÷∆Œƒº˛µƒ¥Œ ˝
-     * @param fileDir “™∏¥÷∆Œƒº˛µƒƒø¬º
-     * @param bucketn obsÕ∞√˚≥∆
-     * @param start obs key÷ÿ√¸√˚µƒø™ º ˝
-     * @param max obs key÷ÿ√¸√˚µƒ◊Ó¥Û ˝
-     * @param threadNum ‘À––œﬂ≥Ã ˝
-     * @throws InterruptedException
-     * @throws ExecutionException
-     */
-    public static void putFiles(int copyCount,String fileDir,String bucketn,int start,int max,int threadNum) throws InterruptedException, ExecutionException{
-        long st=System.currentTimeMillis();
-        System.out.println("begin: copyCount="+copyCount+",fileDir="+fileDir+",bucketn="+bucketn+",start="+start+",max="+max+",threadNum="+threadNum);
-        bucketName  = bucketn;
-        startValue =start;
-        maxValue= max;
-        if (threadNum == 0){
-            threadNum = 8;
+    public static void readFile(String ak,String sk,String endPoint,String bucketName,String objectKey) throws Exception
+    {
+        if(objectKey==null || objectKey.length()==0)
+        {
+            throw new Exception("url not set");
         }
-        File[] files = new File(fileDir).listFiles();
-        System.out.println("total files:"+files.length);
-        List<Future<String>> results = new ArrayList<Future<String>>();
-        ExecutorService es = Executors.newFixedThreadPool(threadNum);
-
-        for(int i=0; i<files.length;i++)
-            for(int j=0; j<copyCount;j++) {
-                results.add(es.submit(new Task(files[i])));
+        try {
+            if ( null == obsClient) {
+                debug(" start read obs client");
+                obsClient = new ObsClient(ak, sk, endPoint);
             }
-        results.add(es.submit(new Task(files[0])));
-//        es.shutdown();
-//        while(true) {
-//            try {
-//                if (es.isTerminated()) {
-//                    if (null != obsClient) obsClient.close();
-//                    long cost = System.currentTimeMillis() - st;
-//                    System.out.println("put files cost=" + cost + "ms");
-//                    if (null != fileWriter) fileWriter.close();
-//                    break;
-//                }
-//                Thread.sleep(1000);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-        System.out.println("end putFiles");
-    }
+            if(objectKey.indexOf("*") != -1) {
+                    ObsObject obsObject = obsClient.getObject(bucketName, objectKey, null);
+                ReadableByteChannel rchannel = Channels.newChannel(obsObject.getObjectContent());
 
-    public static void putFiles(int copyCount,String fileDir,int start,int max,int threadNum) throws InterruptedException, ExecutionException{
-        long st=System.currentTimeMillis();
+                ByteBuffer buffer = ByteBuffer.allocate(4096);
+                WritableByteChannel wchannel = Channels.newChannel(new FileOutputStream(new File(objectKey)));
 
+                while (rchannel.read(buffer) != -1)
+                {
+                    buffer.flip();
+                    wchannel.write(buffer);
+                    buffer.clear();
+                }
+                rchannel.close();
+                wchannel.close();
+                }
 
-        String bucketn = null;
-
-        ResourceBundle resourceBundle = null;
-        try{
-            String proFilePath = System.getProperty("user.home") + "/.kettle/kettle.properties";
-            InputStream in = new BufferedInputStream(new FileInputStream(proFilePath));
-            resourceBundle = new PropertyResourceBundle(in);
-//	        copyCount = Integer.parseInt(resourceBundle.getString("copyCount"));
-//	        fileDir = resourceBundle.getString("fileDir");
-            bucketn = resourceBundle.getString("bucketName");
-//	        start = Integer.parseInt(resourceBundle.getString("start"));
-//	        max = Integer.parseInt(resourceBundle.getString("max"));
-//	        threadNum = Integer.parseInt(resourceBundle.getString("threadNum"));
-            ak = resourceBundle.getString("ak");
-            sk = resourceBundle.getString("sk");
-            endPoint = resourceBundle.getString("endPoint");
-
-        }catch(Exception e) {
+        } catch (Exception e){
             e.printStackTrace();
+            System.exit(-1);
         }
-        System.out.println("begin: copyCount="+copyCount+",fileDir="+fileDir+",bucketn="+bucketn+",start="+start+",max="+max+",threadNum="+threadNum);
-        bucketName  = bucketn;
-        startValue =start;
-        maxValue= max;
-        if (threadNum == 0){
-            threadNum = 8;
-        }
-        File[] files = new File(fileDir).listFiles();
-        System.out.println("total files:"+files.length);
-        List<Future<String>> results = new ArrayList<Future<String>>();
-        ExecutorService es = Executors.newFixedThreadPool(threadNum);
-
-        for(int i=0; i<files.length;i++)
-            for(int j=0; j<copyCount;j++) {
-                results.add(es.submit(new Task(files[i])));
-            }
-        results.add(es.submit(new Task(files[0])));
-        System.out.println("end putFiles");
     }
     /**
      *
@@ -413,9 +256,7 @@ public class PutFiles {
             try {
                 File file = new File("./logs");
                 if (!file.exists()) file.mkdirs();
-//                debug(fileName+" created!");
                 fileWriter=new FileWriter("./logs/log"+generateRandomStr(6)+".txt",true);
-//                debug("./logs/log"+generateRandomStr(6)+".txt");
             } catch (IOException e) {
                 e.printStackTrace();
             }
