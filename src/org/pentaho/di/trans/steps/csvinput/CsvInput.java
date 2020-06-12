@@ -40,6 +40,7 @@ import org.pentaho.di.core.exception.KettleValueException;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.row.RowDataUtil;
 import org.pentaho.di.core.row.RowMeta;
+import org.pentaho.di.core.row.ValueMeta;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.i18n.BaseMessages;
@@ -684,7 +685,19 @@ public class CsvInput extends BaseStep implements StepInterface
 						//
 						ValueMetaInterface sourceValueMeta = data.convertRowMeta.getValueMeta(outputIndex);
 						try {
-							outputRowData[outputIndex++] = sourceValueMeta.convertBinaryStringToNativeType(field);
+							if(sourceValueMeta.getType()== ValueMeta.TYPE_BINARY &&  field.length>17) //if encoded base64 str found in binary field
+							{
+								byte[] head = new byte[17];
+								System.arraycopy(field,0,head,0,17);
+								if(new String(head).equals("ENCODED*#*BASE64_")) {
+									byte[] original = field.clone();
+									byte[] encodedBytes=new byte[field.length-17];
+									System.arraycopy(original, 17, encodedBytes, 0, encodedBytes.length);
+									field = java.util.Base64.getDecoder().decode(encodedBytes);
+									outputRowData[outputIndex++] = field;
+								}
+							}else
+								outputRowData[outputIndex++] = sourceValueMeta.convertBinaryStringToNativeType(field);
 						} catch(KettleValueException e) {
 							// There was a conversion error,
 							//

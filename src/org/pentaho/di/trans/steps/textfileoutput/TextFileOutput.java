@@ -22,7 +22,10 @@
 
 package org.pentaho.di.trans.steps.textfileoutput;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.vfs.FileObject;
+import org.ibex.nestedvm.util.Seekable;
+import org.pentaho.di.cachefile.util.ByteUtil;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.ResultFile;
 import org.pentaho.di.core.WriterOutputStream;
@@ -510,6 +513,11 @@ public class TextFileOutput extends BaseStep implements StepInterface
 	        	else {
 	    			str = formatField(v, valueData);
 	        	}
+
+	        	if(v.getType()==ValueMetaInterface.TYPE_BINARY && str!=null)// encode to a string when binary
+				{
+					str =ArrayUtils.addAll(new String("ENCODED*#*BASE64_").getBytes(),java.util.Base64.getEncoder().encode(str));
+				}
         	}
         	
     		if (str!=null && str.length>0)
