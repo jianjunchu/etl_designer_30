@@ -275,6 +275,13 @@ public class InsertUpdateMeta extends BaseStepMeta implements StepMetaInterface,
 		keyStream2   = new String[nrkeys];
 	}
 
+	public void allocateUpdates(int nrvalues)
+	{
+		updateLookup = new String[nrvalues];
+		updateStream = new String[nrvalues];
+		update       = new Boolean[nrvalues];
+	}
+
 	public Object clone()
 	{
 		InsertUpdateMeta retval = (InsertUpdateMeta)super.clone();
@@ -1002,6 +1009,31 @@ public class InsertUpdateMeta extends BaseStepMeta implements StepMetaInterface,
 							} else if (fieldAttr.getKey().equals("FIELD_STREAM_NAME2")) {
 								keyStream2[row] = (attributeValue == null ? "-1" : attributeValue);
 							} else {
+								throw new RuntimeException("Unhandled metadata injection of attribute: " + fieldAttr.toString() + " - " + fieldAttr.getDescription());
+							}
+
+						}
+					}
+				}
+				else if (attr.getKey().equals("UPDATE_FIELDS")) {
+
+					List<StepInjectionMetaEntry> inputFieldEntries = entry.getDetails();
+					  allocateUpdates(inputFieldEntries.size());
+					for (int row = 0; row < inputFieldEntries.size(); row++) {
+						StepInjectionMetaEntry inputFieldEntry = inputFieldEntries.get(row);
+						List<StepInjectionMetaEntry> fieldAttributes = inputFieldEntry.getDetails();
+
+						for (int i = 0; i < fieldAttributes.size(); i++) {
+							StepInjectionMetaEntry fieldAttribute = fieldAttributes.get(i);
+							KettleAttributeInterface fieldAttr = findAttribute(fieldAttribute.getKey());
+							String attributeValue = (String) fieldAttribute.getValue();
+							if (fieldAttr.getKey().equals("UPDATE_FIELD_NAME")) {
+								updateLookup[row] = attributeValue;
+							} else if (fieldAttr.getKey().equals("UPDATE_FIELD_STREAM_NAME")) {
+								updateStream[row] = attributeValue;
+							} else if (fieldAttr.getKey().equals("UPDATE_Y_N")) {
+								update[row] = "Y".equals(attributeValue)?true:false;
+							}else {
 								throw new RuntimeException("Unhandled metadata injection of attribute: " + fieldAttr.toString() + " - " + fieldAttr.getDescription());
 							}
 
