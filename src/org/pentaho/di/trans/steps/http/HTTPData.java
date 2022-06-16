@@ -37,6 +37,7 @@ public class HTTPData extends BaseStepData implements StepDataInterface
 	public RowMetaInterface outputRowMeta;
 	public RowMetaInterface inputRowMeta;
 	public int indexOfUrlField;
+	public int indexOfFileField;
 	public String realUrl;
 	public String realProxyHost;
 	public int realProxyPort;
@@ -53,6 +54,7 @@ public class HTTPData extends BaseStepData implements StepDataInterface
 	{
 		super();
 		indexOfUrlField=-1;
+		indexOfFileField=-1;
 		realProxyHost=null;
 		realProxyPort=8080;
 		realHttpLogin=null;

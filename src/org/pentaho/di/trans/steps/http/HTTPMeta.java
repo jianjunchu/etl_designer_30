@@ -76,10 +76,15 @@ public class HTTPMeta extends BaseStepMeta implements StepMetaInterface
     private String encoding;
     
     private boolean urlInField;
-    
+
+    private boolean binaryMode;
+
     private String urlField;
-    
-    
+
+    private boolean saveFile;
+
+    private String fileName;
+
     private String proxyHost;
     
     private String proxyPort;
@@ -199,14 +204,60 @@ public class HTTPMeta extends BaseStepMeta implements StepMetaInterface
 	public boolean isUrlInField() {
 		return urlInField;
 	}
-	
+
 	/**
      * @param urlInField Is the url coded in a field?
      */
 	public void setUrlInField(boolean urlInField) {
 		this.urlInField = urlInField;
 	}
-	/**
+
+
+    /**
+     * @return Is save to a file?
+     */
+    public boolean isSaveFile() {
+        return saveFile;
+    }
+
+    /**
+     * @param b Is save file.
+     */
+    public void setSaveFile(boolean b) {
+        this.saveFile = b;
+    }
+
+
+
+    /**
+     * @return Is read as binary?
+     */
+    public boolean isBinaryMode() {
+        return binaryMode;
+    }
+
+    /**
+     * @param b Is the flag of binary mode.
+     */
+    public void setBinaryMode(boolean b) {
+        this.binaryMode = b;
+    }
+
+    /**
+     * @return The field name that to save.
+     */
+    public String getFileName() {
+        return fileName;
+    }
+
+    /**
+     * @param fileName name of the file
+     */
+    public void setFileName ( String fileName) {
+        this.fileName = fileName;
+    }
+
+    /**
      * @return The field name that contains the url.
      */
 	public String getUrlField() {
@@ -312,7 +363,12 @@ public class HTTPMeta extends BaseStepMeta implements StepMetaInterface
         retval.append("    ").append(XMLHandler.addTagValue("url", url)); //$NON-NLS-1$ //$NON-NLS-2$
         retval.append("    "+XMLHandler.addTagValue("urlInField",  urlInField));
         retval.append("    "+XMLHandler.addTagValue("urlField",  urlField));
+        retval.append("    "+XMLHandler.addTagValue("binaryMode",  binaryMode));
+
         retval.append("    "+XMLHandler.addTagValue("encoding",  encoding));
+        retval.append("    "+XMLHandler.addTagValue("saveFile",  saveFile));
+        retval.append("    " + XMLHandler.addTagValue("fileName", fileName));
+
         retval.append("    " + XMLHandler.addTagValue("httpLogin", httpLogin));
         retval.append("    " + XMLHandler.addTagValue("httpPassword", httpPassword));
         retval.append("    " + XMLHandler.addTagValue("proxyHost", proxyHost));
@@ -355,7 +411,11 @@ public class HTTPMeta extends BaseStepMeta implements StepMetaInterface
             url = XMLHandler.getTagValue(stepnode, "url"); //$NON-NLS-1$
             urlInField="Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, "urlInField"));
             urlField = XMLHandler.getTagValue(stepnode, "urlField");
+            binaryMode="Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, "binaryMode"));
             encoding = XMLHandler.getTagValue(stepnode, "encoding");
+            saveFile="Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, "saveFile"));
+            fileName = XMLHandler.getTagValue(stepnode, "fileName");
+
             httpLogin = XMLHandler.getTagValue(stepnode, "httpLogin");
             httpPassword = XMLHandler.getTagValue(stepnode, "httpPassword");
             proxyHost = XMLHandler.getTagValue(stepnode, "proxyHost");
@@ -400,7 +460,12 @@ public class HTTPMeta extends BaseStepMeta implements StepMetaInterface
             url = rep.getStepAttributeString(id_step, "url"); //$NON-NLS-1$
             urlInField = rep.getStepAttributeBoolean (id_step, "urlInField");
             urlField = rep.getStepAttributeString (id_step, "urlField");
+
+            binaryMode=rep.getStepAttributeBoolean (id_step, "binaryMode");
             encoding = rep.getStepAttributeString (id_step, "encoding");
+            saveFile=rep.getStepAttributeBoolean (id_step, "saveFile");
+            fileName = rep.getStepAttributeString(id_step, "fileName");
+
             httpLogin = rep.getStepAttributeString(id_step, "httpLogin");
             httpPassword = rep.getStepAttributeString(id_step, "httpPassword");
             proxyHost = rep.getStepAttributeString(id_step, "proxyHost");
@@ -439,8 +504,12 @@ public class HTTPMeta extends BaseStepMeta implements StepMetaInterface
             rep.saveStepAttribute(id_transformation, id_step, "url", url); //$NON-NLS-1$
 			rep.saveStepAttribute(id_transformation, id_step, "urlInField",   urlInField);
 			rep.saveStepAttribute(id_transformation, id_step, "urlField",   urlField);
-			rep.saveStepAttribute(id_transformation, id_step, "encoding",   encoding);
-			rep.saveStepAttribute(id_transformation, id_step, "httpLogin",   httpLogin);
+            rep.saveStepAttribute(id_transformation, id_step, "binaryMode",   binaryMode);
+            rep.saveStepAttribute(id_transformation, id_step, "encoding",   encoding);
+            rep.saveStepAttribute(id_transformation, id_step, "saveFile",   saveFile);
+            rep.saveStepAttribute(id_transformation, id_step, "fileName",   fileName);
+
+            rep.saveStepAttribute(id_transformation, id_step, "httpLogin",   httpLogin);
 			rep.saveStepAttribute(id_transformation, id_step, "httpPassword",   httpPassword);
 			rep.saveStepAttribute(id_transformation, id_step, "proxyHost",   proxyHost);
 			rep.saveStepAttribute(id_transformation, id_step, "proxyPort",   proxyPort);

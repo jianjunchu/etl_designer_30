@@ -22,8 +22,9 @@
 
 package org.pentaho.di.trans.steps.http;
 
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HostConfiguration;
@@ -93,6 +94,7 @@ public class HTTP extends BaseStep implements StepInterface
 	private Object[] callHttpService(RowMetaInterface rowMeta, Object[] rowData) throws KettleException
     {
         String url = determineUrl(rowMeta, rowData);
+		String fileName = null;
         try
         {
             if(isDetailed()) logDetailed(BaseMessages.getString(PKG, "HTTP.Log.Connecting",url));
@@ -166,21 +168,64 @@ public class HTTP extends BaseStep implements StepInterface
 		                if(isDebug()) log.logDebug(toString(), BaseMessages.getString(PKG, "HTTP.Log.ResponseHeaderEncoding",encoding));
 		                
 		                // the response
-		                if (!Const.isEmpty(encoding)) {
-		                	inputStreamReader = new InputStreamReader(method.getResponseBodyAsStream(),encoding);
-		                } else {
-		                	inputStreamReader = new InputStreamReader(method.getResponseBodyAsStream());
-		                }
-		                StringBuffer bodyBuffer = new StringBuffer(); 
-		                 
-		                 int c;
-		                 while ( (c=inputStreamReader.read())!=-1) {
-		                	bodyBuffer.append((char)c);
-		                 }
-		                
-		                inputStreamReader.close(); 
-		                
-		                body = bodyBuffer.toString();
+						if(meta.isBinaryMode()) {//read as binary
+							InputStream is = method.getResponseBodyAsStream();
+							ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+							int nRead;
+							byte[] byteData = new byte[1024];
+							while ((nRead = is.read(byteData, 0, byteData.length)) != -1) {
+								buffer.write(byteData, 0, nRead);
+							}
+							buffer.flush();
+							byte[] byteArray = buffer.toByteArray();
+							if(meta.isSaveFile())//save to file
+							{
+							    if(rowData[data.indexOfFileField]==null)
+                                {
+                                    logError(BaseMessages.getString(PKG, "HTTP.Log.FileNameIsNull"));
+                                }else{
+							    	fileName =rowData[data.indexOfFileField].toString();
+                                    File file = new File(fileName);
+									if(!file.exists()) {
+										file.getParentFile().mkdirs();
+										file.createNewFile();
+										//createFile(file);
+									}
+                                    FileOutputStream fos = new FileOutputStream(file);
+                                    fos.write(byteArray);
+                                    fos.flush();
+							    }
+							}
+						}
+						else {
+							if (!Const.isEmpty(encoding)) {
+								inputStreamReader = new InputStreamReader(method.getResponseBodyAsStream(), encoding);
+							} else {
+								inputStreamReader = new InputStreamReader(method.getResponseBodyAsStream());
+							}
+							StringBuffer bodyBuffer = new StringBuffer();
+
+							int c;
+							while ((c = inputStreamReader.read()) != -1) {
+								bodyBuffer.append((char) c);
+							}
+							inputStreamReader.close();
+							body = bodyBuffer.toString();
+							if(meta.isSaveFile())//save to txt file
+							{
+                                if(rowData[data.indexOfFileField]==null)
+                                {
+                                    logError(BaseMessages.getString(PKG, "HTTP.Log.FileNameIsNull"));
+                                }else {
+                                	fileName =rowData[data.indexOfFileField].toString();
+                                    File file = new File(fileName);
+                                    FileWriter fos = new FileWriter(file);
+                                    fos.write(body);
+                                    fos.flush();
+                                }
+							}
+						}
+
 		                if (isDebug()) logDebug("Response body: "+body);
                 
 		            }
@@ -217,13 +262,24 @@ public class HTTP extends BaseStep implements StepInterface
     	{
        	   throw new KettleException(BaseMessages.getString(PKG, "HTTP.Error.UnknownHostException", uhe.getMessage()));
        	}
+		catch(IOException e)
+		{
+			throw new KettleException(BaseMessages.getString(PKG, "HTTP.Log.UnableCreateFile",fileName), e);
+		}
         catch(Exception e)
         {
             throw new KettleException(BaseMessages.getString(PKG, "HTTP.Log.UnableGetResult",url), e);
         }
     }
 
-    private String determineUrl(RowMetaInterface outputRowMeta, Object[] row) throws KettleValueException, KettleException
+//	private void createFile(File file) throws IOException {
+//     if(!file.getParentFile().exists())
+//		createFile(file.getParentFile());
+//     else
+//     	file.createNewFile();
+//	}
+
+	private String determineUrl(RowMetaInterface outputRowMeta, Object[] row) throws KettleValueException, KettleException
     {
     	try
     	{
@@ -305,7 +361,28 @@ public class HTTP extends BaseStep implements StepInterface
 			{
 				data.realUrl=environmentSubstitute(meta.getUrl());
 			}
-			
+
+            if(meta.isSaveFile())
+            {
+                if(Const.isEmpty(meta.getFieldName()))
+                {
+                    logError(BaseMessages.getString(PKG, "HTTP.Log.NoField"));
+                    throw new KettleException(BaseMessages.getString(PKG, "HTTP.Log.NoField"));
+                }
+
+                // cache the position of the field
+                if (data.indexOfFileField<0)
+                {
+                    String fieldName=environmentSubstitute(meta.getFileName());
+                    data.indexOfFileField =getInputRowMeta().indexOfValue(fieldName);
+                    if (data.indexOfFileField<0)
+                    {
+                        // The field is unreachable !
+                        logError(BaseMessages.getString(PKG, "HTTP.Log.ErrorFindingField",fieldName));
+                        throw new KettleException(BaseMessages.getString(PKG, "HTTP.Exception.ErrorFindingField",fieldName));
+                    }
+                }
+            }
 			// check for headers
 			int nrHeaders = meta.getHeaderField().length;
 			if (nrHeaders > 0) data.useHeaderParameters=true;
@@ -392,5 +469,18 @@ public class HTTP extends BaseStep implements StepInterface
 	    
 	    super.dispose(smi, sdi);
 	}
+
+//	public static byte[] getStreamBytes(InputStream is) throws Exception {
+//		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//		byte[] buffer = new byte[1024];
+//		int len = 0;
+//		while ((len = is.read(buffer)) != -1) {
+//			baos.write(buffer, 0, len);
+//		}
+//		byte[] b = baos.toByteArray();
+//		is.close();
+//		baos.close();
+//		return b;
+//	}
 
 }
