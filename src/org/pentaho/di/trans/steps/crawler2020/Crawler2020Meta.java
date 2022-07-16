@@ -9,7 +9,7 @@
   * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
   * the license for the specific language governing your rights and limitations.*/
 
- package com.xgn.di.trans.steps.ganji;
+ package org.pentaho.di.trans.steps.crawler2020;
 
  import java.util.List;
  import java.util.Map;
@@ -39,7 +39,7 @@
  import org.pentaho.di.trans.step.StepMeta;
  import org.pentaho.di.trans.step.StepMetaInterface;
  import org.pentaho.di.repository.ObjectId;
- import com.xgn.di.trans.steps.ganji.Messages;
+ import org.pentaho.di.i18n.BaseMessages;
  import org.w3c.dom.Node;
 
 
@@ -52,7 +52,7 @@
   * @since 10-Aug-2010
   */
 
- public class GanjiMeta extends BaseStepMeta implements StepMetaInterface
+ public class Crawler2020Meta extends BaseStepMeta implements StepMetaInterface
  {
 	 public static final String VERSION_FREE = "????";
 	 public static final String VERSION_COMMERCIAL = "?????";
@@ -68,7 +68,7 @@
 	 private String[] keyNames;
 	 private String[] fieldNames;
 
-	 public GanjiMeta()
+	 public Crawler2020Meta()
 	 {
 		 super(); // allocate BaseStepMeta
 	 }
@@ -241,36 +241,36 @@
 		 CheckResult cr;
 		 if (prev==null || prev.size()==0)
 		 {
-			 cr = new CheckResult(CheckResultInterface.TYPE_RESULT_WARNING, Messages.getString("DummyTransMeta.CheckResult.NotReceivingFields"), stepinfo); //$NON-NLS-1$
+			 cr = new CheckResult(CheckResultInterface.TYPE_RESULT_WARNING, BaseMessages.getString("DummyTransMeta.CheckResult.NotReceivingFields"), stepinfo); //$NON-NLS-1$
 			 remarks.add(cr);
 		 }
 		 else
 		 {
-			 cr = new CheckResult(CheckResultInterface.TYPE_RESULT_OK, Messages.getString("DummyTransMeta.CheckResult.StepRecevingData",prev.size()+""), stepinfo); //$NON-NLS-1$ //$NON-NLS-2$
+			 cr = new CheckResult(CheckResultInterface.TYPE_RESULT_OK, BaseMessages.getString("DummyTransMeta.CheckResult.StepRecevingData",prev.size()+""), stepinfo); //$NON-NLS-1$ //$NON-NLS-2$
 			 remarks.add(cr);
 		 }
 
 		 // See if we have input streams leading to this step!
 		 if (input.length>0)
 		 {
-			 cr = new CheckResult(CheckResultInterface.TYPE_RESULT_OK, Messages.getString("DummyTransMeta.CheckResult.StepRecevingData2"), stepinfo); //$NON-NLS-1$
+			 cr = new CheckResult(CheckResultInterface.TYPE_RESULT_OK, BaseMessages.getString("DummyTransMeta.CheckResult.StepRecevingData2"), stepinfo); //$NON-NLS-1$
 			 remarks.add(cr);
 		 }
 		 else
 		 {
-			 cr = new CheckResult(CheckResultInterface.TYPE_RESULT_ERROR, Messages.getString("DummyTransMeta.CheckResult.NoInputReceivedFromOtherSteps"), stepinfo); //$NON-NLS-1$
+			 cr = new CheckResult(CheckResultInterface.TYPE_RESULT_ERROR, BaseMessages.getString("DummyTransMeta.CheckResult.NoInputReceivedFromOtherSteps"), stepinfo); //$NON-NLS-1$
 			 remarks.add(cr);
 		 }
 	 }
 
 	 public StepInterface getStep(StepMeta stepMeta, StepDataInterface stepDataInterface, int cnr, TransMeta tr, Trans trans)
 	 {
-		 return new Ganji(stepMeta, stepDataInterface, cnr, tr, trans);
+		 return new Crawler2020(stepMeta, stepDataInterface, cnr, tr, trans);
 	 }
 
 	 public StepDataInterface getStepData()
 	 {
-		 return new GanjiData();
+		 return new Crawler2020Data();
 	 }
 
 	 public void setVersionName(String versionName) {
@@ -330,10 +330,10 @@
 	 }
 
 	 //import!
-	 public StepDialogInterface getDialog(Shell shell, StepMetaInterface info,
-										  TransMeta transMeta, String name) {
-		 return new GanjiDialog(shell, info, transMeta, name);
-	 }
+//	 public StepDialogInterface getDialog(Shell shell, StepMetaInterface info,
+//										  TransMeta transMeta, String name) {
+//		 return new Crawler2020Dialog(shell, info, transMeta, name);
+//	 }
 
 	 public String[] getListPageCount() {
 		 return listPageCount;
