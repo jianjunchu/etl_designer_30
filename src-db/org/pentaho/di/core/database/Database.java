@@ -333,6 +333,7 @@ public class Database implements VariableSpace, LoggingObjectInterface
         
         try
 		{
+		    //this.getClass().getClassLoader()
             // First see if we use connection pooling...
             //
             if ( databaseMeta.isUsingConnectionPool() &&  // default = false for backward compatibility
@@ -3493,16 +3494,15 @@ public class Database implements VariableSpace, LoggingObjectInterface
 		
 		return retval;
 	}
-	
+
     /**
-     * Generates SQL
+     *
      * @param tableName the table name or schema/table combination: this needs to be quoted properly in advance.
      * @param fields the fields
      * @param tk the name of the technical key field
      * @param use_autoinc true if we need to use auto-increment fields for a primary key
      * @param pk the name of the primary/technical key field
      * @param semicolon append semicolon to the statement
-     * @param pkc primary key composite ( name of the key fields)
      * @return the SQL needed to create the specified table and fields.
      */
 	public String getCreateTableStatement(String tableName, RowMetaInterface fields, String tk, boolean use_autoinc, String pk, boolean semicolon)
