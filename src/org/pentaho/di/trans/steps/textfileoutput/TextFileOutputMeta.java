@@ -147,7 +147,7 @@ public class TextFileOutputMeta extends BaseStepMeta  implements StepMetaInterfa
     
     private String fileNameField;
 
-  private String splitFileField; //20180315
+    private String splitFileField; //20180315
 
 
   // DE-SELECT mode
@@ -169,6 +169,8 @@ public class TextFileOutputMeta extends BaseStepMeta  implements StepMetaInterfa
     private String dateTimeFormat;
 
     private  boolean writeSeparatorAfterLastColumn;
+
+    private  boolean removeCRLF;
 
 	public TextFileOutputMeta()
     {
@@ -716,6 +718,7 @@ public class TextFileOutputMeta extends BaseStepMeta  implements StepMetaInterfa
 
             enclosureForced = "Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, "enclosure_forced"));
             writeSeparatorAfterLastColumn = "Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, "separator_last_column"));
+            removeCRLF  = "Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, "remove_crlf"));
             String sDisableEnclosureFix = XMLHandler.getTagValue(stepnode, "enclosure_fix_disabled");
             // Default this value to true for backwards compatibility
             if(sDisableEnclosureFix == null) {
@@ -746,7 +749,7 @@ public class TextFileOutputMeta extends BaseStepMeta  implements StepMetaInterfa
 
 			fileName              = XMLHandler.getTagValue(stepnode, "file", "name");
 			fileAsCommand         = "Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, "file", "is_command"));
-      servletOutput         = "Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, "file", "servlet_output"));
+            servletOutput         = "Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, "file", "servlet_output"));
 			doNotOpenNewFileInit  = "Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, "file", "do_not_open_new_file_init"));
 			extension             = XMLHandler.getTagValue(stepnode, "file", "extention");
 			fileAppended          = "Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, "file", "append"));
@@ -830,11 +833,11 @@ public class TextFileOutputMeta extends BaseStepMeta  implements StepMetaInterfa
 
 	public void setDefault()
 	{
-
 		createparentfolder=false;
 		separator  = ";";
 		writeSeparatorAfterLastColumn=true;//jason 2016
-		enclosure  = "\"";
+        removeCRLF  = false;//jason 2020
+        enclosure  = "\"";
 		specifyingFormat=false;
 		dateTimeFormat=null;
         enclosureForced  = false;
@@ -845,7 +848,7 @@ public class TextFileOutputMeta extends BaseStepMeta  implements StepMetaInterfa
 		fileCompression  = fileCompressionTypeCodes[FILE_COMPRESSION_TYPE_NONE];
 		fileName         = "file";
 		fileAsCommand    = false;
-    servletOutput    = false;
+        servletOutput    = false;
 		doNotOpenNewFileInit =false;
 		extension        = "txt";
 		stepNrInFilename = false;
@@ -866,7 +869,6 @@ public class TextFileOutputMeta extends BaseStepMeta  implements StepMetaInterfa
 		for (i=0;i<nrfields;i++)
 		{
 			outputFields[i] = new TextFileField();
-
 			outputFields[i].setName( "field"+i );				
 			outputFields[i].setType( "Number" );
 			outputFields[i].setFormat( " 0,000,000.00;-0,000,000.00" );
@@ -1050,7 +1052,9 @@ public class TextFileOutputMeta extends BaseStepMeta  implements StepMetaInterfa
 		
 		retval.append("    ").append(XMLHandler.addTagValue("separator", separator));
 		retval.append("    ").append(XMLHandler.addTagValue("separator_last_column", writeSeparatorAfterLastColumn));
-		retval.append("    ").append(XMLHandler.addTagValue("enclosure", enclosure));
+        retval.append("    ").append(XMLHandler.addTagValue("remove_crlf", removeCRLF));
+
+      retval.append("    ").append(XMLHandler.addTagValue("enclosure", enclosure));
         retval.append("    ").append(XMLHandler.addTagValue("enclosure_forced", enclosureForced));
         retval.append("    ").append(XMLHandler.addTagValue("enclosure_fix_disabled", disableEnclosureFix));
 		retval.append("    ").append(XMLHandler.addTagValue("header",    headerEnabled));
@@ -1126,6 +1130,7 @@ public class TextFileOutputMeta extends BaseStepMeta  implements StepMetaInterfa
 		{
 			separator           =  rep.getStepAttributeString (id_step, "separator");
 			writeSeparatorAfterLastColumn    =  rep.getStepAttributeBoolean(id_step, "separator_last_column");
+            removeCRLF    =  rep.getStepAttributeBoolean(id_step, "remove_crlf");
 			enclosure           =  rep.getStepAttributeString (id_step, "enclosure");
             enclosureForced     =  rep.getStepAttributeBoolean(id_step, "enclosure_forced");
             disableEnclosureFix =  rep.getStepAttributeBoolean(id_step, 0, "enclosure_fix_disabled", true);
@@ -1219,7 +1224,8 @@ public class TextFileOutputMeta extends BaseStepMeta  implements StepMetaInterfa
 		{
 			rep.saveStepAttribute(id_transformation, id_step, "separator",        separator);
 			rep.saveStepAttribute(id_transformation, id_step, "separator_last_column", writeSeparatorAfterLastColumn);
-			rep.saveStepAttribute(id_transformation, id_step, "enclosure",        enclosure);
+            rep.saveStepAttribute(id_transformation, id_step, "remove_crlf", removeCRLF);
+            rep.saveStepAttribute(id_transformation, id_step, "enclosure",        enclosure);
             rep.saveStepAttribute(id_transformation, id_step, "enclosure_forced", enclosureForced);
             rep.saveStepAttribute(id_transformation, id_step, 0, "enclosure_fix_disabled", disableEnclosureFix);
 			rep.saveStepAttribute(id_transformation, id_step, "header",           headerEnabled);
@@ -1229,7 +1235,7 @@ public class TextFileOutputMeta extends BaseStepMeta  implements StepMetaInterfa
             rep.saveStepAttribute(id_transformation, id_step, "encoding",         encoding);
 			rep.saveStepAttribute(id_transformation, id_step, "file_name",        fileName);
 			rep.saveStepAttribute(id_transformation, id_step, "file_is_command",  fileAsCommand);
-      rep.saveStepAttribute(id_transformation, id_step, "file_servlet_output",  servletOutput);
+            rep.saveStepAttribute(id_transformation, id_step, "file_servlet_output",  servletOutput);
 			rep.saveStepAttribute(id_transformation, id_step, "do_not_open_new_file_init", doNotOpenNewFileInit);  
 			rep.saveStepAttribute(id_transformation, id_step, "file_extention",   extension);
 			rep.saveStepAttribute(id_transformation, id_step, "file_append",      fileAppended);
@@ -1431,6 +1437,15 @@ public void injectStepMetadataEntries(List<StepInjectionMetaEntry> metadata)  th
       writeSeparatorAfterLastColumn = s;
   }
 
+  public boolean isRemoveCRLF()
+  {
+    return removeCRLF;
+  }
+
+  public void setRemoveCRLF(boolean s) {
+    // TODO Auto-generated method stub
+    removeCRLF = s;
+  }
 
   public RowMetaInterface getDeleteFields(RowMetaInterface inputRowMeta) throws KettleStepException {
     if (deleteName!=null && deleteName.length>0)  // DESELECT values from the stream...
@@ -1448,11 +1463,6 @@ public void injectStepMetadataEntries(List<StepInjectionMetaEntry> metadata)  th
       }
     }
     return inputRowMeta;
-  }
-
-  public boolean isRemoveCRLF()
-  {
-    return true;
   }
 
 }

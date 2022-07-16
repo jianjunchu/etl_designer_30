@@ -134,7 +134,11 @@ public class TextFileOutputDialog extends BaseStepDialog implements StepDialogIn
 	private Label        wlSeparatorAfterLastColumn;
     private Button       wSeparatorAfterLastColumn;
     private FormData     fdlSeparatorAfterLastColumn, fdSeparatorAfterLastColumn;
-    
+
+	private Label        wlRemoveCRLF;
+	private Button       wRemoveCRLF;
+	private FormData     fdlRemoveCRLF, fdRemoveCRLF;
+
 	private Label        wlEnclosure;
 	private TextVar      wEnclosure;
 	private FormData     fdlEnclosure, fdEnclosure;
@@ -852,15 +856,40 @@ public class TextFileOutputDialog extends BaseStepDialog implements StepDialogIn
                 }
             }
         );
-        
-		
+
+		//remove CRLF jason 2016
+		wlRemoveCRLF=new Label(wContentComp, SWT.RIGHT);
+		wlRemoveCRLF.setText(BaseMessages.getString(PKG, "TextFileOutputDialog.RemoveCRLF.Label"));
+		props.setLook(wlRemoveCRLF);
+		fdlRemoveCRLF=new FormData();
+		fdlRemoveCRLF.left = new FormAttachment(0, 0);
+		fdlRemoveCRLF.top  = new FormAttachment(wSeparatorAfterLastColumn, margin);
+		fdlRemoveCRLF.right= new FormAttachment(middle, -margin);
+		wlRemoveCRLF.setLayoutData(fdlRemoveCRLF);
+		wRemoveCRLF=new Button(wContentComp, SWT.CHECK );
+		props.setLook(wRemoveCRLF);
+		fdRemoveCRLF=new FormData();
+		fdRemoveCRLF.left = new FormAttachment(middle, 0);
+		fdRemoveCRLF.top  = new FormAttachment(wSeparatorAfterLastColumn, margin);
+		fdRemoveCRLF.right= new FormAttachment(100, 0);
+		wRemoveCRLF.setLayoutData(fdRemoveCRLF);
+		wRemoveCRLF.addSelectionListener(new SelectionAdapter()
+													   {
+														   public void widgetSelected(SelectionEvent e)
+														   {
+															   input.setChanged();
+														   }
+													   }
+		);
+
+
 		// Enclosure line...
 		wlEnclosure=new Label(wContentComp, SWT.RIGHT);
 		wlEnclosure.setText(BaseMessages.getString(PKG, "TextFileOutputDialog.Enclosure.Label"));
  		props.setLook(wlEnclosure);
 		fdlEnclosure=new FormData();
 		fdlEnclosure.left = new FormAttachment(0, 0);
-		fdlEnclosure.top  = new FormAttachment(wSeparatorAfterLastColumn, margin);
+		fdlEnclosure.top  = new FormAttachment(wRemoveCRLF, margin);
 		fdlEnclosure.right= new FormAttachment(middle, -margin);
 		wlEnclosure.setLayoutData(fdlEnclosure);
 		wEnclosure=new TextVar(transMeta, wContentComp, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
@@ -868,7 +897,7 @@ public class TextFileOutputDialog extends BaseStepDialog implements StepDialogIn
 		wEnclosure.addModifyListener(lsMod);
 		fdEnclosure=new FormData();
 		fdEnclosure.left = new FormAttachment(middle, 0);
-		fdEnclosure.top  = new FormAttachment(wSeparatorAfterLastColumn, margin);
+		fdEnclosure.top  = new FormAttachment(wRemoveCRLF, margin);
 		fdEnclosure.right= new FormAttachment(100, 0);
 		wEnclosure.setLayoutData(fdEnclosure);
 
@@ -1652,6 +1681,7 @@ public class TextFileOutputDialog extends BaseStepDialog implements StepDialogIn
 		wExtension.setText(Const.NVL(input.getExtension(), ""));
 		wSeparator.setText(Const.NVL(input.getSeparator(), ""));
 		wSeparatorAfterLastColumn.setSelection(input.isWriteSepatatorAfterLastColumn());//jason 2016
+		wRemoveCRLF.setSelection(input.isRemoveCRLF());//jason 2016
 		wEnclosure.setText(Const.NVL(input.getEnclosure(), ""));
 		
 		if (input.getFileFormat()!=null) {
@@ -1752,6 +1782,8 @@ public class TextFileOutputDialog extends BaseStepDialog implements StepDialogIn
 		tfoi.setSplitEvery( Const.toInt(wSplitEvery.getText(), 0) );
 		tfoi.setEndedLine( wEndedLine.getText() );
 		tfoi.setWriteSepatatorAfterLashColumn(wSeparatorAfterLastColumn.getSelection());//jason 2016
+		tfoi.setRemoveCRLF(wRemoveCRLF.getSelection());//jason
+
 		tfoi.setFileNameField(   wFileNameField.getText() );
 		tfoi.setFileNameInField( wFileNameInField.getSelection() );
 
