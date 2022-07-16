@@ -62,7 +62,6 @@ import org.pentaho.di.trans.step.StepMetaInjectionInterface;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputField;
 import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
-import org.pentaho.metastore.api.IMetaStore;
 import org.w3c.dom.Node;
 //import org.pentaho.di.core.row.value.ValueMetaFactory;
 //import org.pentaho.di.core.exception.KettlePluginException;
