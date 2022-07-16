@@ -62,7 +62,6 @@ public class Pan {
 
   public static void main(String[] a) throws KettleException {
     KettleEnvironment.init();
-
     List<String> args = new ArrayList<String>();
     for (int i = 0; i < a.length; i++) {
       if (a[i].length() > 0) {

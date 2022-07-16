@@ -112,8 +112,15 @@ public abstract class BasePluginType implements PluginTypeInterface{
 	 */
 	public void searchPlugins() throws KettlePluginException {
 		registerNatives();
-		registerPluginJars();
-		registerXmlPlugins();
+		String pluginName = this.getName().replace(" ","_").toUpperCase();
+		if(System.getProperties().getProperty(pluginName)== null ||System.getProperties().getProperty(pluginName).equals("Y")) {
+			registerPluginJars();
+			registerXmlPlugins();
+			System.out.println(pluginName+" plugs is registered");
+		}else {
+			System.out.println(pluginName+" plugs not registered");
+		}
+
 	}
 	
 	protected abstract void registerNatives() throws KettlePluginException;

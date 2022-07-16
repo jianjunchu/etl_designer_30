@@ -416,6 +416,7 @@ public class PluginRegistry {
 	 * @throws KettlePluginException
 	 */
   public synchronized static void init() throws KettlePluginException {
+	  long time1 = System.currentTimeMillis();
 
       final PluginRegistry registry = getInstance();
 
@@ -425,17 +426,15 @@ public class PluginRegistry {
         List<PluginInterface> plugins = registry.getPlugins(PluginRegistryPluginType.class);
         for(PluginInterface extensionPlugin : plugins){
           PluginRegistryExtension extension = (PluginRegistryExtension) registry.loadClass(extensionPlugin);
-          extensions.add(extension);
+			extensions.add(extension);
         }
       } catch (KettlePluginException e) {
         e.printStackTrace();
       }
-      
-      
+
       for (final PluginTypeInterface pluginType : pluginTypes) {
-        registry.registerType(pluginType);
+		  registry.registerType(pluginType);
       }
-      
       /*
       System.out.println(MetricsUtil.getDuration(log.getLogChannelId(), Metrics.METRIC_PLUGIN_REGISTRY_REGISTER_EXTENSIONS_START.getDescription()).get(0));
       System.out.println(MetricsUtil.getDuration(log.getLogChannelId(), Metrics.METRIC_PLUGIN_REGISTRY_PLUGIN_REGISTRATION_START.getDescription()).get(0));

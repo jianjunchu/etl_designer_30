@@ -51,38 +51,40 @@ public class KettleEnvironment {
 			// Create a home for Kettle if it doesn't exist yet.
 			//
 			createKettleHome();
-			
+
 			// Read the kettle.properties file before anything else
 			//
 			EnvUtil.environmentInit();
-			
 			// Initialize the logging back-end.
 			//
 			CentralLogStore.init();
-			
+
 			// Set the console log level to debug
 			//
 			LogWriter.setConsoleAppenderDebug();
-			
+
 			// Configure Simple JNDI when we run in stand-alone mode (spoon, pan, kitchen, carte, ... NOT on the platform
 			//
 			if (simpleJndi) {
 			  JndiUtil.initJNDI();
 			}
-			
+
 			// Register the native types and the plugins for the various plugin types...
 			//
 			PluginRegistry.addPluginType(StepPluginType.getInstance());
 			PluginRegistry.addPluginType(PartitionerPluginType.getInstance());
 			PluginRegistry.addPluginType(JobEntryPluginType.getInstance());
 			PluginRegistry.addPluginType(RepositoryPluginType.getInstance());
+
 			PluginRegistry.addPluginType(DatabasePluginType.getInstance());
 			PluginRegistry.addPluginType(LifecyclePluginType.getInstance());
 			PluginRegistry.addPluginType(ImportRulePluginType.getInstance());
+
 			PluginRegistry.addPluginType(KettleLifecyclePluginType.getInstance());
 			PluginRegistry.addPluginType(FunctionPluginType.getInstance());
+
 			PluginRegistry.init();
-			
+
 			// Also read the list of variables.
 			//
 			KettleVariablesList.init();
@@ -90,7 +92,7 @@ public class KettleEnvironment {
 			// Initialize the Lifecycle Listeners
 			//
 			initLifecycleListeners();
-						
+
 			initialized = true;
 		}
 	}
