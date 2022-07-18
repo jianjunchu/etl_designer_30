@@ -833,6 +833,8 @@ public class TransDialog extends Dialog
 						if(field.getSubject() == null){
 							field.setSubject(item.getText(2));
 						}
+					}else {
+						field.setSubject(null);
 					}
 				}
 			}

@@ -116,9 +116,9 @@ public abstract class BasePluginType implements PluginTypeInterface{
 		if(System.getProperties().getProperty(pluginName)== null ||System.getProperties().getProperty(pluginName).equals("Y")) {
 			registerPluginJars();
 			registerXmlPlugins();
-			System.out.println(pluginName+" plugs is registered");
+			System.out.println(pluginName+" plugins is registered");
 		}else {
-			System.out.println(pluginName+" plugs not registered");
+			System.out.println(pluginName+" plugins not registered");
 		}
 
 	}
