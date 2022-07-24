@@ -483,7 +483,7 @@ public class Database implements VariableSpace, LoggingObjectInterface
                     }
                   } else {
                     // also allow for empty username with given password, in this case username must be given with one space 
-                	  System.out.println("start to connect: url="+url+"   username="+username+"   password="+password );  
+                	//  System.out.println("start to connect: url="+url+"   username="+username+"   password="+password );
                     connection = DriverManager.getConnection(url, Const.NVL(username, " "), Const.NVL(password, ""));
                   }
                 }

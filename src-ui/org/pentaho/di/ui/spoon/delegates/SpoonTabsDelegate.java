@@ -497,6 +497,7 @@ public class SpoonTabsDelegate extends SpoonDelegate
 					{
 						spoon.refreshCoreObjects();
 					}
+
 				}
 				
 				if (entry.getObject() instanceof JobGraph) {

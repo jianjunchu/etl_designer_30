@@ -47,6 +47,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.batik.dom.util.HashTable;
 import org.apache.commons.vfs.FileObject;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
@@ -61,6 +62,7 @@ import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.TreeEditor;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
@@ -68,20 +70,7 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.DropTargetListener;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.MenuDetectEvent;
-import org.eclipse.swt.events.MenuDetectListener;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseMoveListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.ShellAdapter;
-import org.eclipse.swt.events.ShellEvent;
-import org.eclipse.swt.events.TreeAdapter;
-import org.eclipse.swt.events.TreeEvent;
+import org.eclipse.swt.events.*;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.DeviceData;
@@ -93,22 +82,7 @@ import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.printing.Printer;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Sash;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.swt.widgets.ToolItem;
-import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.swt.widgets.*;
 import org.pentaho.di.cachefile.CacheFile;
 import org.pentaho.di.cluster.ClusterSchema;
 import org.pentaho.di.cluster.SlaveServer;
@@ -190,18 +164,7 @@ import org.pentaho.di.laf.BasePropertyHandler;
 import org.pentaho.di.pan.CommandLineOption;
 import org.pentaho.di.partition.PartitionSchema;
 import org.pentaho.di.pkg.JarfileGenerator;
-import org.pentaho.di.repository.ObjectId;
-import org.pentaho.di.repository.RepositoriesMeta;
-import org.pentaho.di.repository.Repository;
-import org.pentaho.di.repository.RepositoryCapabilities;
-import org.pentaho.di.repository.RepositoryDirectory;
-import org.pentaho.di.repository.RepositoryDirectoryInterface;
-import org.pentaho.di.repository.RepositoryElementInterface;
-import org.pentaho.di.repository.RepositoryMeta;
-import org.pentaho.di.repository.RepositoryObjectType;
-import org.pentaho.di.repository.RepositoryOperation;
-import org.pentaho.di.repository.RepositorySecurityManager;
-import org.pentaho.di.repository.RepositorySecurityProvider;
+import org.pentaho.di.repository.*;
 import org.pentaho.di.repository.kdr.KettleDatabaseRepositoryBase;
 import org.pentaho.di.repository.kdr.KettleDatabaseRepositoryMeta;
 import org.pentaho.di.repository.kdr.KettleDatabaseRepository;
@@ -229,35 +192,23 @@ import org.pentaho.di.ui.cluster.dialog.SlaveServerDialog;
 import org.pentaho.di.ui.core.ConstUI;
 import org.pentaho.di.ui.core.PrintSpool;
 import org.pentaho.di.ui.core.PropsUI;
+import org.pentaho.di.ui.core.database.dialog.DatabaseDialog;
 import org.pentaho.di.ui.core.database.wizard.CreateDatabaseWizard;
-import org.pentaho.di.ui.core.dialog.CheckResultDialog;
-import org.pentaho.di.ui.core.dialog.EnterMappingDialog;
-import org.pentaho.di.ui.core.dialog.EnterOptionsDialog;
-import org.pentaho.di.ui.core.dialog.EnterSearchDialog;
-import org.pentaho.di.ui.core.dialog.EnterSelectionDialog;
-import org.pentaho.di.ui.core.dialog.EnterStringsDialog;
-import org.pentaho.di.ui.core.dialog.EnterTextDialog;
-import org.pentaho.di.ui.core.dialog.ErrorDialog;
-import org.pentaho.di.ui.core.dialog.KettlePropertiesFileDialog;
-import org.pentaho.di.ui.core.dialog.PreviewRowsDialog;
-import org.pentaho.di.ui.core.dialog.ShowBrowserDialog;
-import org.pentaho.di.ui.core.dialog.ShowMessageDialog;
-import org.pentaho.di.ui.core.dialog.Splash;
+import org.pentaho.di.ui.core.dialog.*;
 import org.pentaho.di.ui.core.gui.GUIResource;
 import org.pentaho.di.ui.core.gui.WindowProperty;
+import org.pentaho.di.ui.core.widget.ComboVar;
+import org.pentaho.di.ui.core.widget.DoubleClickInterface;
+import org.pentaho.di.ui.core.widget.TreeItemAccelerator;
 import org.pentaho.di.ui.core.widget.TreeMemory;
 import org.pentaho.di.ui.imp.ImportRulesDialog;
 import org.pentaho.di.ui.job.dialog.JobLoadProgressDialog;
 import org.pentaho.di.ui.partition.dialog.PartitionSchemaDialog;
 import org.pentaho.di.ui.repository.ILoginCallback;
 import org.pentaho.di.ui.repository.RepositoriesDialog;
+import org.pentaho.di.ui.repository.RepositoryDirectoryUI;
 import org.pentaho.di.ui.repository.RepositorySecurityUI;
-import org.pentaho.di.ui.repository.dialog.RepositoryDialogInterface;
-import org.pentaho.di.ui.repository.dialog.RepositoryExportProgressDialog;
-import org.pentaho.di.ui.repository.dialog.RepositoryImportProgressDialog;
-import org.pentaho.di.ui.repository.dialog.RepositoryRevisionBrowserDialogInterface;
-import org.pentaho.di.ui.repository.dialog.SelectDirectoryDialog;
-import org.pentaho.di.ui.repository.dialog.SelectObjectDialog;
+import org.pentaho.di.ui.repository.dialog.*;
 import org.pentaho.di.ui.repository.repositoryexplorer.RepositoryExplorer;
 import org.pentaho.di.ui.repository.repositoryexplorer.RepositoryExplorerCallback;
 import org.pentaho.di.ui.repository.repositoryexplorer.UISupportRegistery;
@@ -442,10 +393,13 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
 
   private Composite tabComp;
 
+  //Steps and job entries
   private Tree selectionTree;
 
+  //Editing
   private Tree coreObjectsTree;
 
+  private Tree repositoryTree;
   private TransExecutionConfiguration transExecutionConfiguration;
 
   private TransExecutionConfiguration transPreviewExecutionConfiguration;
@@ -510,6 +464,10 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
   private RepositoriesDialog loginDialog;
 
   private VfsFileChooserDialog vfsFileChooserDialog;
+
+  RepositoryExplorerDialog repositoryExplorerDialog;
+
+  private HashTable openedObjects = new HashTable();
 
   /**
    * This is the main procedure for Spoon.
@@ -1779,12 +1737,13 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
         }
         if (selectionTree != null && !selectionTree.isDisposed()) {
           refreshTree();
-          if(!Const.isEmpty(selectionFilter.getText())) {
-        	  tidyBranches(selectionTree.getItems(), true); // expand all
+          if (!Const.isEmpty(selectionFilter.getText())) {
+            tidyBranches(selectionTree.getItems(), true); // expand all
           } else { // no filter: collapse all
-        	  tidyBranches(selectionTree.getItems(), false);
+            tidyBranches(selectionTree.getItems(), false);
           }
           selectionFilter.setFocus();
+
         }
       }
     });
@@ -1797,7 +1756,10 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
           tidyBranches(coreObjectsTree.getItems(), true);
         }
         if (viewSelected) {
-          tidyBranches(selectionTree.getItems(), true);
+          if(selectionTree!=null)
+            tidyBranches(selectionTree.getItems(), true);
+          if(repositoryTree!=null)
+            tidyBranches(repositoryTree.getItems(), true);
         }
       }
     });
@@ -1808,7 +1770,10 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
           tidyBranches(coreObjectsTree.getItems(), false);
         }
         if (viewSelected) {
-          tidyBranches(selectionTree.getItems(), false);
+          if(selectionTree!=null)
+            tidyBranches(selectionTree.getItems(), false);
+          if(repositoryTree!=null)
+            tidyBranches(repositoryTree.getItems(), false);
         }
       }
     });
@@ -1851,6 +1816,7 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
 
     addDefaultKeyListeners(tabFolder);
     addDefaultKeyListeners(mainComposite);
+
   }
   
   public void addDefaultKeyListeners(Control control) {
@@ -2998,6 +2964,16 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
 
   public boolean tabClose(TabItem item) {
     try {
+      if(item.getControl() instanceof JobGraph){
+        String path = ((JobGraph) item.getControl()).getMeta().getRepositoryDirectory().getPath();
+        String name = ((JobGraph) item.getControl()).getMeta().getName();
+        openedObjects.remove(path + "/" + name);
+      }
+      else if (item.getControl() instanceof TransGraph) {
+        String path = ((TransGraph) item.getControl()).getMeta().getRepositoryDirectory().getPath();
+        String name = ((TransGraph) item.getControl()).getMeta().getName();
+        openedObjects.remove(path + "/" + name);
+      }
       return delegates.tabs.tabClose(item);
     } catch (Exception e) {
       new ErrorDialog(shell, "Error", "Unexpected error closing tab!", e);
@@ -3012,6 +2988,42 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
   public void tabSelected(TabItem item) {
     delegates.tabs.tabSelected(item);
     enableMenus();
+    //if(item.getObject() instanceof TransGraph)
+    //RepositoryDirectory dir =((TransGraph)item.getObject()).getMeta().getRepositoryDirectory();
+    if(item.getControl() instanceof TransGraph && !repositoryTree.isDisposed())
+    {
+      String path = ((TransGraph)item.getControl()).getMeta().getRepositoryDirectory().getPath();
+      String name = ((TransGraph)item.getControl()).getMeta().getName();
+      TreeItem ti =  (TreeItem)openedObjects.get(path+"/"+name);
+      if(ti !=null && !ti.isDisposed())
+        repositoryTree.setSelection(ti);
+      else
+      {
+        String parentName = path.substring(path.lastIndexOf("/")+1,path.length());
+        TreeItem transItem =  ConstUI.findTreeItem(repositoryTree.getItem(0),null,STRING_TRANSFORMATIONS);
+        ti = ConstUI.findTreeItem(transItem,parentName,name);
+        if(ti!=null) {
+          repositoryTree.setSelection(ti);
+          openedObjects.put(path + "/" + name, ti);
+        }
+      }
+    }
+    if( item.getControl() instanceof JobGraph)
+    {
+      String path = ((JobGraph)item.getControl()).getMeta().getRepositoryDirectory().getPath();
+      String name = ((JobGraph)item.getControl()).getMeta().getName();
+      TreeItem ti =  (TreeItem)openedObjects.get(path+"/"+name);
+      if(ti !=null && !ti.isDisposed())
+        repositoryTree.setSelection(ti);
+      else
+      {
+        String parentName = path.substring(path.lastIndexOf("/")+1,path.length());
+        TreeItem jobItem =  ConstUI.findTreeItem(repositoryTree.getItem(0),null,STRING_JOBS);
+        ti = ConstUI.findTreeItem(jobItem,parentName,name);
+        repositoryTree.setSelection(ti);
+        openedObjects.put(path+"/"+name,ti);
+      }
+    }
   }
 
   public String getRepositoryName() {
@@ -3584,7 +3596,17 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
       }
     }
   }
-  
+  public boolean openRepObject(RepositoryDirectoryInterface repdir,String objname,RepositoryObjectType objectType, String revision) {
+    if (objname != null) {
+      //if (repdir.getObjectId() != null) { // new way
+      //  loadObjectFromRepository(repdir.getObjectId(), objectType, revision);
+      //} else { // old way
+        loadObjectFromRepository(objname, objectType, repdir, revision);
+      //}
+    }
+    return false; // do not close explorer
+  }
+
   public void exploreRepository() {
     if (rep != null) {
       final RepositoryExplorerCallback cb = new RepositoryExplorerCallback() {
@@ -3754,7 +3776,7 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
     //add by cli 20120828  bug 21205
     KettleDatabaseRepository kdbRep = (KettleDatabaseRepository)rep;
     try {
-DatabaseMeta dbMeta = kdbRep.getDatabaseMeta();
+        DatabaseMeta dbMeta = kdbRep.getDatabaseMeta();
     	if(dbMeta.getDatabaseInterface() instanceof MySQLDatabaseMeta){
     		kdbRep.lockRepository();
     	    kdbRep.unlockRepository();
@@ -4479,7 +4501,18 @@ DatabaseMeta dbMeta = kdbRep.getDatabaseMeta();
   }
 
   public boolean saveToRepository(EngineMetaInterface meta) throws KettleException {
-    return saveToRepository(meta, meta.getObjectId() == null);
+    String savePath = meta.getRepositoryDirectory().getPath();
+    RepositoryDirectoryInterface repDir = rep.findDirectory(savePath);
+    if(repDir==null)
+    {
+      ShowMessageDialog dialog = new ShowMessageDialog(shell, SWT.OK | SWT.ICON_ERROR, BaseMessages.getString(PKG,
+              "Spoon.Dialog.SaveRepositoryFailed.Title"), BaseMessages.getString(PKG,
+              "Spoon.Dialog.SaveRepositoryFailed.DirectoryNotFound",savePath) );
+      dialog.open();
+      return false;
+    }
+      else
+      return saveToRepository(meta, meta.getObjectId() == null);
   }
 
   public boolean saveToRepository(EngineMetaInterface meta, boolean ask_name) throws KettleException {
@@ -5394,6 +5427,13 @@ DatabaseMeta dbMeta = kdbRep.getDatabaseMeta();
 
     if (!viewSelected)
       return; // Nothing to see here, move along...
+
+    if(rep!=null && rep.isConnected())// if repository is used , the selection tab is used for repository tree.
+    {
+      if (repositoryTree == null || repositoryTree.isDisposed())
+        refreshRepositoryTree();
+      return;
+    }
 
     if (selectionTree == null || selectionTree.isDisposed()) {
       // //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -7660,7 +7700,7 @@ DatabaseMeta dbMeta = kdbRep.getDatabaseMeta();
   /**
    * Select a clustering schema for this step.
    * 
-   * @param stepMeta
+   * @param stepMetas
    *            The steps (at least one!) to set the clustering schema for.
    */
   public void editClustering(TransMeta transMeta, List<StepMeta> stepMetas) {
@@ -8295,7 +8335,6 @@ DatabaseMeta dbMeta = kdbRep.getDatabaseMeta();
     }
 
   }
-
   public void setLog() {
     LogSettingsDialog lsd = new LogSettingsDialog(shell, SWT.NONE, props);
     lsd.open();
@@ -8540,4 +8579,1020 @@ DatabaseMeta dbMeta = kdbRep.getDatabaseMeta();
          // splash.show();
        }
     }
+
+  public void refreshRepositoryTree()
+  {
+    int sortColumn=0;
+    int ascending=0;
+    RepositoryDirectoryInterface directoryTree=null;
+    try {
+      directoryTree = rep.loadRepositoryDirectoryTree();
+    } catch (KettleException e) {
+      throw new RuntimeException(e);
+    }
+
+    try
+    {
+      repositoryTree = new Tree(variableComposite, SWT.SINGLE);
+      props.setLook(repositoryTree);
+      repositoryTree.setLayout(new FillLayout());
+      addDefaultKeyListeners(repositoryTree);
+      if(repositoryExplorerDialog==null) {
+        repositoryExplorerDialog = new RepositoryExplorerDialog(shell, SWT.NONE, rep, null, Variables.getADefaultVariableSpace());
+      }
+      repositoryExplorerDialog.setwTree(repositoryTree);
+      repositoryExplorerDialog.setShell(shell);
+
+      repositoryTree.removeAll();
+      // Load the directory tree:
+      //rep.setDirectoryTree( new RepositoryDirectory(rep) );
+      TreeItem tiTree = new TreeItem(repositoryTree, SWT.NONE);
+      tiTree.setImage(GUIResource.getInstance().getImageFolderConnections());
+      tiTree.setText(rep.getName()==null?"-":rep.getName()); //$NON-NLS-1$
+
+      // The Databases...
+      TreeItem tiParent = new TreeItem(tiTree, SWT.NONE);
+      tiParent.setImage(GUIResource.getInstance().getImageBol());
+      tiParent.setText("DATABASES");
+      //if (!userinfo.isReadonly())
+      TreeItemAccelerator.addDoubleClick(tiParent, new DoubleClickInterface() { public void action(TreeItem treeItem) { newDatabase(); } });
+      TreeItem tiTrans=null;
+      TreeItem tiJob=null;
+
+      String names[] = rep.getDatabaseNames(false);
+      for (int i=0;i<names.length;i++)
+      {
+        TreeItem newDB = new TreeItem(tiParent, SWT.NONE);
+        newDB.setImage(GUIResource.getInstance().getImageConnection());
+        newDB.setText(Const.NVL(names[i], ""));
+        //if (!userinfo.isReadonly())
+        //TreeItemAccelerator.addDoubleClick(newDB, new DoubleClickInterface() { public void action(TreeItem treeItem) { editDatabase(treeItem.getText()); } });
+      }
+/*
+      // The partition schemas...
+      tiParent = new TreeItem(tiTree, SWT.NONE);
+      tiParent.setImage(GUIResource.getInstance().getImageBol());
+      tiParent.setText(STRING_PARTITIONS);
+      if (!userinfo.isReadonly()) TreeItemAccelerator.addDoubleClick(tiParent,
+              new DoubleClickInterface() { public void action(TreeItem treeItem) { newPartitionSchema(); } });
+
+      names = rep.getPartitionSchemaNames();
+      for (int i=0;i<names.length;i++)
+      {
+        TreeItem newItem = new TreeItem(tiParent, SWT.NONE);
+        newItem.setImage(GUIResource.getInstance().getImageFolderConnections());
+        newItem.setText(Const.NVL(names[i], ""));
+        if (!userinfo.isReadonly()) TreeItemAccelerator.addDoubleClick(newItem,
+                new DoubleClickInterface() { public void action(TreeItem treeItem) { editPartitionSchema(treeItem.getText()); } });
+      }
+
+      // The slaves...
+
+      tiParent = new TreeItem(tiTree, SWT.NONE);
+      tiParent.setImage(GUIResource.getInstance().getImageBol());
+      tiParent.setText(STRING_SLAVES);
+      if (!userinfo.isReadonly()) TreeItemAccelerator.addDoubleClick(tiParent, new DoubleClickInterface() { public void action(TreeItem treeItem) { newSlaveServer(); } });
+
+      names = rep.getSlaveNames();
+      for (int i=0;i<names.length;i++)
+      {
+        TreeItem newItem = new TreeItem(tiParent, SWT.NONE);
+        newItem.setImage(GUIResource.getInstance().getImageSlave());
+        newItem.setText(Const.NVL(names[i], ""));
+        if (!userinfo.isReadonly()) TreeItemAccelerator.addDoubleClick(newItem, new DoubleClickInterface() { public void action(TreeItem treeItem) { editSlaveServer(treeItem.getText()); } });
+      }
+
+      // The clusters ...
+      tiParent = new TreeItem(tiTree, SWT.NONE);
+      tiParent.setImage(GUIResource.getInstance().getImageBol());
+      tiParent.setText(STRING_CLUSTERS);
+      if (!userinfo.isReadonly()) TreeItemAccelerator.addDoubleClick(tiParent,
+              new DoubleClickInterface() { public void action(TreeItem treeItem) { newCluster(); } });
+
+      names = rep.getClusterNames();
+      for (int i=0;i<names.length;i++)
+      {
+        TreeItem newItem = new TreeItem(tiParent, SWT.NONE);
+        newItem.setImage(GUIResource.getInstance().getImageCluster());
+        newItem.setText(Const.NVL(names[i], ""));
+        if (!userinfo.isReadonly()) TreeItemAccelerator.addDoubleClick(newItem,
+                new DoubleClickInterface() { public void action(TreeItem treeItem) { editCluster(treeItem.getText()); } });
+      }
+*/
+
+      // The transformations...
+      if (true)
+      {
+        tiTrans = new TreeItem(tiTree, SWT.NONE);
+        tiTrans.setImage(GUIResource.getInstance().getImageTransGraph());
+        tiTrans.setText(STRING_TRANSFORMATIONS);
+
+        TreeItem newCat = new TreeItem(tiTrans, SWT.NONE);
+        newCat.setImage(GUIResource.getInstance().getImageLogoSmall());
+        Color dircolor = GUIResource.getInstance().getColorDirectory();
+        RepositoryDirectoryUI.getTreeWithNames(newCat, rep, dircolor, sortColumn, false, true, true,false, directoryTree,null,null);
+      }
+
+      // The Jobs...
+      //if (userinfo.useJobs())
+      if (true)
+      {
+        tiJob = new TreeItem(tiTree, SWT.NONE);
+        tiJob.setImage(GUIResource.getInstance().getImageJobGraph());
+        tiJob.setText(STRING_JOBS);
+
+        TreeItem newJob = new TreeItem(tiJob, SWT.NONE);
+        newJob.setImage(GUIResource.getInstance().getImageLogoSmall());
+        Color dircolor = GUIResource.getInstance().getColorDirectory();
+        RepositoryDirectoryUI.getTreeWithNames(newJob, rep, dircolor, sortColumn, false, true, false,true, directoryTree,null,null);
+      }
+
+      //
+      // Add the users or only yourself
+      //
+     /* TreeItem tiUser = new TreeItem(tiTree, SWT.NONE);
+      tiUser.setImage(GUIResource.getInstance().getImageBol());
+      tiUser.setText("USERS");
+      if (!userinfo.isReadonly()) TreeItemAccelerator.addDoubleClick(tiUser, new DoubleClickInterface() { public void action(TreeItem treeItem) { newUser(); } });
+
+      String users[] = rep.getUserLogins();
+      for (int i=0;i<users.length;i++)
+      {
+        if (userinfo.isAdministrator() || userinfo.getLogin().equalsIgnoreCase(users[i]))
+        {
+          if ( users[i] != null )
+          {
+            // If users[i] is null TreeWidget will throw exceptions.
+            // The solution is to verify on saving a user.
+            TreeItem newUser = new TreeItem(tiUser, SWT.NONE);
+            newUser.setImage(GUIResource.getInstance().getImageUser());
+            newUser.setText(users[i]);
+            if (!userinfo.isReadonly()) TreeItemAccelerator.addDoubleClick(newUser, new DoubleClickInterface() { public void action(TreeItem treeItem) { editUser(treeItem.getText()); } });
+          }
+        }
+      }
+*/
+      repositoryTree.addMouseListener(new MouseAdapter()
+                   {
+                     public void mouseDown(MouseEvent e)
+                     {
+                       if (e.button == 3) // right click!
+                       {
+                         setTreeMenu();
+                       }
+                     }
+
+                     public void mouseDoubleClick(MouseEvent e) {
+                       if (e.button == 1) // left double click!
+                       {
+                         doDoubleClick();
+                       }
+                     }
+
+                   }
+      );
+      // Set the expanded flags based on the TreeMemory
+      TreeMemory.setExpandedFromMemory(repositoryTree, "REPOSITORY_NAME");
+      repositoryTree.setFocus();
+      repositoryTree.layout();
+      variableComposite.layout(true, true);
+      setShellText();
+      //refresh openedObjects
+      for(int i =0;i<openedObjects.size();i++)
+      {
+        String key = (String)openedObjects.key(i);
+        String name = key.substring(key.lastIndexOf("/")+1,key.length());
+        String parentPath = key.substring(0,key.lastIndexOf("/"));
+        String parentName = key.substring(parentPath.lastIndexOf("/")+1,parentPath.length());
+        TreeItem ti=null;
+        if(key.indexOf(STRING_JOBS)>-1)
+          ti = ConstUI.findTreeItem(tiTrans,parentName,name);
+        else if (key.indexOf(STRING_TRANSFORMATIONS)>-1)
+          ti = ConstUI.findTreeItem(tiJob,parentName,name);
+        else
+          ti = ConstUI.findTreeItem(repositoryTree.getItem(0),parentName,name);
+        if(ti!=null) {
+          openedObjects.put(key, ti);
+          if(i==0)//set the first opened graph as the focus one in tree
+            repositoryTree.setSelection(ti);
+        }
+        else
+          log.logDetailed(key+" is not found in repository tree.");
+      }
+      // Always expand the top level entry...
+      tiTree.setExpanded(true);
+    }
+    catch(KettleException dbe)
+    {
+      new ErrorDialog(shell, "Title", "Message", dbe); //$NON-NLS-1$ //$NON-NLS-2$
+    }
+  }
+
+  public void setTreeMenu()
+  {
+    Menu mTree = new Menu(shell, SWT.POP_UP);
+
+    final TreeItem tisel[]=repositoryTree.getSelection();
+    if (tisel.length==1 || repositoryExplorerDialog.sameCategory(tisel))
+    {
+      final TreeItem ti = tisel[0];
+      final int level = ConstUI.getTreeLevel(ti);
+      final String path[] = ConstUI.getTreeStrings(ti);
+      final String item = ti.getText();
+      int cat = getItemCategory(ti);
+      String realpath[] = new String[level-2];
+      String realpathString = "";
+      RepositoryDirectoryInterface repdir=null;
+//      if(level>=2) {// the level of repository tree node is more than 2
+//        for (int i = 0; i < realpath.length; i++) {
+//          if(i==0||i==1)
+//            realpathString =realpathString +path[i + 2];
+//          else
+//            realpathString =realpathString+"/" +path[i + 2];
+//          realpath[i] = path[i + 2];
+//        }
+//        // Find the directory in the directory tree...
+//        try {
+//          repdir = rep.findDirectory(realpathString);
+//        } catch (KettleException e) {
+//          throw new RuntimeException(e);
+//        }
+//      }else {repdir=null;}
+      switch(cat)
+      {
+        case RepositoryExplorerDialog.ITEM_CATEGORY_ROOT :
+        {
+          // Export all
+//          MenuItem miExp  = new MenuItem(mTree, SWT.PUSH);
+//          miExp.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Objects.ExportAll")); //$NON-NLS-1$
+//          SelectionAdapter lsExp = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { exportAll(rep.getDirectoryTree()); } };
+//          miExp.addSelectionListener( lsExp );
+//
+//          // Import all
+//          MenuItem miImp  = new MenuItem(mTree, SWT.PUSH);
+//          miImp.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Objects.ImportAll")); //$NON-NLS-1$
+//          SelectionAdapter lsImp = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { importAll(); } };
+//          miImp.addSelectionListener( lsImp );
+//          //miImp.setEnabled(!rep.getUserInfo().isReadonly());
+//          miImp.setEnabled(true);
+
+          // Export transMeta
+          MenuItem miTrans  = new MenuItem(mTree, SWT.PUSH);
+          //miTrans.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Objects.ExportTrans")); //$NON-NLS-1$
+          miTrans.setText("ExportTrans");
+          SelectionAdapter lsTrans = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) {
+            try {
+              repositoryExplorerDialog.exportTransformations(rep.findDirectory("/"));
+            } catch (KettleException ex) {
+              throw new RuntimeException(ex);
+            }
+          } };
+          miTrans.addSelectionListener( lsTrans );
+
+          // Export jobs
+          MenuItem miJobs  = new MenuItem(mTree, SWT.PUSH);
+          //miJobs.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Objects.ExportJob")); //$NON-NLS-1$
+          miTrans.setText("ExportJob");
+          SelectionAdapter lsJobs = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) {
+            try {
+              repositoryExplorerDialog.exportJobs(rep.getUserHomeDirectory());
+            } catch (KettleException ex) {
+              throw new RuntimeException(ex);
+            }
+          } };
+          miJobs.addSelectionListener( lsJobs );
+        }
+        break;
+
+        case RepositoryExplorerDialog.ITEM_CATEGORY_DATABASES_ROOT              :
+        {
+          // New database
+//          MenuItem miNew  = new MenuItem(mTree, SWT.PUSH);
+//          miNew.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.ConnectionsRoot.New")); //$NON-NLS-1$
+//          SelectionAdapter lsNew = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { newDatabase(); } };
+//          miNew.addSelectionListener( lsNew );
+//          miNew.setEnabled(!rep.getUserInfo().isReadonly());
+        }
+        break;
+
+        case RepositoryExplorerDialog.ITEM_CATEGORY_DATABASE                    :
+        {
+          // New database
+//          MenuItem miNew  = new MenuItem(mTree, SWT.PUSH);
+//          miNew.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Connections.New")); //$NON-NLS-1$
+//          SelectionAdapter lsNew = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { newDatabase(); } };
+//          miNew.addSelectionListener( lsNew );
+//          miNew.setEnabled(!rep.getUserInfo().isReadonly());
+//          // Edit database info
+//          MenuItem miEdit  = new MenuItem(mTree, SWT.PUSH);
+//          miEdit.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Connections.Edit")); //$NON-NLS-1$
+//          SelectionAdapter lsEdit = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { editDatabase(item); } };
+//          miEdit.addSelectionListener( lsEdit );
+//          miEdit.setEnabled(!rep.getUserInfo().isReadonly());
+//          // Delete database info
+//          MenuItem miDel  = new MenuItem(mTree, SWT.PUSH);
+//          miDel.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Connections.Delete")); //$NON-NLS-1$
+//          SelectionAdapter lsDel = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { delDatabase(item); } };
+//          miDel.addSelectionListener( lsDel );
+//          miDel.setEnabled(!rep.getUserInfo().isReadonly());
+        }
+        break;
+
+        case RepositoryExplorerDialog.ITEM_CATEGORY_SLAVES_ROOT :
+        {
+          // New slave
+//          MenuItem miNew  = new MenuItem(mTree, SWT.PUSH);
+//          miNew.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Slave.New")); //$NON-NLS-1$
+//          SelectionAdapter lsNew = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { newSlaveServer(); } };
+//          miNew.addSelectionListener( lsNew );
+//          miNew.setEnabled(!rep.getUserInfo().isReadonly());
+        }
+        break;
+
+        case RepositoryExplorerDialog.ITEM_CATEGORY_SLAVE :
+        {
+          // New slave
+//          MenuItem miNew  = new MenuItem(mTree, SWT.PUSH);
+//          miNew.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Slave.New")); //$NON-NLS-1$
+//          SelectionAdapter lsNew = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { newSlaveServer(); } };
+//          miNew.addSelectionListener( lsNew );
+//          miNew.setEnabled(!rep.getUserInfo().isReadonly());
+//          // Edit slave
+//          MenuItem miEdit  = new MenuItem(mTree, SWT.PUSH);
+//          miEdit.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Slave.Edit")); //$NON-NLS-1$
+//          SelectionAdapter lsEdit = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { editSlaveServer(item); } };
+//          miEdit.addSelectionListener( lsEdit );
+//          miEdit.setEnabled(!rep.getUserInfo().isReadonly());
+//          // Delete slave
+//          MenuItem miDel  = new MenuItem(mTree, SWT.PUSH);
+//          miDel.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Slave.Delete")); //$NON-NLS-1$
+//          SelectionAdapter lsDel = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { delSlaveServer(item); } };
+//          miDel.addSelectionListener( lsDel );
+//          miDel.setEnabled(!rep.getUserInfo().isReadonly());
+        }
+        break;
+
+
+        case RepositoryExplorerDialog.ITEM_CATEGORY_PARTITIONS_ROOT :
+        {
+          // New partition schema
+//          MenuItem miNew  = new MenuItem(mTree, SWT.PUSH);
+//          miNew.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.PartitionSchema.New")); //$NON-NLS-1$
+//          SelectionAdapter lsNew = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { newPartitionSchema(); } };
+//          miNew.addSelectionListener( lsNew );
+//          miNew.setEnabled(!rep.getUserInfo().isReadonly());
+        }
+        break;
+
+        case RepositoryExplorerDialog.ITEM_CATEGORY_PARTITION :
+        {
+          // New partition schema
+//          MenuItem miNew  = new MenuItem(mTree, SWT.PUSH);
+//          miNew.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.PartitionSchema.New")); //$NON-NLS-1$
+//          SelectionAdapter lsNew = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { newPartitionSchema(); } };
+//          miNew.addSelectionListener( lsNew );
+//          miNew.setEnabled(!rep.getUserInfo().isReadonly());
+//          // Edit partition schema
+//          MenuItem miEdit  = new MenuItem(mTree, SWT.PUSH);
+//          miEdit.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.PartitionSchema.Edit")); //$NON-NLS-1$
+//          SelectionAdapter lsEdit = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { editPartitionSchema(item); } };
+//          miEdit.addSelectionListener( lsEdit );
+//          miEdit.setEnabled(!rep.getUserInfo().isReadonly());
+//          // Delete partition schema
+//          MenuItem miDel  = new MenuItem(mTree, SWT.PUSH);
+//          miDel.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.PartitionSchema.Delete")); //$NON-NLS-1$
+//          SelectionAdapter lsDel = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { delPartitionSchema(item); } };
+//          miDel.addSelectionListener( lsDel );
+//          miDel.setEnabled(!rep.getUserInfo().isReadonly());
+        }
+        break;
+
+        case RepositoryExplorerDialog.ITEM_CATEGORY_CLUSTERS_ROOT :
+        {
+          // New cluster
+//          MenuItem miNew  = new MenuItem(mTree, SWT.PUSH);
+//          miNew.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Cluster.New")); //$NON-NLS-1$
+//          SelectionAdapter lsNew = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { newCluster(); } };
+//          miNew.addSelectionListener( lsNew );
+//          miNew.setEnabled(!rep.getUserInfo().isReadonly());
+        }
+        break;
+
+        case RepositoryExplorerDialog.ITEM_CATEGORY_CLUSTER:
+        {
+          // New cluster
+//          MenuItem miNew  = new MenuItem(mTree, SWT.PUSH);
+//          miNew.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Cluster.New")); //$NON-NLS-1$
+//          SelectionAdapter lsNew = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { newCluster(); } };
+//          miNew.addSelectionListener( lsNew );
+//          miNew.setEnabled(!userinfo.isReadonly());
+//          // Edit cluster
+//          MenuItem miEdit  = new MenuItem(mTree, SWT.PUSH);
+//          miEdit.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Cluster.Edit")); //$NON-NLS-1$
+//          SelectionAdapter lsEdit = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { editCluster(item); } };
+//          miEdit.addSelectionListener( lsEdit );
+//          miEdit.setEnabled(!rep.getUserInfo().isReadonly());
+//          // Delete cluster
+//          MenuItem miDel  = new MenuItem(mTree, SWT.PUSH);
+//          miDel.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Cluster.Delete")); //$NON-NLS-1$
+//          SelectionAdapter lsDel = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { delCluster(item); } };
+//          miDel.addSelectionListener( lsDel );
+//          miDel.setEnabled(!rep.getUserInfo().isReadonly());
+        }
+        break;
+        case RepositoryExplorerDialog.ITEM_CATEGORY_TRANSFORMATIONS_ROOT        :
+          break;
+        case RepositoryExplorerDialog.ITEM_CATEGORY_TRANSFORMATION              :
+          if (level>=2)
+          {
+            // Open transformation...
+            MenuItem miOpen  = new MenuItem(mTree, SWT.PUSH);
+            miOpen.setText(BaseMessages.getString(RepositoryExplorerDialog.class, "RepositoryExplorerDialog.PopupMenu.Transformations.Open"));
+            miOpen.addSelectionListener(
+                    new SelectionAdapter()
+                    {
+                      public void widgetSelected(SelectionEvent e)
+                      {
+                        repositoryExplorerDialog.openTransformation(item, repdir);
+                      }
+                    }
+            );
+            // Delete transformation
+            MenuItem miDel  = new MenuItem(mTree, SWT.PUSH);
+            miDel.setText(BaseMessages.getString(RepositoryExplorerDialog.class,"RepositoryExplorerDialog.PopupMenu.Transformations.Delete")); //$NON-NLS-1$
+            miDel.addSelectionListener(
+                    new SelectionAdapter()
+                    {
+                      public void widgetSelected(SelectionEvent e)
+                      {
+                        delSelectedObjects();
+                      }
+                    }
+            );
+            // Rename transformation
+            //miDel.setEnabled(!rep.getUserInfo().isReadonly());
+            miDel.setEnabled(true);
+            MenuItem miRen  = new MenuItem(mTree, SWT.PUSH);
+            miRen.setText(BaseMessages.getString(RepositoryExplorerDialog.class,"RepositoryExplorerDialog.PopupMenu.Transformations.Rename")); //$NON-NLS-1$
+            miRen.addSelectionListener(
+                    new SelectionAdapter()
+                    {
+                      public void widgetSelected(SelectionEvent e)
+                      {
+                        repositoryExplorerDialog.renameTransformation(item, repdir);
+                      }
+                    }
+            );
+            //miRen.setEnabled(!rep.getUserInfo().isReadonly());
+            miRen.setEnabled(true);
+          }else{}//else do nothing
+          break;
+
+        case RepositoryExplorerDialog.ITEM_CATEGORY_JOB_DIRECTORY               :
+        case RepositoryExplorerDialog.ITEM_CATEGORY_TRANSFORMATION_DIRECTORY    :
+//          if (level>=2)
+//          {
+//            // The first levels of path[] don't belong to the path to this directory!
+//            String realpath[] = new String[level-1];
+//            for (int i=0;i<realpath.length;i++) realpath[i] = path[i+2];
+//
+//            // Find the directory in the directory tree...
+//            final RepositoryDirectory repdir = rep.getDirectoryTree().findDirectory(realpath);
+//
+//            // Export xforms and jobs from directory
+//            MenuItem miExp  = new MenuItem(mTree, SWT.PUSH);
+//            miExp.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Objects.ExportAll")); //$NON-NLS-1$
+//            SelectionAdapter lsExp = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { exportAll(repdir); } };
+//            miExp.addSelectionListener( lsExp );
+//            miExp.setEnabled(!rep.getUserInfo().isReadonly());
+//
+//            if (cat == RepositoryExplorerDialog.ITEM_CATEGORY_TRANSFORMATION_DIRECTORY)
+//            {
+//              // Export transMeta
+//              MenuItem miTrans  = new MenuItem(mTree, SWT.PUSH);
+//              miTrans.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Objects.ExportTrans")); //$NON-NLS-1$
+//              SelectionAdapter lsTrans = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { exportTransformations(repdir); } };
+//              miTrans.addSelectionListener( lsTrans );
+//            }
+//
+//            if (cat == RepositoryExplorerDialog.ITEM_CATEGORY_JOB_DIRECTORY)
+//            {
+//              // Export jobs
+//              MenuItem miJobs  = new MenuItem(mTree, SWT.PUSH);
+//              miJobs.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Objects.ExportJob")); //$NON-NLS-1$
+//              SelectionAdapter lsJobs = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { exportJobs(repdir); } };
+//              miJobs.addSelectionListener( lsJobs );
+//            }
+//
+//            // create directory...
+            MenuItem miCreate  = new MenuItem(mTree, SWT.PUSH);
+            miCreate.setText(BaseMessages.getString(RepositoryExplorerDialog.class, "RepositoryExplorerDialog.PopupMenu.TransDirectory.Create")); //$NON-NLS-1$
+            miCreate.addSelectionListener(
+                    new SelectionAdapter()
+                    {
+                      public void widgetSelected(SelectionEvent e)
+                      {
+                        //if(repdir==null)
+                        RepositoryDirectoryInterface selectedRepdir=getRepositoryDirectory(ti);
+                        createDirectory(ti, selectedRepdir);
+                      }
+                    }
+            );
+//
+            if (level>2) // Can't rename or delete root directory...
+            {
+              // Rename directory
+              MenuItem miRename  = new MenuItem(mTree, SWT.PUSH);
+              miRename.setText(BaseMessages.getString(RepositoryExplorerDialog.class, "RepositoryExplorerDialog.PopupMenu.TransDirectory.Rename")); //$NON-NLS-1$
+              miRename.addSelectionListener(
+                      new SelectionAdapter()
+                      {
+                        public void widgetSelected(SelectionEvent e)
+                        {
+                          renameDirectory(ti, repdir);
+                        }
+                      }
+              );
+              // Delete directory
+              MenuItem miDelete  = new MenuItem(mTree, SWT.PUSH);
+              miDelete.setText(BaseMessages.getString(RepositoryExplorerDialog.class, "RepositoryExplorerDialog.PopupMenu.TransDirectory.Delete")); //$NON-NLS-1$
+              miDelete.addSelectionListener(
+                      new SelectionAdapter()
+                      {
+                        public void widgetSelected(SelectionEvent e)
+                        {
+                          RepositoryDirectoryInterface selectedDir = getRepositoryDirectory(ti);
+                          delDirectory(ti, selectedDir);
+                        }
+                      }
+              );
+            }
+          break;
+        case RepositoryExplorerDialog.ITEM_CATEGORY_JOB                         :
+//        {
+          // The first 3 levels of text[] don't belong to the path to this transformation!
+//          String realpath[] = new String[level-2];
+//          for (int i=0;i<realpath.length;i++) realpath[i] = path[i+2];
+//
+//          // Find the directory in the directory tree...
+//          final RepositoryDirectory repdir = rep.getDirectoryTree().findDirectory(realpath);
+//
+//          // Open job...
+//          MenuItem miOpen  = new MenuItem(mTree, SWT.PUSH);
+//          miOpen.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Jobs.Open")); //$NON-NLS-1$
+//          miOpen.addSelectionListener(
+//                  new SelectionAdapter()
+//                  {
+//                    public void widgetSelected(SelectionEvent e)
+//                    {
+//                      openJob(item, repdir);
+//                    }
+//                  }
+//          );
+//          // Delete job
+//          MenuItem miDel  = new MenuItem(mTree, SWT.PUSH);
+//          miDel.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Jobs.Delete")); //$NON-NLS-1$
+//          miDel.addSelectionListener(
+//                  new SelectionAdapter()
+//                  {
+//                    public void widgetSelected(SelectionEvent e)
+//                    {
+//                      if (delJob(item, repdir)) ti.dispose();
+//                    }
+//                  }
+//          );
+//          // Rename job
+//          miDel.setEnabled(!userinfo.isReadonly());
+//          MenuItem miRen  = new MenuItem(mTree, SWT.PUSH);
+//          miRen.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Jobs.Rename")); //$NON-NLS-1$
+//          miRen.addSelectionListener(
+//                  new SelectionAdapter()
+//                  {
+//                    public void widgetSelected(SelectionEvent e)
+//                    {
+//                      renameJob(ti, item, repdir);
+//                    }
+//                  }
+//          );
+//          miRen.setEnabled(!rep.getUserInfo().isReadonly());
+//        }
+        break;
+
+        case RepositoryExplorerDialog.ITEM_CATEGORY_USERS_ROOT                  :
+        {
+//          mTree = new Menu(shell, SWT.POP_UP);
+//          // New user
+//          MenuItem miNew  = new MenuItem(mTree, SWT.PUSH);
+//          miNew.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.UsersRoot.New")); //$NON-NLS-1$
+//          SelectionAdapter lsNew = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { newUser(); } };
+//          miNew.addSelectionListener( lsNew );
+//          miNew.setEnabled(!rep.getUserInfo().isReadonly());
+        }
+        break;
+
+        case RepositoryExplorerDialog.ITEM_CATEGORY_USER                        :
+        {
+          // New user
+//          MenuItem miNew  = new MenuItem(mTree, SWT.PUSH);
+//          miNew.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Users.New")); //$NON-NLS-1$
+//          SelectionAdapter lsNew = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { newUser(); } };
+//          miNew.addSelectionListener( lsNew );
+//          miNew.setEnabled(!rep.getUserInfo().isReadonly());
+//          // Edit user info
+//          MenuItem miEdit  = new MenuItem(mTree, SWT.PUSH);
+//          miEdit.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Users.Edit")); //$NON-NLS-1$
+//          SelectionAdapter lsEdit = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { editUser(item); } };
+//          miEdit.addSelectionListener( lsEdit );
+//          miEdit.setEnabled(!rep.getUserInfo().isReadonly());
+//          // Rename user
+//          MenuItem miRen = new MenuItem(mTree, SWT.PUSH);
+//          miRen.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Users.Rename")); //$NON-NLS-1$
+//          SelectionAdapter lsRen = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { renameUser(); } };
+//          miRen.addSelectionListener( lsRen );
+//          miRen.setEnabled(!rep.getUserInfo().isReadonly());
+//          // Delete user info
+//          MenuItem miDel  = new MenuItem(mTree, SWT.PUSH);
+//          miDel.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Users.Delete")); //$NON-NLS-1$
+//          SelectionAdapter lsDel = new SelectionAdapter() { public void widgetSelected(SelectionEvent e) { delUser(item); } };
+//          miDel.addSelectionListener( lsDel );
+//          miDel.setEnabled(!rep.getUserInfo().isReadonly());
+        }
+        break;
+        default:
+          mTree = null;
+      }
+    }
+
+    ConstUI.displayMenu(mTree, repositoryTree);
+  }
+
+  private int getItemCategory(TreeItem ti)
+  {
+    int cat = RepositoryExplorerDialog.ITEM_CATEGORY_NONE;
+    int level = ConstUI.getTreeLevel(ti);
+    String path[] = ConstUI.getTreeStrings(ti);
+    String item = ""; //$NON-NLS-1$
+    String parent = ""; //$NON-NLS-1$
+
+    if (ti!=null)
+    {
+      item = ti.getText();
+      if (ti.getParentItem()!=null)
+      {
+        parent = ti.getParentItem().getText();
+      }
+    }
+    // Level 1:
+    if (level==0)
+    {
+      cat = RepositoryExplorerDialog.ITEM_CATEGORY_ROOT;
+    }
+    else
+    if (level==1)
+    {
+//      if (item.equals(STRING_USERS))           cat = RepositoryExplorerDialog.ITEM_CATEGORY_USERS_ROOT;
+//      else if (item.equals(STRING_PROFILES))        cat = RepositoryExplorerDialog.ITEM_CATEGORY_PROFILES_ROOT;
+//      else if (item.equals(STRING_DATABASES))       cat = RepositoryExplorerDialog.ITEM_CATEGORY_DATABASES_ROOT;
+//      else
+      if (item.equals(STRING_PARTITIONS))      cat = RepositoryExplorerDialog.ITEM_CATEGORY_PARTITIONS_ROOT;
+      else if (item.equals(STRING_SLAVES))          cat = RepositoryExplorerDialog.ITEM_CATEGORY_SLAVES_ROOT;
+      else if (item.equals(STRING_CLUSTERS))        cat = RepositoryExplorerDialog.ITEM_CATEGORY_CLUSTERS_ROOT;
+      else if (item.equals(STRING_TRANSFORMATIONS)) cat = RepositoryExplorerDialog.ITEM_CATEGORY_TRANSFORMATIONS_ROOT;
+      else if (item.equals(STRING_JOBS))            cat = RepositoryExplorerDialog.ITEM_CATEGORY_JOB_DIRECTORY;
+    }
+    else
+    if (level>=2)
+    {
+//      if (parent.equals(STRING_USERS)) cat = RepositoryExplorerDialog.ITEM_CATEGORY_USER;
+//      else if (parent.equals(STRING_PROFILES)) cat = RepositoryExplorerDialog.ITEM_CATEGORY_PROFILE;
+//      else if (parent.equals(STRING_DATABASES)) cat = RepositoryExplorerDialog.ITEM_CATEGORY_DATABASE;
+//      else
+      if (parent.equals(STRING_PARTITIONS)) cat = RepositoryExplorerDialog.ITEM_CATEGORY_PARTITION;
+      else if (parent.equals(STRING_SLAVES)) cat = RepositoryExplorerDialog.ITEM_CATEGORY_SLAVE;
+      else if (parent.equals(STRING_CLUSTERS)) cat = RepositoryExplorerDialog.ITEM_CATEGORY_CLUSTER;
+
+      final Color dircolor = GUIResource.getInstance().getColorDirectory();
+      if (path[1].equals(STRING_TRANSFORMATIONS))
+      {
+        if (ti.getForeground().equals(dircolor))
+          cat = RepositoryExplorerDialog.ITEM_CATEGORY_TRANSFORMATION_DIRECTORY;
+        else
+          cat = RepositoryExplorerDialog.ITEM_CATEGORY_TRANSFORMATION;
+      }
+      else
+      if (path[1].equals(STRING_JOBS))
+      {
+        if (ti.getForeground().equals(dircolor))
+          cat = RepositoryExplorerDialog.ITEM_CATEGORY_JOB_DIRECTORY;
+        else cat = RepositoryExplorerDialog.ITEM_CATEGORY_JOB;
+      }
+    }
+
+    return cat;
+  }
+
+  public void newDatabase()
+  {
+    try
+    {
+      DatabaseMeta databaseMeta = new DatabaseMeta();
+      DatabaseDialog dd = new DatabaseDialog(shell, databaseMeta);
+      String name = dd.open();
+      if (name!=null)
+      {
+        // See if this user already exists...
+        ObjectId idDatabase = rep.getDatabaseID(name);
+        if (new Integer(idDatabase.getId()).intValue()<=0)
+        {
+          //rep.lockRepository();
+          rep.insertLogEntry("Creating new database '"+databaseMeta.getName()+"'");
+          //rep.saveDatabaseMeta(databaseMeta,rep);
+        }
+        else
+        {
+          MessageBox mb = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+          mb.setMessage("AlreadyExists"); //$NON-NLS-1$
+          mb.setText("AlreadyExists"); //$NON-NLS-1$
+          mb.open();
+        }
+        // Refresh tree...
+        refreshTree();
+      }
+    }
+    catch(KettleException e)
+    {
+      new ErrorDialog(shell, "Error","Message", e); //$NON-NLS-1$ //$NON-NLS-2$
+    }
+    finally
+    {
+//      try
+//      {
+//        rep.unlockRepository();
+//      }
+//      catch(KettleException e)
+//      {
+//        new ErrorDialog(shell, "Error", "Unexpected error unlocking the repository database", e);
+//      }
+    }
+  }
+
+  public void doDoubleClick()
+  {
+    final TreeItem tisel[]=repositoryTree.getSelection();
+    if (tisel.length==1 || repositoryExplorerDialog.sameCategory(tisel))
+    {
+      final TreeItem ti = tisel[0];
+      int cat = getItemCategory(ti);
+      RepositoryDirectoryInterface repdir = null;
+      final String path[] = ConstUI.getTreeStrings(ti);
+      String objectName = path[path.length-1];
+      repdir = getRepositoryDirectory(ti);
+      if(repdir!=null)
+        switch (cat) {
+          case RepositoryExplorerDialog.ITEM_CATEGORY_JOB_DIRECTORY:
+          case RepositoryExplorerDialog.ITEM_CATEGORY_TRANSFORMATION_DIRECTORY: {
+            //if (!userinfo.isReadonly())
+            createDirectory(ti, repdir);
+            //refreshRepositoryTree();
+            break;
+          }
+          case RepositoryExplorerDialog.ITEM_CATEGORY_TRANSFORMATION: {
+            openRepObject(repdir,objectName,RepositoryObjectType.TRANSFORMATION,null);
+            openedObjects.put(repdir.toString()+"/"+objectName,ti);
+            break;
+          }
+          case RepositoryExplorerDialog.ITEM_CATEGORY_JOB: {
+            openRepObject(repdir,objectName,RepositoryObjectType.JOB,null);
+            openedObjects.put(repdir.toString()+"/"+objectName,ti);
+            break;
+          }
+          default:
+        }
+    }
+  }
+
+  private RepositoryDirectoryInterface getRepositoryDirectory(TreeItem ti) {
+    final int level = ConstUI.getTreeLevel(ti);
+    int cat = getItemCategory(ti);
+    RepositoryDirectoryInterface repdir = null;
+    if ((level >= 2) &&
+            ((cat == RepositoryExplorerDialog.ITEM_CATEGORY_JOB_DIRECTORY) || (cat == RepositoryExplorerDialog.ITEM_CATEGORY_TRANSFORMATION_DIRECTORY) ||
+                    (cat == RepositoryExplorerDialog.ITEM_CATEGORY_JOB) || (cat == RepositoryExplorerDialog.ITEM_CATEGORY_TRANSFORMATION)))
+    {
+      String realpath[];
+      if ((cat == RepositoryExplorerDialog.ITEM_CATEGORY_JOB_DIRECTORY) || (cat == RepositoryExplorerDialog.ITEM_CATEGORY_TRANSFORMATION_DIRECTORY))
+      {
+        // The first levels of path[] don't belong to the path to this directory!
+        realpath = new String[level - 1];
+      }
+      else
+      {
+        // The first 3 levels of path[] don't belong to the path to this transformation or Job!
+        realpath = new String[level - 2];
+      }
+      final String path[] = ConstUI.getTreeStrings(ti);
+      String realpathStr="";
+      for (int i = 0; i < realpath.length; i++)
+      {
+        realpath[i] = path[i + 2];
+        if(i==0 ||i==1)
+          realpathStr =realpathStr+ path[i + 2];
+        else
+          realpathStr =realpathStr+"/"+ path[i + 2];
+      }
+      // Find the directory in the directory tree...
+      try {
+        repdir = rep.findDirectory(realpathStr);
+        return repdir;
+        //repdir.
+      } catch (KettleException e) {
+        throw new RuntimeException(e);
+      }
+    }else
+      return null;
+  }
+
+  public boolean delSelectedObjects()  {
+    TreeItem items[] = repositoryTree.getSelection();
+    boolean error = false;
+    MessageBox mb = new MessageBox(shell, SWT.ICON_WARNING | SWT.YES | SWT.NO);
+    mb.setMessage(BaseMessages.getString(RepositoryExplorerDialog.class, "RepositoryExplorerDialog.Trans.Delete.Confirm.Message1")+(items.length>1?BaseMessages.getString(PKG, "RepositoryExplorerDialog.Trans.Delete.Confirm.Message2")+items.length+BaseMessages.getString(PKG, "RepositoryExplorerDialog.Trans.Delete.Confirm.Message3"):BaseMessages.getString(PKG, "RepositoryExplorerDialog.Trans.Delete.Confirm.Message4"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+    mb.setText(BaseMessages.getString(RepositoryExplorerDialog.class, "RepositoryExplorerDialog.Trans.Delete.Confirm.Title")); //$NON-NLS-1$
+    int answer = mb.open();
+    if (answer!=SWT.YES)
+    {
+      return false;
+    }
+    for (int i=0;i<items.length;i++)
+    {
+      //final RepositoryElementMetaInterface repositoryObject = objectMap.get(ConstUI.getTreePath(items[i], 0));
+      RepositoryDirectoryInterface repDir = getRepositoryDirectory(items[i]);
+      String objectName =items[i].getText();
+      int category = getItemCategory(items[i]);
+      try {
+        switch(category) {
+          case RepositoryExplorerDialog.ITEM_CATEGORY_TRANSFORMATION : {ObjectId id = rep.getTransformationID(objectName,repDir);rep.deleteTransformation(id); break;}
+          case RepositoryExplorerDialog.ITEM_CATEGORY_JOB            : {ObjectId id = rep.getJobId(objectName,repDir);rep.deleteJob(id); break;}
+          default:
+            break;
+        }
+      } catch(Exception e) {
+        new ErrorDialog(shell, BaseMessages.getString(PKG, "RepositoryExplorerDialog.Trans.Delete.ErrorRemoving.Title"), BaseMessages.getString(PKG, "RepositoryExplorerDialog.Trans.Delete.ErrorRemoving.Message")+objectName+"]", e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        error=true;
+      }
+    }
+    disposeVariableComposite(true,false,false,false);
+    refreshRepositoryTree();
+    return !error;
+  }
+  public void createDirectory(TreeItem ti, RepositoryDirectoryInterface repdir)
+  {
+    EnterStringDialog esd = new EnterStringDialog(shell, BaseMessages.getString(RepositoryExplorerDialog.class, "RepositoryExplorerDialog.Directory.Create.AskName.Default"), BaseMessages.getString(RepositoryExplorerDialog.class, "RepositoryExplorerDialog.Directory.Create.AskName.Title"), BaseMessages.getString(RepositoryExplorerDialog.class, "RepositoryExplorerDialog.Directory.Create.AskName.Message")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    String newdirName = esd.open();
+    if (newdirName!=null)
+    {
+      RepositoryDirectoryInterface rd = new RepositoryDirectory(repdir, newdirName);
+      String path[] = rd.getPathArray();
+
+      RepositoryDirectoryInterface exists = repdir.findDirectory( path );
+      if (exists==null)
+      {
+        try {
+          rep.saveRepositoryDirectory(rd);
+          TreeItem newItem = new TreeItem(ti,SWT.NONE);
+          newItem.setImage(GUIResource.getInstance().getImageArrow());
+          newItem.setText(newdirName);
+          Color dircolor = GUIResource.getInstance().getColorDirectory();
+          newItem.setForeground(dircolor);
+          repositoryTree.setSelection(newItem);
+        } catch(Exception exception) {
+          new ErrorDialog(shell,
+                  BaseMessages.getString(RepositoryExplorerDialog.class, "RepositoryExplorerDialog.Directory.Create.UnexpectedError.Message1")+newdirName+BaseMessages.getString(PKG, "RepositoryExplorerDialog.Directory.Create.UnexpectedError.Message2")+repdir.getPath()+"]", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                  BaseMessages.getString(RepositoryExplorerDialog.class, "RepositoryExplorerDialog.Directory.Create.UnexpectedError.Title"), //$NON-NLS-1$
+                  exception
+          );
+
+        }
+      }
+      else
+      {
+        MessageBox mb = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+        mb.setMessage(BaseMessages.getString(RepositoryExplorerDialog.class, "RepositoryExplorerDialog.Directory.Create.AlreadyExists.Message1")+newdirName+BaseMessages.getString(PKG, "RepositoryExplorerDialog.Directory.Create.AlreadyExists.Message2")+repdir.getPath()+BaseMessages.getString(PKG, "RepositoryExplorerDialog.Directory.Create.AlreadyExists.Message3")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        mb.setText(BaseMessages.getString(RepositoryExplorerDialog.class, "RepositoryExplorerDialog.Directory.Create.AlreadyExists.Title")); //$NON-NLS-1$
+        mb.open();
+      }
+    }
+  }
+
+  public void delDirectory(TreeItem ti, RepositoryDirectoryInterface repdir)
+  {
+    try
+    {
+      rep.deleteRepositoryDirectory(repdir);
+      ti.dispose();
+      //refreshTree();
+    }
+    catch(KettleException e)
+    {
+      new ErrorDialog(shell,
+              BaseMessages.getString(RepositoryExplorerDialog.class, "RepositoryExplorerDialog.Directory.Delete.ErrorRemoving.Title"), //$NON-NLS-1$
+              BaseMessages.getString(RepositoryExplorerDialog.class, "RepositoryExplorerDialog.Directory.Delete.ErrorRemoving.Message1"), //$NON-NLS-1$
+              e
+      );
+    }
+  }
+
+  public void renameDirectory(TreeItem treeitem, RepositoryDirectoryInterface rd)
+  {
+    final TreeItem ti = treeitem;
+    final RepositoryDirectoryInterface repdir = rd;
+
+    final String name = ti.getText();
+    TreeEditor editor = new TreeEditor(repositoryTree);
+    editor.setItem(ti);
+    final Text text = new Text(repositoryTree, SWT.NONE);
+    props.setLook(text);
+    text.setText(name);
+    text.addFocusListener(new FocusAdapter()
+                          {
+                            public void focusLost(FocusEvent arg0)
+                            {
+                              // Focus is lost: apply changes
+                              String newname = text.getText();
+                              if (renameDirectory(repdir, name, newname))
+                              {
+                                ti.setText(newname);
+                              }
+                              text.dispose();
+                            }
+                          }
+    );
+    text.addKeyListener(new KeyAdapter()
+                        {
+                          public void keyPressed(KeyEvent e)
+                          {
+                            // ESC --> Don't change tree item...
+                            if (e.keyCode   == SWT.ESC)
+                            {
+                              text.dispose();
+                            };
+                            // ENTER --> Save changes...
+                            if (e.character == SWT.CR )
+                            {
+                              String newname = text.getText();
+                              if (renameDirectory(repdir, name, newname))
+                              {
+                                ti.setText(newname);
+                              }
+                              text.dispose();
+                            }
+                          }
+                        }
+    );
+
+    editor.horizontalAlignment = SWT.LEFT;
+    editor.grabHorizontal = true;
+    editor.grabVertical   = true;
+    editor.minimumWidth   =   50;
+
+    text.selectAll();
+    text.setFocus();
+
+    editor.layout();
+    editor.setEditor(text);
+  }
+
+  public boolean renameDirectory(RepositoryDirectoryInterface repdir, String name, String newname)
+  {
+    boolean retval=false;
+
+    try
+    {
+      if (Const.isEmpty(newname))
+      {
+        throw new KettleException(BaseMessages.getString(RepositoryExplorerDialog.class, "RepositoryExplorerDialog.Exception.NameCanNotBeEmpty"));
+      }
+      if (!name.equals(newname))
+      {
+        repdir.setName(newname);
+        try {
+          rep.renameRepositoryDirectory(repdir.getObjectId(), repdir, newname);
+          retval=true;
+        } catch (Exception exception) {
+          retval=false;
+          new ErrorDialog(shell,
+                  BaseMessages.getString(RepositoryExplorerDialog.class, "RepositoryExplorerDialog.Directory.Rename.UnexpectedError.Message1")+name+"]"+Const.CR+BaseMessages.getString(PKG, "RepositoryExplorerDialog.Directory.Rename.UnexpectedError.Message2"), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                  BaseMessages.getString(RepositoryExplorerDialog.class, "RepositoryExplorerDialog.Directory.Rename.UnexpectedError.Title"), //$NON-NLS-1$
+                  exception
+          );
+        }
+      }
+    }
+    catch(KettleException e)
+    {
+      new ErrorDialog(shell, BaseMessages.getString(RepositoryExplorerDialog.class, "RepositoryExplorerDialog.Directory.Rename.UnexpectedError.Title"), BaseMessages.getString(PKG, "RepositoryExplorerDialog.Directory.Rename.UnexpectedError.Message"), e); //$NON-NLS-1$ //$NON-NLS-2$
+    }
+
+    return retval;
+  }
 }

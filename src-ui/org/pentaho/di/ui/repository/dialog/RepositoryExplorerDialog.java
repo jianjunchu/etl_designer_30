@@ -186,27 +186,36 @@ public class RepositoryExplorerDialog extends Dialog
 	public  static final String STRING_TRANSFORMATIONS = BaseMessages.getString(PKG, "RepositoryExplorerDialog.Tree.String.Transformations"); //$NON-NLS-1$
 	public  static final String STRING_JOBS            = BaseMessages.getString(PKG, "RepositoryExplorerDialog.Tree.String.Jobs"); //$NON-NLS-1$
 	private static final String STRING_USERS           = BaseMessages.getString(PKG, "RepositoryExplorerDialog.Tree.String.Users"); //$NON-NLS-1$
-	
-	private static final int    ITEM_CATEGORY_NONE                        =  0;
-	private static final int    ITEM_CATEGORY_ROOT                        =  1;
-	private static final int    ITEM_CATEGORY_DATABASES_ROOT              =  2;
-	private static final int    ITEM_CATEGORY_DATABASE                    =  3;
-	private static final int    ITEM_CATEGORY_TRANSFORMATIONS_ROOT        =  4;
-	private static final int    ITEM_CATEGORY_TRANSFORMATION              =  5;
-	private static final int    ITEM_CATEGORY_TRANSFORMATION_DIRECTORY    =  6;
+
+	public static final int    ITEM_CATEGORY_NONE                        =  0;
+	public static final int    ITEM_CATEGORY_ROOT                        =  1;
+	public static final int    ITEM_CATEGORY_DATABASES_ROOT              =  2;
+	public static final int    ITEM_CATEGORY_DATABASE                    =  3;
+	public static final int    ITEM_CATEGORY_TRANSFORMATIONS_ROOT        =  4;
+	public static final int    ITEM_CATEGORY_TRANSFORMATION              =  5;
+	public static final int    ITEM_CATEGORY_TRANSFORMATION_DIRECTORY    =  6;
 	private static final int    ITEM_CATEGORY_JOBS_ROOT                   =  7;
-	private static final int    ITEM_CATEGORY_JOB                         =  8;
-	private static final int    ITEM_CATEGORY_JOB_DIRECTORY               =  9;
-	private static final int    ITEM_CATEGORY_USERS_ROOT                  = 10;
-	private static final int    ITEM_CATEGORY_USER                        = 11;
-    private static final int    ITEM_CATEGORY_PARTITIONS_ROOT             = 14;
-    private static final int    ITEM_CATEGORY_PARTITION                   = 15;
-    private static final int    ITEM_CATEGORY_SLAVES_ROOT                 = 16;
-    private static final int    ITEM_CATEGORY_SLAVE                       = 17;
-    private static final int    ITEM_CATEGORY_CLUSTERS_ROOT               = 18;
-    private static final int    ITEM_CATEGORY_CLUSTER                     = 19;
-    
+	public static final int    ITEM_CATEGORY_JOB                         =  8;
+	public static final int    ITEM_CATEGORY_JOB_DIRECTORY               =  9;
+	public static final int    ITEM_CATEGORY_USERS_ROOT                  = 10;
+	public static final int    ITEM_CATEGORY_USER                        = 11;
+	public static final int    ITEM_CATEGORY_PARTITIONS_ROOT             = 14;
+	public static final int    ITEM_CATEGORY_PARTITION                   = 15;
+	public static final int    ITEM_CATEGORY_SLAVES_ROOT                 = 16;
+	public static final int    ITEM_CATEGORY_SLAVE                       = 17;
+	public static final int    ITEM_CATEGORY_CLUSTERS_ROOT               = 18;
+	public static final int    ITEM_CATEGORY_CLUSTER                     = 19;
+
+	public void setShell(Shell shell) {
+		this.shell = shell;
+	}
+
 	private Shell     shell;
+
+	public void setwTree(Tree wTree) {
+		this.wTree = wTree;
+	}
+
 	private Tree      wTree;
 	private Button    wOK;
 
@@ -1642,10 +1651,12 @@ public class RepositoryExplorerDialog extends Dialog
 			}
 			else
 			{
-				MessageBox mb = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-				mb.setMessage(BaseMessages.getString(PKG, "RepositoryExplorerDialog.Trans.Rename.ErrorFinding.Message1")+name+"]"+Const.CR+BaseMessages.getString(PKG, "RepositoryExplorerDialog.Trans.Rename.ErrorFinding.Message2")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				mb.setText(BaseMessages.getString(PKG, "RepositoryExplorerDialog.Trans.Rename.ErrorFinding.Title")); //$NON-NLS-1$
-				mb.open();
+				if(shell !=null) {
+					MessageBox mb = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+					mb.setMessage(BaseMessages.getString(PKG, "RepositoryExplorerDialog.Trans.Rename.ErrorFinding.Message1") + name + "]" + Const.CR + BaseMessages.getString(PKG, "RepositoryExplorerDialog.Trans.Rename.ErrorFinding.Message2")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					mb.setText(BaseMessages.getString(PKG, "RepositoryExplorerDialog.Trans.Rename.ErrorFinding.Title")); //$NON-NLS-1$
+					mb.open();
+				}
 			}
 		}
 		catch(KettleException dbe)

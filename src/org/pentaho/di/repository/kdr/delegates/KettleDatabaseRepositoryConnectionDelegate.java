@@ -1733,7 +1733,7 @@ public class KettleDatabaseRepositoryConnectionDelegate extends KettleDatabaseRe
         Object[] result = database.getRow(resultSet);
         if (result==null)
 		{
-			log.logBasic("getOneRow: result=null, "+"sql="+sql+" , parameter="+id);
+			log.logDetailed("getOneRow: result=null, "+"sql="+sql+" , parameter="+id);
 			return new RowMetaAndData(database.getReturnRowMeta(), RowDataUtil.allocateRowData(database.getReturnRowMeta().size()));
 		}
         return new RowMetaAndData(database.getReturnRowMeta(), result);
