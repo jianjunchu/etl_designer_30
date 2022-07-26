@@ -165,7 +165,6 @@ import org.pentaho.di.pan.CommandLineOption;
 import org.pentaho.di.partition.PartitionSchema;
 import org.pentaho.di.pkg.JarfileGenerator;
 import org.pentaho.di.repository.*;
-import org.pentaho.di.repository.kdr.KettleDatabaseRepositoryBase;
 import org.pentaho.di.repository.kdr.KettleDatabaseRepositoryMeta;
 import org.pentaho.di.repository.kdr.KettleDatabaseRepository;
 import org.pentaho.di.resource.ResourceExportInterface;
@@ -197,7 +196,6 @@ import org.pentaho.di.ui.core.database.wizard.CreateDatabaseWizard;
 import org.pentaho.di.ui.core.dialog.*;
 import org.pentaho.di.ui.core.gui.GUIResource;
 import org.pentaho.di.ui.core.gui.WindowProperty;
-import org.pentaho.di.ui.core.widget.ComboVar;
 import org.pentaho.di.ui.core.widget.DoubleClickInterface;
 import org.pentaho.di.ui.core.widget.TreeItemAccelerator;
 import org.pentaho.di.ui.core.widget.TreeMemory;
@@ -1619,7 +1617,9 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
     }
   }
 
-  private static final String STRING_SPOON_MAIN_TREE = BaseMessages.getString(PKG, "Spoon.MainTree.Label");
+  private static final String STRING_SPOON_REPOSITORY_TREE = BaseMessages.getString(PKG, "Spoon.MainTree.Label");
+
+  private static final String STRING_SPOON_FILE_TREE = BaseMessages.getString(PKG, "Spoon.FileTree.Label");
 
   private static final String STRING_SPOON_CORE_OBJECTS_TREE = BaseMessages.getString(PKG,
       "Spoon.CoreObjectsTree.Label");
@@ -1675,7 +1675,7 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
 
     view = new CTabItem(tabFolder, SWT.NONE);
     view.setControl(new Composite(tabFolder, SWT.NONE));
-    view.setText(STRING_SPOON_MAIN_TREE);
+    view.setText(STRING_SPOON_REPOSITORY_TREE);
     view.setImage(GUIResource.getInstance().getImageExploreSolutionSmall());
 
     design = new CTabItem(tabFolder, SWT.NONE);
@@ -5430,11 +5430,16 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
 
     if(rep!=null && rep.isConnected())// if repository is used , the selection tab is used for repository tree.
     {
+      if(selectionTree!=null)
+        selectionTree.dispose();
       if (repositoryTree == null || repositoryTree.isDisposed())
         refreshRepositoryTree();
+      view.setText(STRING_SPOON_REPOSITORY_TREE);
       return;
-    }
+    }else if(repositoryTree!=null)
+      repositoryTree.dispose();
 
+    view.setText(STRING_SPOON_FILE_TREE);
     if (selectionTree == null || selectionTree.isDisposed()) {
       // //////////////////////////////////////////////////////////////////////////////////////////////////
       //
@@ -5454,7 +5459,7 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
        */
 
       // Add a tree memory as well...
-      TreeMemory.addTreeListener(selectionTree, STRING_SPOON_MAIN_TREE);
+      TreeMemory.addTreeListener(selectionTree, STRING_SPOON_FILE_TREE);
 
       selectionTree.addMenuDetectListener(new MenuDetectListener() {
         public void menuDetected(MenuDetectEvent e) {
@@ -5510,7 +5515,7 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
 
       // Set expanded if this is the only transformation shown.
       if (props.isOnlyActiveFileShownInTree()) {
-        TreeMemory.getInstance().storeExpanded(STRING_SPOON_MAIN_TREE, tiTrans, true);
+        TreeMemory.getInstance().storeExpanded(STRING_SPOON_FILE_TREE, tiTrans, true);
       }
 
       for (TabMapEntry entry : delegates.tabs.getTabs()) {
@@ -5535,7 +5540,7 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
             // Set expanded if this is the only transformation
             // shown.
             if (props.isOnlyActiveFileShownInTree()) {
-              TreeMemory.getInstance().storeExpanded(STRING_SPOON_MAIN_TREE, tiTransName, true);
+              TreeMemory.getInstance().storeExpanded(STRING_SPOON_FILE_TREE, tiTransName, true);
             }
 
             // /////////////////////////////////////////////////////
@@ -5721,7 +5726,7 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
       // Set expanded if this is the only job shown.
       if (props.isOnlyActiveFileShownInTree()) {
         tiJobs.setExpanded(true);
-        TreeMemory.getInstance().storeExpanded(STRING_SPOON_MAIN_TREE, tiJobs, true);
+        TreeMemory.getInstance().storeExpanded(STRING_SPOON_FILE_TREE, tiJobs, true);
       }
 
       // Now add the jobs
@@ -5749,7 +5754,7 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
 
             // Set expanded if this is the only job shown.
             if (props.isOnlyActiveFileShownInTree()) {
-              TreeMemory.getInstance().storeExpanded(STRING_SPOON_MAIN_TREE, tiJobName, true);
+              TreeMemory.getInstance().storeExpanded(STRING_SPOON_FILE_TREE, tiJobName, true);
             }
 
             // /////////////////////////////////////////////////////
@@ -5850,7 +5855,7 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
     }
 
     // Set the expanded state of the complete tree.
-    TreeMemory.setExpandedFromMemory(selectionTree, STRING_SPOON_MAIN_TREE);
+    TreeMemory.setExpandedFromMemory(selectionTree, STRING_SPOON_FILE_TREE);
 
     // refreshCoreObjectsHistory();
 
@@ -9013,7 +9018,7 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
                     {
                       public void widgetSelected(SelectionEvent e)
                       {
-                        repositoryExplorerDialog.openTransformation(item, repdir);
+                        openRepObject(getRepositoryDirectory(ti),item,RepositoryObjectType.TRANSFORMATION,null);
                       }
                     }
             );
@@ -9039,7 +9044,7 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
                     {
                       public void widgetSelected(SelectionEvent e)
                       {
-                        repositoryExplorerDialog.renameTransformation(item, repdir);
+                        repositoryExplorerDialog.renameTransformation(item, getRepositoryDirectory(ti));
                       }
                     }
             );
@@ -9109,7 +9114,7 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
                       {
                         public void widgetSelected(SelectionEvent e)
                         {
-                          renameDirectory(ti, repdir);
+                          renameDirectory(ti, getRepositoryDirectory(ti));
                         }
                       }
               );
@@ -9129,7 +9134,7 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
             }
           break;
         case RepositoryExplorerDialog.ITEM_CATEGORY_JOB                         :
-//        {
+        {
           // The first 3 levels of text[] don't belong to the path to this transformation!
 //          String realpath[] = new String[level-2];
 //          for (int i=0;i<realpath.length;i++) realpath[i] = path[i+2];
@@ -9149,6 +9154,44 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
 //                    }
 //                  }
 //          );
+          MenuItem miOpen  = new MenuItem(mTree, SWT.PUSH);
+          miOpen.setText(BaseMessages.getString(RepositoryExplorerDialog.class, "RepositoryExplorerDialog.PopupMenu.Jobs.Open"));
+          miOpen.addSelectionListener(
+                  new SelectionAdapter()
+                  {
+                    public void widgetSelected(SelectionEvent e)
+                    {
+                      openRepObject(getRepositoryDirectory(ti),item,RepositoryObjectType.JOB,null);
+                    }
+                  }
+          );
+          MenuItem miDel  = new MenuItem(mTree, SWT.PUSH);
+          miDel.setText(BaseMessages.getString(RepositoryExplorerDialog.class,"RepositoryExplorerDialog.PopupMenu.Jobs.Delete")); //$NON-NLS-1$
+          miDel.addSelectionListener(
+                  new SelectionAdapter()
+                  {
+                    public void widgetSelected(SelectionEvent e)
+                    {
+                      delSelectedObjects();
+                    }
+                  }
+          );
+          // Rename Job
+          //miDel.setEnabled(!rep.getUserInfo().isReadonly());
+          miDel.setEnabled(true);
+          MenuItem miRen  = new MenuItem(mTree, SWT.PUSH);
+          miRen.setText(BaseMessages.getString(RepositoryExplorerDialog.class,"RepositoryExplorerDialog.PopupMenu.Jobs.Rename")); //$NON-NLS-1$
+          miRen.addSelectionListener(
+                  new SelectionAdapter()
+                  {
+                    public void widgetSelected(SelectionEvent e)
+                    {
+                      repositoryExplorerDialog.renameJob(item, getRepositoryDirectory(ti));
+                    }
+                  }
+          );
+          //miRen.setEnabled(!rep.getUserInfo().isReadonly());
+          miRen.setEnabled(true);
 //          // Delete job
 //          MenuItem miDel  = new MenuItem(mTree, SWT.PUSH);
 //          miDel.setText(Messages.getString("RepositoryExplorerDialog.PopupMenu.Jobs.Delete")); //$NON-NLS-1$
@@ -9175,7 +9218,7 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
 //                  }
 //          );
 //          miRen.setEnabled(!rep.getUserInfo().isReadonly());
-//        }
+        }
         break;
 
         case RepositoryExplorerDialog.ITEM_CATEGORY_USERS_ROOT                  :
