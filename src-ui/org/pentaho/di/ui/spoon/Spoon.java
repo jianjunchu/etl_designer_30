@@ -2990,38 +2990,36 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
     enableMenus();
     //if(item.getObject() instanceof TransGraph)
     //RepositoryDirectory dir =((TransGraph)item.getObject()).getMeta().getRepositoryDirectory();
-    if(item.getControl() instanceof TransGraph && !repositoryTree.isDisposed())
-    {
-      String path = ((TransGraph)item.getControl()).getMeta().getRepositoryDirectory().getPath();
-      String name = ((TransGraph)item.getControl()).getMeta().getName();
-      TreeItem ti =  (TreeItem)openedObjects.get(path+"/"+name);
-      if(ti !=null && !ti.isDisposed())
-        repositoryTree.setSelection(ti);
-      else
-      {
-        String parentName = path.substring(path.lastIndexOf("/")+1,path.length());
-        TreeItem transItem =  ConstUI.findTreeItem(repositoryTree.getItem(0),null,STRING_TRANSFORMATIONS);
-        ti = ConstUI.findTreeItem(transItem,parentName,name);
-        if(ti!=null) {
+    if( repositoryTree!=null &&  !repositoryTree.isDisposed()) {
+      if (item.getControl() instanceof TransGraph) {
+        String path = ((TransGraph) item.getControl()).getMeta().getRepositoryDirectory().getPath();
+        String name = ((TransGraph) item.getControl()).getMeta().getName();
+        TreeItem ti = (TreeItem) openedObjects.get(path + "/" + name);
+        if (ti != null && !ti.isDisposed())
+          repositoryTree.setSelection(ti);
+        else {
+          String parentName = path.substring(path.lastIndexOf("/") + 1, path.length());
+          TreeItem transItem = ConstUI.findTreeItem(repositoryTree.getItem(0), null, STRING_TRANSFORMATIONS);
+          ti = ConstUI.findTreeItem(transItem, parentName, name);
+          if (ti != null) {
+            repositoryTree.setSelection(ti);
+            openedObjects.put(path + "/" + name, ti);
+          }
+        }
+      }
+      if (item.getControl() instanceof JobGraph) {
+        String path = ((JobGraph) item.getControl()).getMeta().getRepositoryDirectory().getPath();
+        String name = ((JobGraph) item.getControl()).getMeta().getName();
+        TreeItem ti = (TreeItem) openedObjects.get(path + "/" + name);
+        if (ti != null && !ti.isDisposed())
+          repositoryTree.setSelection(ti);
+        else {
+          String parentName = path.substring(path.lastIndexOf("/") + 1, path.length());
+          TreeItem jobItem = ConstUI.findTreeItem(repositoryTree.getItem(0), null, STRING_JOBS);
+          ti = ConstUI.findTreeItem(jobItem, parentName, name);
           repositoryTree.setSelection(ti);
           openedObjects.put(path + "/" + name, ti);
         }
-      }
-    }
-    if( item.getControl() instanceof JobGraph)
-    {
-      String path = ((JobGraph)item.getControl()).getMeta().getRepositoryDirectory().getPath();
-      String name = ((JobGraph)item.getControl()).getMeta().getName();
-      TreeItem ti =  (TreeItem)openedObjects.get(path+"/"+name);
-      if(ti !=null && !ti.isDisposed())
-        repositoryTree.setSelection(ti);
-      else
-      {
-        String parentName = path.substring(path.lastIndexOf("/")+1,path.length());
-        TreeItem jobItem =  ConstUI.findTreeItem(repositoryTree.getItem(0),null,STRING_JOBS);
-        ti = ConstUI.findTreeItem(jobItem,parentName,name);
-        repositoryTree.setSelection(ti);
-        openedObjects.put(path+"/"+name,ti);
       }
     }
   }
