@@ -551,5 +551,12 @@
 		<category>i18n:org.pentaho.di.job:JobCategory.Category.FileEncryption</category>
 		<tooltip>i18n:org.pentaho.di.job.entry:JobEntry.PGPVerify.Tooltip</tooltip>
 		<iconfile>ui/images/PGPVerif.png</iconfile>
-	</job-entry> 
+	</job-entry>
+	<job-entry id="EXCEL_UTIL">
+		<description>i18n:org.pentaho.di.job.entry:JobEntry.JobEntryExcelUtil.TypeDesc</description>
+		<classname>org.pentaho.di.job.entries.excelutil.JobEntryExcelUtil</classname>
+		<category>i18n:org.pentaho.di.job:JobCategory.Category.Utility</category>
+		<tooltip>i18n:org.pentaho.di.job.entry:JobEntry.JobEntryExcelUtil.Tooltip</tooltip>
+		<iconfile>ui/images/EXU.png</iconfile>
+	</job-entry>
 </job-entries>
