@@ -8803,6 +8803,8 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
       final String path[] = ConstUI.getTreeStrings(ti);
       final String item = ti.getText();
       int cat = getItemCategory(ti);
+      if(level-2<0)
+        return;
       String realpath[] = new String[level-2];
       String realpathString = "";
       RepositoryDirectoryInterface repdir=null;
@@ -9263,8 +9265,8 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
           mTree = null;
       }
     }
-
-    ConstUI.displayMenu(mTree, repositoryTree);
+    if(mTree!=null)
+      ConstUI.displayMenu(mTree, repositoryTree);
   }
 
   private int getItemCategory(TreeItem ti)
