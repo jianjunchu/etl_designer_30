@@ -72,7 +72,7 @@ public class KingbaseESDatabaseMeta extends BaseDatabaseMeta implements Database
 		}
 		else
 		{
-			return "com.kingbase.Driver";
+			return "com.kingbase8.Driver";
 		}
 	}
 
@@ -84,7 +84,7 @@ public class KingbaseESDatabaseMeta extends BaseDatabaseMeta implements Database
 		}
 		else
 		{
-			return "jdbc:kingbase://"+hostname+":"+port+"/"+databaseName;
+			return "jdbc:kingbase8://"+hostname+":"+port+"/"+databaseName;
 		}
 	}
 
