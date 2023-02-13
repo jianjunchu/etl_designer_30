@@ -16,6 +16,10 @@
  import org.pentaho.di.trans.step.BaseStepData;
  import org.pentaho.di.trans.step.StepDataInterface;
 
+ import java.util.HashSet;
+ import java.util.LinkedList;
+ import java.util.Queue;
+
 
  /**
   * web site info extractor
@@ -23,16 +27,17 @@
   * @author Jason
   * @since 10-Aug-2010
   */
- public class Crawler2020Data extends BaseStepData implements StepDataInterface
+ public class CrawlerInputData extends BaseStepData implements StepDataInterface
  {
 
 	 public RowMetaInterface ouputRowMeta;
 	 public int rowCount;
-
+	 public HashSet<String> allListPage=  new HashSet();
+	 public Queue<String> listPageQueue = new LinkedList();
 	 /**
 	  *
 	  */
-	 public Crawler2020Data()
+	 public CrawlerInputData()
 	 {
 		 super();
 	 }
