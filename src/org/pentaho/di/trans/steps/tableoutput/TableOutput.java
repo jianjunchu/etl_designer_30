@@ -52,7 +52,6 @@ import org.pentaho.di.trans.step.StepDataInterface;
 import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
-import org.pentaho.di.ui.spoon.dialog.SearchFieldsProgressDialog;
 
 /**
  * Writes rows to a database table.

@@ -1537,10 +1537,10 @@ public class TextFileOutputDialog extends BaseStepDialog implements StepDialogIn
 	{
 	   	wlFileNameField.setEnabled(wFileNameInField.getSelection());
 	   	wFileNameField.setEnabled(wFileNameInField.getSelection());
-    	wlExtension.setEnabled(!wFileNameInField.getSelection());
-    	wExtension.setEnabled(!wFileNameInField.getSelection());
-    	wlFilename.setEnabled(!wFileNameInField.getSelection());
-    	wFilename.setEnabled(!wFileNameInField.getSelection());
+//    	wlExtension.setEnabled(!wFileNameInField.getSelection());//can set extension and filename when fileNameInField is enabled
+//    	wExtension.setEnabled(!wFileNameInField.getSelection());
+//    	wlFilename.setEnabled(!wFileNameInField.getSelection());
+//    	wFilename.setEnabled(!wFileNameInField.getSelection());
 
     	if(wFileNameInField.getSelection()) 
     	{

@@ -80,8 +80,18 @@ public class TransLogTable extends BaseLogTable implements Cloneable, LogTableIn
 		VARIABLE2("VARIABLE2"),
 		VARIABLE3("VARIABLE3"),
 		VARIABLE4("VARIABLE4"),
-		VARIABLE5("VARIABLE5");
-		
+		VARIABLE5("VARIABLE5"),
+		VARIABLE6("VARIABLE6"),
+		VARIABLE7("VARIABLE7"),
+		VARIABLE8("VARIABLE8"),
+		VARIABLE9("VARIABLE9"),
+		VARIABLE10("VARIABLE10"),
+		VARIABLE11("VARIABLE11"),
+		VARIABLE12("VARIABLE12"),
+		VARIABLE13("VARIABLE13"),
+		VARIABLE14("VARIABLE14"),
+		VARIABLE15("VARIABLE15");
+
 		private String id;
 		private ID(String id) {
 			this.id = id;
@@ -229,6 +239,17 @@ public class TransLogTable extends BaseLogTable implements Cloneable, LogTableIn
 		table.fields.add( new LogTableField(ID.VARIABLE3.id, true, true, "VARIABLE3", BaseMessages.getString(PKG, "TransLogTable.FieldName.Variable3"), BaseMessages.getString(PKG, "TransLogTable.FieldDescription.VarField"), ValueMetaInterface.TYPE_STRING, 255) );
 		table.fields.add( new LogTableField(ID.VARIABLE4.id, true, true, "VARIABLE4", BaseMessages.getString(PKG, "TransLogTable.FieldName.Variable4"), BaseMessages.getString(PKG, "TransLogTable.FieldDescription.VarField"), ValueMetaInterface.TYPE_STRING, 255) );
 		table.fields.add( new LogTableField(ID.VARIABLE5.id, true, true, "VARIABLE5", BaseMessages.getString(PKG, "TransLogTable.FieldName.Variable5"), BaseMessages.getString(PKG, "TransLogTable.FieldDescription.VarField"), ValueMetaInterface.TYPE_STRING, 255) );
+		table.fields.add( new LogTableField(ID.VARIABLE6.id, true, true, "VARIABLE6", BaseMessages.getString(PKG, "TransLogTable.FieldName.Variable6"), BaseMessages.getString(PKG, "TransLogTable.FieldDescription.VarField"), ValueMetaInterface.TYPE_STRING, 255) );
+		table.fields.add( new LogTableField(ID.VARIABLE7.id, true, true, "VARIABLE7", BaseMessages.getString(PKG, "TransLogTable.FieldName.Variable7"), BaseMessages.getString(PKG, "TransLogTable.FieldDescription.VarField"), ValueMetaInterface.TYPE_STRING, 255) );
+		table.fields.add( new LogTableField(ID.VARIABLE8.id, true, true, "VARIABLE8", BaseMessages.getString(PKG, "TransLogTable.FieldName.Variable8"), BaseMessages.getString(PKG, "TransLogTable.FieldDescription.VarField"), ValueMetaInterface.TYPE_STRING, 255) );
+		table.fields.add( new LogTableField(ID.VARIABLE9.id, true, true, "VARIABLE9", BaseMessages.getString(PKG, "TransLogTable.FieldName.Variable9"), BaseMessages.getString(PKG, "TransLogTable.FieldDescription.VarField"), ValueMetaInterface.TYPE_STRING, 255) );
+		table.fields.add( new LogTableField(ID.VARIABLE10.id, true, true, "VARIABLE10", BaseMessages.getString(PKG, "TransLogTable.FieldName.Variable10"), BaseMessages.getString(PKG, "TransLogTable.FieldDescription.VarField"), ValueMetaInterface.TYPE_STRING, 255) );
+		table.fields.add( new LogTableField(ID.VARIABLE11.id, true, true, "VARIABLE11", BaseMessages.getString(PKG, "TransLogTable.FieldName.Variable11"), BaseMessages.getString(PKG, "TransLogTable.FieldDescription.VarField"), ValueMetaInterface.TYPE_STRING, 255) );
+		table.fields.add( new LogTableField(ID.VARIABLE12.id, true, true, "VARIABLE12", BaseMessages.getString(PKG, "TransLogTable.FieldName.Variable12"), BaseMessages.getString(PKG, "TransLogTable.FieldDescription.VarField"), ValueMetaInterface.TYPE_STRING, 255) );
+		table.fields.add( new LogTableField(ID.VARIABLE13.id, true, true, "VARIABLE13", BaseMessages.getString(PKG, "TransLogTable.FieldName.Variable13"), BaseMessages.getString(PKG, "TransLogTable.FieldDescription.VarField"), ValueMetaInterface.TYPE_STRING, 255) );
+		table.fields.add( new LogTableField(ID.VARIABLE14.id, true, true, "VARIABLE14", BaseMessages.getString(PKG, "TransLogTable.FieldName.Variable14"), BaseMessages.getString(PKG, "TransLogTable.FieldDescription.VarField"), ValueMetaInterface.TYPE_STRING, 255) );
+		table.fields.add( new LogTableField(ID.VARIABLE15.id, true, true, "VARIABLE15", BaseMessages.getString(PKG, "TransLogTable.FieldName.Variable15"), BaseMessages.getString(PKG, "TransLogTable.FieldDescription.VarField"), ValueMetaInterface.TYPE_STRING, 255) );
+
 		table.fields.add( new LogTableField(ID.LOG_FIELD.id, true, false, "LOG_FIELD", BaseMessages.getString(PKG, "TransLogTable.FieldName.LogField"), BaseMessages.getString(PKG, "TransLogTable.FieldDescription.LogField"), ValueMetaInterface.TYPE_STRING, DatabaseMeta.CLOB_LENGTH) );
 
 		table.findField(ID.ID_BATCH).setKey(true);
@@ -399,7 +420,17 @@ public class TransLogTable extends BaseLogTable implements Cloneable, LogTableIn
 						case VARIABLE3:
 						case VARIABLE4:
 						case VARIABLE5:
-							if(field.getSubject() != null ){
+						case VARIABLE6:
+						case VARIABLE7:
+						case VARIABLE8:
+						case VARIABLE9:
+						case VARIABLE10:
+						case VARIABLE11:
+						case VARIABLE12:
+						case VARIABLE13:
+						case VARIABLE14:
+						case VARIABLE15:
+								if(field.getSubject() != null ){
 								value = trans.environmentSubstitute(field.getSubject().toString());
 							}
 							break;

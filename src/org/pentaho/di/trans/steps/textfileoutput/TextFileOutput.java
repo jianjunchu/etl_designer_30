@@ -166,7 +166,14 @@ public class TextFileOutput extends BaseStep implements StepInterface
 				}
 				
 				data.fileNameMeta = getInputRowMeta().getValueMeta(data.fileNameFieldIndex);
-				data.fileName = data.fileNameMeta.getString(r[data.fileNameFieldIndex]);
+				//data.fileName = data.fileNameMeta.getString(r[data.fileNameFieldIndex]);
+				String dirName=meta.getFileName();
+				if(dirName !=null && dirName.length()>0) {
+					if (dirName.lastIndexOf("/") == dirName.length() - 1 || dirName.lastIndexOf("\\") == dirName.length() - 1)
+						dirName = dirName.substring(0, dirName.length() - 1);
+					data.fileName = dirName + "/" + data.fileNameMeta.getString(r[data.fileNameFieldIndex]);
+				}else
+					data.fileName = data.fileNameMeta.getString(r[data.fileNameFieldIndex]);
 				setDataWriterForFilename(data.fileName);
 			}else if(!StringUtil.isEmpty(meta.getSplitFileField())){
 
@@ -248,8 +255,20 @@ public class TextFileOutput extends BaseStep implements StepInterface
 		// Write a header line as well if needed
 		//
 		if (meta.isFileNameInField()) {
-			String baseFilename = data.fileNameMeta.getString(r[data.fileNameFieldIndex]);
-			setDataWriterForFilename(baseFilename);
+			//String baseFilename = data.fileNameMeta.getString(r[data.fileNameFieldIndex]);
+
+			//String baseFilename;
+			String dirName=meta.getFileName();
+			if(dirName !=null && dirName.length()>0) {
+				if (dirName.lastIndexOf("/") == dirName.length() - 1 || dirName.lastIndexOf("\\") == dirName.length() - 1)
+					dirName = dirName.substring(0, dirName.length() - 1);
+				data.fileName = dirName + "/" + data.fileNameMeta.getString(r[data.fileNameFieldIndex]);
+			}else
+				data.fileName = data.fileNameMeta.getString(r[data.fileNameFieldIndex]);
+			setDataWriterForFilename(data.fileName);
+
+//			setDataWriterForFilename(data.fileName);
+
 		}
 
 		if(!StringUtil.isEmpty(meta.getSplitFileField())){
@@ -271,6 +290,18 @@ public class TextFileOutput extends BaseStep implements StepInterface
 
 		if (checkFeedback(getLinesOutput()))
 			logBasic("linenr " + getLinesOutput());
+
+		if ( meta.isFileNameInField() && data.writer != null ) //close previous data.writer first
+		{
+			OutputStream finishedWriter = data.fileWriterMap.remove(data.fileName);
+			try {
+				if(finishedWriter!=null)
+					finishedWriter.close();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			if(log.isDebug()) logDebug("Closed output stream");
+		}
 
 		return result;
 	}
@@ -298,7 +329,6 @@ public class TextFileOutput extends BaseStep implements StepInterface
 		// First handle the writers themselves.
 		// If we didn't have a writer yet, we create one.
 		// Basically we open a new file
-		//
 		data.writer = data.fileWriterMap.get(filename);
 		if (data.writer==null) {
 			openNewFile(filename);
@@ -801,6 +831,7 @@ public class TextFileOutput extends BaseStep implements StepInterface
           logDetailed("Opened new file with name [" + filename + "]");
       }
     } catch (Exception e) {
+		e.printStackTrace();
       throw new KettleException("Error opening new file : " + e.toString());
     }
     // System.out.println("end of newFile(), splitnr="+splitnr);
