@@ -59,9 +59,9 @@ import org.pentaho.ui.xul.containers.XulDeck;
 import org.pentaho.ui.xul.containers.XulDialog;
 import org.pentaho.ui.xul.containers.XulListbox;
 import org.pentaho.ui.xul.containers.XulRoot;
-//import org.pentaho.ui.xul.containers.XulTree;
-//import org.pentaho.ui.xul.containers.XulTreeItem;
-//import org.pentaho.ui.xul.containers.XulTreeRow;
+import org.pentaho.ui.xul.containers.XulTree;
+import org.pentaho.ui.xul.containers.XulTreeItem;
+import org.pentaho.ui.xul.containers.XulTreeRow;
 import org.pentaho.ui.xul.containers.XulWindow;
 import org.pentaho.ui.xul.impl.AbstractXulEventHandler;
 
@@ -168,13 +168,13 @@ public class DataHandler extends AbstractXulEventHandler {
 
   // ==== Options Panel ==== //
 
-//  protected XulTree optionsParameterTree;
+  protected XulTree optionsParameterTree;
 
   // ==== Clustering Panel ==== //
 
   private XulCheckbox clusteringCheck;
 
-//  protected XulTree clusterParameterTree;
+  protected XulTree clusterParameterTree;
 
   private XulLabel clusterParameterDescriptionLabel;
 
@@ -212,7 +212,7 @@ public class DataHandler extends AbstractXulEventHandler {
 
   private XulLabel poolingDescriptionLabel;
 
-  //protected XulTree poolParameterTree;
+  protected XulTree poolParameterTree;
 
   public DataHandler() {
   }
@@ -260,9 +260,9 @@ public class DataHandler extends AbstractXulEventHandler {
 
     setDefaultPoolParameters();
     // HACK: reDim the pooling table
-//    if(poolParameterTree != null) {
-//      poolParameterTree.setRows(poolParameterTree.getRows());
-//    }
+    if(poolParameterTree != null) {
+      poolParameterTree.setRows(poolParameterTree.getRows());
+    }
   }
 
   //On Database type change
@@ -324,19 +324,19 @@ public class DataHandler extends AbstractXulEventHandler {
   }
 
   public void editOptions(int index) {
-//    if( index +1 == optionsParameterTree.getRows()){
-//      //editing last row add a new one below
-//
-//      Object[][] values = optionsParameterTree.getValues();
-//      Object[] row = values[values.length-1];
-//      if(row != null && (!StringUtils.isEmpty((String)row[0]) || !StringUtils.isEmpty((String)row[1]))){
-//        //acutally have something in current last row
-//        XulTreeRow newRow = optionsParameterTree.getRootChildren().addNewRow();
-//
-//        newRow.addCellText(0, "");
-//        newRow.addCellText(1, "");
-//      }
-//    }
+    if( index +1 == optionsParameterTree.getRows()){
+      //editing last row add a new one below
+
+      Object[][] values = optionsParameterTree.getValues();
+      Object[] row = values[values.length-1];
+      if(row != null && (!StringUtils.isEmpty((String)row[0]) || !StringUtils.isEmpty((String)row[1]))){
+        //acutally have something in current last row
+        XulTreeRow newRow = optionsParameterTree.getRootChildren().addNewRow();
+
+        newRow.addCellText(0, "");
+        newRow.addCellText(1, "");
+      }
+    }
   }
 
   public void getOptionHelp() {
@@ -404,9 +404,9 @@ public class DataHandler extends AbstractXulEventHandler {
       if (maxPoolSizeLabel != null) {
         maxPoolSizeLabel.setDisabled(dis);
       }
-//      if (poolParameterTree != null) {
-//        poolParameterTree.setDisabled(dis);
-//      }
+      if (poolParameterTree != null) {
+        poolParameterTree.setDisabled(dis);
+      }
       if (poolingParameterDescriptionLabel != null) {
         poolingParameterDescriptionLabel.setDisabled(dis);
       }
@@ -423,9 +423,9 @@ public class DataHandler extends AbstractXulEventHandler {
   public void onClusterCheck() {
     if (clusteringCheck != null) {
       boolean dis = !clusteringCheck.isChecked();
-//      if (clusterParameterTree != null) {
-//        clusterParameterTree.setDisabled(dis);
-//      }
+      if (clusterParameterTree != null) {
+        clusterParameterTree.setDisabled(dis);
+      }
       if(clusterParameterDescriptionLabel != null){
         clusterParameterDescriptionLabel.setDisabled(dis);
       }
@@ -574,29 +574,29 @@ public class DataHandler extends AbstractXulEventHandler {
 
     // Option parameters: 
 
-//    if (optionsParameterTree != null) {
-//      Object[][] values = optionsParameterTree.getValues();
-//      for (int i = 0; i < values.length; i++) {
-//
-//        String parameter = (String) values[i][0];
-//        String value = (String) values[i][1];
-//
-//        if (value == null) {
-//          value = ""; //$NON-NLS-1$
-//        }
-//
-//        String dbType = meta.getPluginId();
-//
-//        // Only if parameter are supplied, we will add to the map...
-//        if ((parameter != null) && (parameter.trim().length() > 0)) {
-//          if (value.trim().length() <= 0) {
-//            value = DatabaseMeta.EMPTY_OPTIONS_STRING;
-//          }
-//
-//          meta.addExtraOption(dbType, parameter, value);
-//        }
-//      }
-//    }
+    if (optionsParameterTree != null) {
+      Object[][] values = optionsParameterTree.getValues();
+      for (int i = 0; i < values.length; i++) {
+
+        String parameter = (String) values[i][0];
+        String value = (String) values[i][1];
+
+        if (value == null) {
+          value = ""; //$NON-NLS-1$
+        }
+
+        String dbType = meta.getPluginId();
+
+        // Only if parameter are supplied, we will add to the map...
+        if ((parameter != null) && (parameter.trim().length() > 0)) {
+          if (value.trim().length() <= 0) {
+            value = DatabaseMeta.EMPTY_OPTIONS_STRING;
+          }
+          
+          meta.addExtraOption(dbType, parameter, value);
+        }
+      }
+    }
 
     // Advanced panel settings:
 
@@ -629,31 +629,31 @@ public class DataHandler extends AbstractXulEventHandler {
       meta.setPartitioned(clusteringCheck.isChecked());
     }
 
-//    if ((clusterParameterTree != null) && (meta.isPartitioned())) {
-//
-//      Object[][] values = clusterParameterTree.getValues();
-//      List<PartitionDatabaseMeta> pdms = new ArrayList<PartitionDatabaseMeta>();
-//      for (int i = 0; i < values.length; i++) {
-//
-//        String partitionId = (String) values[i][0];
-//
-//        if ((partitionId == null) || (partitionId.trim().length() <= 0)) {
-//          continue;
-//        }
-//
-//        String hostname = (String) values[i][1];
-//        String port = (String) values[i][2];
-//        String dbName = (String) values[i][3];
-//        String username = (String) values[i][4];
-//        String password = (String) values[i][5];
-//        PartitionDatabaseMeta pdm = new PartitionDatabaseMeta(partitionId, hostname, port, dbName);
-//        pdm.setUsername(username);
-//        pdm.setPassword(password);
-//        pdms.add(pdm);
-//      }
-//      PartitionDatabaseMeta[] pdmArray = new PartitionDatabaseMeta[pdms.size()];
-//      meta.setPartitioningInformation(pdms.toArray(pdmArray));
-//    }
+    if ((clusterParameterTree != null) && (meta.isPartitioned())) {
+
+      Object[][] values = clusterParameterTree.getValues();
+      List<PartitionDatabaseMeta> pdms = new ArrayList<PartitionDatabaseMeta>();
+      for (int i = 0; i < values.length; i++) {
+
+        String partitionId = (String) values[i][0];
+
+        if ((partitionId == null) || (partitionId.trim().length() <= 0)) {
+          continue;
+        }
+
+        String hostname = (String) values[i][1];
+        String port = (String) values[i][2];
+        String dbName = (String) values[i][3];
+        String username = (String) values[i][4];
+        String password = (String) values[i][5];
+        PartitionDatabaseMeta pdm = new PartitionDatabaseMeta(partitionId, hostname, port, dbName);
+        pdm.setUsername(username);
+        pdm.setPassword(password);
+        pdms.add(pdm);
+      }
+      PartitionDatabaseMeta[] pdmArray = new PartitionDatabaseMeta[pdms.size()];
+      meta.setPartitioningInformation(pdms.toArray(pdmArray));
+    }
 
     if (poolingCheck != null) {
       meta.setUsingConnectionPool(poolingCheck.isChecked());
@@ -678,31 +678,31 @@ public class DataHandler extends AbstractXulEventHandler {
         }
       }
 
-//      if (poolParameterTree != null) {
-//        Object[][] values = poolParameterTree.getValues();
-//        Properties properties = new Properties();
-//        for (int i = 0; i < values.length; i++) {
-//
-//          boolean isChecked = false;
-//          if (values[i][0] instanceof Boolean){
-//            isChecked = ((Boolean)values[i][0]).booleanValue();
-//          }else{
-//            isChecked = Boolean.valueOf((String) values[i][0]);
-//          }
-//
-//          if (!isChecked) {
-//            continue;
-//          }
-//
-//          String parameter = (String) values[i][1];
-//          String value = (String) values[i][2];
-//          if ((parameter != null) && (parameter.trim().length() > 0) && (value != null) && (value.trim().length() > 0)) {
-//            properties.setProperty(parameter, value);
-//          }
-//
-//        }
-//        meta.setConnectionPoolingProperties(properties);
-//      }
+      if (poolParameterTree != null) {
+        Object[][] values = poolParameterTree.getValues();
+        Properties properties = new Properties();
+        for (int i = 0; i < values.length; i++) {
+
+          boolean isChecked = false;
+          if (values[i][0] instanceof Boolean){
+            isChecked = ((Boolean)values[i][0]).booleanValue();
+          }else{
+            isChecked = Boolean.valueOf((String) values[i][0]);
+          }
+
+          if (!isChecked) {
+            continue;
+          }
+
+          String parameter = (String) values[i][1];
+          String value = (String) values[i][2];
+          if ((parameter != null) && (parameter.trim().length() > 0) && (value != null) && (value.trim().length() > 0)) {
+            properties.setProperty(parameter, value);
+          }
+
+        }
+        meta.setConnectionPoolingProperties(properties);
+      }
     }
 
   }
@@ -810,205 +810,203 @@ public class DataHandler extends AbstractXulEventHandler {
   private boolean checkPoolingParameters(){
     
     List <String> returnList = new ArrayList <String>();
-//    if (poolParameterTree != null) {
-//      Object[][] values = poolParameterTree.getValues();
-//      for (int i = 0; i < values.length; i++) {
-//
-//        boolean isChecked = false;
-//        if (values[i][0] instanceof Boolean){
-//          isChecked = ((Boolean)values[i][0]).booleanValue();
-//        }else{
-//          isChecked = Boolean.valueOf((String) values[i][0]);
-//        }
-//
-//        if (!isChecked) {
-//          continue;
-//        }
-//
-//        String parameter = (String) values[i][1];
-//        String value = (String) values[i][2];
-//        if ((value == null) || (value.trim().length() <= 0)) {
-//          returnList.add(parameter);
-//        }
-//
-//      }
-//      if (returnList.size() > 0){
-//        String parameters = System.getProperty("line.separator"); //$NON-NLS-1$
-//        for (String parameter : returnList){
-//          parameters = parameters.concat(parameter).concat(System.getProperty("line.separator")); //$NON-NLS-1$
-//        }
-//
-//        String message = Messages.getString("DataHandler.USER_INVALID_PARAMETERS").concat(parameters); //$NON-NLS-1$
-//        showMessage(message, false);
-//      }
-//    }
+    if (poolParameterTree != null) {
+      Object[][] values = poolParameterTree.getValues();
+      for (int i = 0; i < values.length; i++) {
+
+        boolean isChecked = false;
+        if (values[i][0] instanceof Boolean){
+          isChecked = ((Boolean)values[i][0]).booleanValue();
+        }else{
+          isChecked = Boolean.valueOf((String) values[i][0]);
+        }
+
+        if (!isChecked) {
+          continue;
+        }
+
+        String parameter = (String) values[i][1];
+        String value = (String) values[i][2];
+        if ((value == null) || (value.trim().length() <= 0)) {
+          returnList.add(parameter);
+        }
+
+      }
+      if (returnList.size() > 0){
+        String parameters = System.getProperty("line.separator"); //$NON-NLS-1$
+        for (String parameter : returnList){
+          parameters = parameters.concat(parameter).concat(System.getProperty("line.separator")); //$NON-NLS-1$
+        }
+        
+        String message = Messages.getString("DataHandler.USER_INVALID_PARAMETERS").concat(parameters); //$NON-NLS-1$
+        showMessage(message, false);
+      }
+    }
     return returnList.size() <= 0;
   }
 
   private void setPoolProperties(Properties properties) {
-//    if (poolParameterTree != null) {
-//      Object[][] values = poolParameterTree.getValues();
-//      for (int i = 0; i < values.length; i++) {
-//
-//        String parameter = (String) values[i][1];
-//        boolean isChecked = properties.containsKey(parameter);
-//
-//        if (!isChecked) {
-//          continue;
-//        }
-//        XulTreeItem item = poolParameterTree.getRootChildren().getItem(i);
-//        item.getRow().addCellText(0, "true"); // checks the checkbox //$NON-NLS-1$
-//
-//        String value = properties.getProperty(parameter);
-//        item.getRow().addCellText(2, value);
-//
-//      }
-//    }
+    if (poolParameterTree != null) {
+      Object[][] values = poolParameterTree.getValues();
+      for (int i = 0; i < values.length; i++) {
+
+        String parameter = (String) values[i][1];
+        boolean isChecked = properties.containsKey(parameter);
+
+        if (!isChecked) {
+          continue;
+        }
+        XulTreeItem item = poolParameterTree.getRootChildren().getItem(i);
+        item.getRow().addCellText(0, "true"); // checks the checkbox //$NON-NLS-1$
+
+        String value = properties.getProperty(parameter);
+        item.getRow().addCellText(2, value);
+
+      }
+    }
 
   }
   
   public void restoreDefaults(){
-//    if (poolParameterTree != null) {
-//      for (int i = 0; i < poolParameterTree.getRootChildren().getItemCount(); i++){
-//        XulTreeItem item = poolParameterTree.getRootChildren().getItem(i);
-//        String parameterName = item.getRow().getCell(1).getLabel();
-//        String defaultValue = DatabaseConnectionPoolParameter.findParameter(parameterName, BaseDatabaseMeta.poolingParameters).getDefaultValue();
-//        if ((defaultValue == null) || (defaultValue.trim().length()<=0)){
-//          continue;
-//        }
-//        item.getRow().addCellText(2, defaultValue);
-//      }
-//    }
+    if (poolParameterTree != null) {
+      for (int i = 0; i < poolParameterTree.getRootChildren().getItemCount(); i++){
+        XulTreeItem item = poolParameterTree.getRootChildren().getItem(i);
+        String parameterName = item.getRow().getCell(1).getLabel();
+        String defaultValue = DatabaseConnectionPoolParameter.findParameter(parameterName, BaseDatabaseMeta.poolingParameters).getDefaultValue();
+        if ((defaultValue == null) || (defaultValue.trim().length()<=0)){
+          continue;
+        }
+        item.getRow().addCellText(2, defaultValue);
+      }
+    }
     
   }
 
   private void setDefaultPoolParameters() {
-//    if (poolParameterTree != null) {
-//      for (DatabaseConnectionPoolParameter parameter : BaseDatabaseMeta.poolingParameters){
-//        XulTreeRow row = poolParameterTree.getRootChildren().addNewRow();
-//        row.addCellText(0, "false"); //$NON-NLS-1$
-//        row.addCellText(1, parameter.getParameter());
-//        row.addCellText(2, parameter.getDefaultValue());
-//      }
-//    }
+    if (poolParameterTree != null) {
+      for (DatabaseConnectionPoolParameter parameter : BaseDatabaseMeta.poolingParameters){
+        XulTreeRow row = poolParameterTree.getRootChildren().addNewRow();
+        row.addCellText(0, "false"); //$NON-NLS-1$
+        row.addCellText(1, parameter.getParameter());
+        row.addCellText(2, parameter.getDefaultValue());
+      }
+    }
   }
   
   private void removeTypedOptions(Map<String, String> extraOptions){
 
     List<Integer> removeList = new ArrayList<Integer>();
 
-//    if(optionsParameterTree!=null) {
-//      Object[][] values = optionsParameterTree.getValues();
-//      for (int i = 0; i < values.length; i++) {
-//
-//        String parameter = (String) values[i][0];
-//
-//        // See if it's defined
-//        Iterator<String> keys = extraOptions.keySet().iterator();
-//        if (extraOptions.keySet().size() > 0) {
-//          while (keys.hasNext()) {
-//            String param = keys.next();
-//            String parameterKey = param.substring(param.indexOf('.') + 1);
-//            if (parameter.equals(parameterKey) || "".equals(parameter)) {
-//              //match, remove it if not already in the list
-//              if (!removeList.contains(i)) {
-//                removeList.add(i);
-//              }
-//            }
-//          }
-//        } else if ("".equals(parameter)) {
-//          if (!removeList.contains(i)) {
-//            removeList.add(i);
-//          }
-//        }
-//
-//      }
-//      if (optionsParameterTree != null) {
-//        for (int i = removeList.size() - 1; i >= 0; i--) {
-//          optionsParameterTree.getRootChildren().removeItem(removeList.get(i));
-//        }
-//      }
-//    }
+    Object[][] values = optionsParameterTree.getValues();
+    for (int i = 0; i < values.length; i++) {
+
+      String parameter = (String) values[i][0];
+
+      // See if it's defined
+      Iterator<String> keys = extraOptions.keySet().iterator();
+      if(extraOptions.keySet().size() > 0){
+        while (keys.hasNext()) {
+          String param = keys.next();
+          String parameterKey = param.substring(param.indexOf('.')+1);
+          if(parameter.equals(parameterKey) || "".equals(parameter)){
+            //match, remove it if not already in the list
+          	if (!removeList.contains(i)) {
+          		removeList.add(i);
+          	}
+          }
+        }
+      } else if("".equals(parameter)){
+      	if (!removeList.contains(i)) {
+      		removeList.add(i);
+      	}
+      }
+    
+    }
+    
+    for(int i= removeList.size()-1; i >=0; i--){
+      optionsParameterTree.getRootChildren().removeItem(removeList.get(i));
+    }
+    
   }
 
   private void setOptionsData(Map<String, String> extraOptions) {
 
-//    if (optionsParameterTree == null) {
-//      return;
-//    }
-//    if(extraOptions != null){
-//      removeTypedOptions(extraOptions);
-//      Iterator<String> keys = extraOptions.keySet().iterator();
-//
-//
-//      Object connection = connectionBox.getSelectedItem();
-//      String currentType = null;
-//
-//      if(connection != null){
-//        currentType = connectionMap.get(connection.toString()).getPluginId();
-//      }
-//
-//      while (keys.hasNext()) {
-//
-//        String parameter = keys.next();
-//        String value = extraOptions.get(parameter);
-//        if ((value == null) || (value.trim().length() <= 0) || (value.equals(DatabaseMeta.EMPTY_OPTIONS_STRING))) {
-//          value = ""; //$NON-NLS-1$
-//        }
-//
-//        // If the parameter starts with a database type code we show it in the options, otherwise we don't.
-//        // For example MySQL.defaultFetchSize
-//        //
-//
-//        int dotIndex = parameter.indexOf('.');
-//        if (dotIndex >= 0) {
-//          String parameterOption = parameter.substring(dotIndex + 1);
-//          String databaseTypeString = parameter.substring(0,dotIndex);
-//          String databaseType = databaseTypeString;
-//          if (currentType != null && currentType.equals(databaseType)) {
-//	          XulTreeRow row = optionsParameterTree.getRootChildren().addNewRow();
-//	          row.addCellText(0, parameterOption);
-//	          row.addCellText(1, value);
-//          }
-//        }
-//      }
-//
-//    }
-//    // Add 5 blank rows if none are already there, otherwise, just add one.
-//    int numToAdd = 5;
-//    if(extraOptions != null && extraOptions.keySet().size() > 0){
-//      numToAdd = 1;
-//    }
-//    while(numToAdd-- > 0){
-//      XulTreeRow row = optionsParameterTree.getRootChildren().addNewRow();
-//      row.addCellText(0, "");   //easy way of putting new cells in the row
-//      row.addCellText(1, "");
-//    }
+    if (optionsParameterTree == null) {
+      return;
+    }
+    if(extraOptions != null){
+      removeTypedOptions(extraOptions);
+      Iterator<String> keys = extraOptions.keySet().iterator();
+      
+
+      Object connection = connectionBox.getSelectedItem();
+      String currentType = null;
+      
+      if(connection != null){
+        currentType = connectionMap.get(connection.toString()).getPluginId();
+      }
+      
+      while (keys.hasNext()) {
+
+        String parameter = keys.next();
+        String value = extraOptions.get(parameter);
+        if ((value == null) || (value.trim().length() <= 0) || (value.equals(DatabaseMeta.EMPTY_OPTIONS_STRING))) {
+          value = ""; //$NON-NLS-1$
+        }
+
+        // If the parameter starts with a database type code we show it in the options, otherwise we don't.
+        // For example MySQL.defaultFetchSize
+        //
+
+        int dotIndex = parameter.indexOf('.');
+        if (dotIndex >= 0) {
+          String parameterOption = parameter.substring(dotIndex + 1);
+          String databaseTypeString = parameter.substring(0,dotIndex);
+          String databaseType = databaseTypeString;
+          if (currentType != null && currentType.equals(databaseType)) {
+	          XulTreeRow row = optionsParameterTree.getRootChildren().addNewRow();
+	          row.addCellText(0, parameterOption);
+	          row.addCellText(1, value);
+          }
+        }
+      }
+      
+    }
+    // Add 5 blank rows if none are already there, otherwise, just add one.
+    int numToAdd = 5;
+    if(extraOptions != null && extraOptions.keySet().size() > 0){
+      numToAdd = 1;
+    }
+    while(numToAdd-- > 0){
+      XulTreeRow row = optionsParameterTree.getRootChildren().addNewRow();
+      row.addCellText(0, "");   //easy way of putting new cells in the row
+      row.addCellText(1, "");
+    }
   }
 
   private void setClusterData(PartitionDatabaseMeta[] clusterInformation) {
 
-//  	if (clusterParameterTree == null) {
-//  		// there's nothing to do
-//  		return;
-//  	}
+  	if (clusterParameterTree == null) {
+  		// there's nothing to do 
+  		return;
+  	}
   	
-  	//clusterParameterTree.getRootChildren().removeAll();
+  	clusterParameterTree.getRootChildren().removeAll();
   	
-//    if ((clusterInformation != null) && (clusterParameterTree != null)) {
-//
-//      for (int i = 0; i < clusterInformation.length; i++) {
-//
-//        PartitionDatabaseMeta meta = clusterInformation[i];
-//        XulTreeRow row = clusterParameterTree.getRootChildren().addNewRow();
-//        row.addCellText(0, Const.NVL(meta.getPartitionId(), "")); //$NON-NLS-1$
-//        row.addCellText(1, Const.NVL(meta.getHostname(), "")); //$NON-NLS-1$
-//        row.addCellText(2, Const.NVL(meta.getPort(), "")); //$NON-NLS-1$
-//        row.addCellText(3, Const.NVL(meta.getDatabaseName(), "")); //$NON-NLS-1$
-//        row.addCellText(4, Const.NVL(meta.getUsername(), "")); //$NON-NLS-1$
-//        row.addCellText(5, Const.NVL(meta.getPassword(), "")); //$NON-NLS-1$
-//      }
-//    }
+    if ((clusterInformation != null) && (clusterParameterTree != null)) {
+
+      for (int i = 0; i < clusterInformation.length; i++) {
+
+        PartitionDatabaseMeta meta = clusterInformation[i];
+        XulTreeRow row = clusterParameterTree.getRootChildren().addNewRow();
+        row.addCellText(0, Const.NVL(meta.getPartitionId(), "")); //$NON-NLS-1$
+        row.addCellText(1, Const.NVL(meta.getHostname(), "")); //$NON-NLS-1$
+        row.addCellText(2, Const.NVL(meta.getPort(), "")); //$NON-NLS-1$
+        row.addCellText(3, Const.NVL(meta.getDatabaseName(), "")); //$NON-NLS-1$
+        row.addCellText(4, Const.NVL(meta.getUsername(), "")); //$NON-NLS-1$
+        row.addCellText(5, Const.NVL(meta.getPassword(), "")); //$NON-NLS-1$
+      }
+    }
     
     // Add 5 blank rows if none are already there, otherwise, just add one.
     int numToAdd = 5;
@@ -1017,15 +1015,15 @@ public class DataHandler extends AbstractXulEventHandler {
       numToAdd = 1;
     }
     */
-//    while(numToAdd-- > 0){
-//      XulTreeRow row = clusterParameterTree.getRootChildren().addNewRow();
-//      row.addCellText(0, "");   //easy way of putting new cells in the row
-//      row.addCellText(1, "");
-//      row.addCellText(2, "");
-//      row.addCellText(3, "");
-//      row.addCellText(4, "");
-//      row.addCellText(5, "");
-//    }
+    while(numToAdd-- > 0){
+      XulTreeRow row = clusterParameterTree.getRootChildren().addNewRow();
+      row.addCellText(0, "");   //easy way of putting new cells in the row
+      row.addCellText(1, "");
+      row.addCellText(2, "");
+      row.addCellText(3, "");
+      row.addCellText(4, "");
+      row.addCellText(5, "");
+    }
   }
 
   public void poolingRowChange(int idx) {
@@ -1040,10 +1038,10 @@ public class DataHandler extends AbstractXulEventHandler {
       }
       poolingDescription.setValue(BaseDatabaseMeta.poolingParameters[idx].getDescription());
       
-//      XulTreeRow row = poolParameterTree.getRootChildren().getItem(idx).getRow();
-//      if (row.getSelectedColumnIndex() == 2){
-//        row.addCellText(0, "true"); //$NON-NLS-1$
-//      }
+      XulTreeRow row = poolParameterTree.getRootChildren().getItem(idx).getRow();
+      if (row.getSelectedColumnIndex() == 2){
+        row.addCellText(0, "true"); //$NON-NLS-1$
+      }
       
     }
   }
@@ -1257,9 +1255,9 @@ public class DataHandler extends AbstractXulEventHandler {
     poolSizeBox = (XulTextbox) document.getElementById("pool-size-text"); //$NON-NLS-1$
     maxPoolSizeLabel = (XulLabel) document.getElementById("max-pool-size-label"); //$NON-NLS-1$
     maxPoolSizeBox = (XulTextbox) document.getElementById("max-pool-size-text"); //$NON-NLS-1$
-//    poolParameterTree = (XulTree) document.getElementById("pool-parameter-tree"); //$NON-NLS-1$
-//    clusterParameterTree = (XulTree) document.getElementById("cluster-parameter-tree"); //$NON-NLS-1$
-//    optionsParameterTree = (XulTree) document.getElementById("options-parameter-tree"); //$NON-NLS-1$
+    poolParameterTree = (XulTree) document.getElementById("pool-parameter-tree"); //$NON-NLS-1$
+    clusterParameterTree = (XulTree) document.getElementById("cluster-parameter-tree"); //$NON-NLS-1$
+    optionsParameterTree = (XulTree) document.getElementById("options-parameter-tree"); //$NON-NLS-1$
     poolingDescription = (XulTextbox) document.getElementById("pooling-description"); //$NON-NLS-1$ 
     poolingParameterDescriptionLabel = (XulLabel) document.getElementById("pool-parameter-description-label"); //$NON-NLS-1$ 
     poolingDescriptionLabel = (XulLabel) document.getElementById("pooling-description-label"); //$NON-NLS-1$ 
