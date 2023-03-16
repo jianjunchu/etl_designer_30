@@ -113,7 +113,7 @@
 
 				<label id="parameter-description-label" value="${DatabaseDialog.USER_PARAMETERS}"/>
 				<label id="spacer" />
-
+<!--
 				<tree id="options-parameter-tree" flex="1" editable="true" onedit="dataHandler.editOptions()" seltype="cell">
 
 					<treecols id="option-column-list">
@@ -125,7 +125,7 @@
 					</treechildren>
 
 				</tree>
-				
+-->
 				<hbox id="help-button-box">
 					<label id="spacer-label" flex="10" />
 					<button id="help-button" label="${DatabaseDialog.button.ShowHelp}" flex="1" onclick="dataHandler.getOptionHelp()" />
@@ -161,7 +161,7 @@
 
 				 	<label id="spacer" /> 
 					<label id="pool-parameter-description-label" flex="1" value="${DatabaseDialog.USER_PARAMETERS}" disabled="true"/>
-
+<!--
 					<tree id="pool-parameter-tree" flex="3" rows="5" editable="false" seltype="single" disabled="true" onselect="dataHandler.poolingRowChange()">
 						<treecols id="column-list">
 						  	<treecol id="select-col"  fixed="true" type="checkbox" flex="1" editable="true" />  
@@ -172,7 +172,7 @@
 						<treechildren id="main-treechildren">
 						</treechildren>
 					</tree>
-					
+-->
 					<hbox id="help-button-box">
 						<label id="spacer-label" flex="5" />
 						<button id="restore-defaults-button" label="${DatabaseDialog.button.RestoreDefaults}" flex="1" onclick="dataHandler.restoreDefaults()" />
@@ -200,7 +200,7 @@
 				<label id="spacer" />
 				<label id="cluster-parameter-description-label" value="${DatabaseDialog.USER_PARAMETERS}" disabled="true"/>
 				<label id="spacer" />
-
+<!--
 				<tree id="cluster-parameter-tree" flex="1" editable="true" seltype="cell" disabled="true">
 
 					<treecols id="cluster-column-list">
@@ -215,7 +215,7 @@
 					<treechildren>
 					</treechildren>
 				</tree>
-
+-->
 			</groupbox>				
 	<!--  ###############################################################################  -->
 	<!--     END - CLUSTER SETTINGS BOX                                                    -->
