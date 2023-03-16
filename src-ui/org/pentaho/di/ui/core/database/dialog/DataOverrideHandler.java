@@ -38,7 +38,7 @@ import org.pentaho.di.ui.core.dialog.PreviewRowsDialog;
 import org.pentaho.di.ui.core.dialog.ShowMessageDialog;
 import org.pentaho.ui.database.event.DataHandler;
 import org.pentaho.ui.xul.components.XulTextbox;
-import org.pentaho.ui.xul.containers.XulTree;
+//import org.pentaho.ui.xul.containers.XulTree;
 
 public class DataOverrideHandler extends DataHandler {
   boolean cancelPressed = false;
@@ -151,14 +151,15 @@ public class DataOverrideHandler extends DataHandler {
       }
     }
     
-    XulTree[] trees = new XulTree[] {poolParameterTree, clusterParameterTree, optionsParameterTree};
-
-    for (int i = 0; i < trees.length; i++) {
-      XulTree xulTree = trees[i];
-      if (xulTree != null){
-        xulTree.setData(databaseMeta);
-      }
-    }
+//    XulTree[] trees = new XulTree[] {poolParameterTree, clusterParameterTree, optionsParameterTree};
+//    if(trees!=null) {
+//      for (int i = 0; i < trees.length; i++) {
+//        XulTree xulTree = trees[i];
+//        if (xulTree != null) {
+//          xulTree.setData(databaseMeta);
+//        }
+//      }
+//    }
   }
   
   public java.util.List<DatabaseMeta> getDatabases() {
