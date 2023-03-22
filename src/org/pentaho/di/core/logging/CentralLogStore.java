@@ -64,7 +64,7 @@ public class CentralLogStore {
 					busy.set(true);
 					if (maxLogTimeoutMinutes>0) {
 						long minTimeBoundary = new Date().getTime() - maxLogTimeoutMinutes*60*1000;
-						synchronized(appender) {
+						synchronized(Const.VERSION) {
 							//xnren start prevent concurrent modification problems
 							//2015-06-25
 //							Iterator<BufferLine> i = appender.getBufferIterator();

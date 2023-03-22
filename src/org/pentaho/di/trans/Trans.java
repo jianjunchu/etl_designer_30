@@ -2014,7 +2014,7 @@ public class Trans implements VariableSpace, NamedParams, HasLogChannelInterface
 			{
 				if (intervalInSeconds<=0 || (status.equals(LogStatus.END) || status.equals(LogStatus.STOP)) ) {
 					ldb.disconnect();
-					CentralLogStore.discardLines(getLogChannelId());
+					//CentralLogStore.discardLines(getLogChannelId());
 					transLogTableDatabaseConnection = null; // disconnected
 				} 
 			}
