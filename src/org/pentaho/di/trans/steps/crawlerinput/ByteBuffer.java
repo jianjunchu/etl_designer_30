@@ -1,4 +1,4 @@
-package org.pentaho.di.trans.steps.crawler2020;
+package org.pentaho.di.trans.steps.crawlerinput;
 
 /*********************************************
     Copyright (c) 2001 by Daniel Matuschek

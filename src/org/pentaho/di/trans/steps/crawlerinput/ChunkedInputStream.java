@@ -1,4 +1,4 @@
-package org.pentaho.di.trans.steps.crawler2020;
+package org.pentaho.di.trans.steps.crawlerinput;
 
 // ChunkedInputStream - an InputStream that implements HTTP/1.1 chunking
 //

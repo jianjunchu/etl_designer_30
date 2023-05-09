@@ -1,4 +1,4 @@
-package org.pentaho.di.trans.steps.crawler2020;
+package org.pentaho.di.trans.steps.crawlerinput;
 
 import java.net.*;
 import java.io.*;

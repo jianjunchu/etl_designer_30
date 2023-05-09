@@ -1,6 +1,7 @@
-package org.pentaho.di.trans.steps.crawler2020;
+package org.pentaho.di.trans.steps.crawlerinput;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Properties;
 import java.net.URL;
 import java.util.regex.Pattern;
@@ -18,7 +19,7 @@ import com.xgn.search.html.HTMLTractor;
  *
  * <p>Company: </p>
  *
- * @author ������
+ * @author
  * @version 1.0
  */
 public class HTMLParser {
@@ -28,14 +29,151 @@ public class HTMLParser {
 
   int nestedLevel;
 
-  int offSet; //the offset of the start mark in the string. �ڼ�����ʼ���
+  int offSet; //the offset of the start mark in the string
   
   private String encoding;
+
+  public static int CATEGORY_YUMI = 1;
+  public static int CATEGORY_SHUIDAO = 2;
+  public static int CATEGORY_PUTONGXIAOMAI = 3;
+  public static int CATEGORY_DADOU = 4;
+  public static int CATEGORY_HUASHENG = 5;
+  public static int CATEGORY_DABAICAI = 6;
+  public static int CATEGORY_GANLANGXINGYOUCAI = 7;
+  public static String[] categoryNamesForSearch =  new String[]{"玉米Zea","水稻Oryza","普通小麦Triticumaestivum","大豆Glycine","花生Arachis","高粱Sorghum","大麦属Hordeum","大白菜Brassica","甘蓝型油菜Brassica","棉属Gossypium","梨属Pyrus","南瓜Cucurbita","辣椒属Capsicum","菠菜Spinacia","小豆Vigna","菜豆Phaseolus","普通番茄Lycopersicon","马铃薯Solanum","茄子Solanum","大蒜Allium","甘蔗属Saccharum","猕猴桃属Actinidia","柑橘属Citrus","苹果属Malus","苎麻属Boehmeria","普通西瓜Citrullus","葡萄属Vitis","桃Prunus","香蕉Musa","芝麻Sesamum","百合属Lilium","兰属Cymbidium","非洲菊Gerbera","秋海棠属Begonia"};
+  public static String[] categoryNames =  new String[]{"玉米","水稻","普通小麦","大豆","花生","高粱","大麦属","大白菜","甘蓝型油菜","棉属","梨属","南瓜","辣椒属","菠菜","小豆","菜豆","普通番茄","马铃薯","茄子","大蒜","甘蔗属","猕猴桃属","柑橘属","苹果属","苎麻属","普通西瓜","葡萄属","桃","香蕉","芝麻","百合属","兰属","非洲菊","秋海棠属"};
+
+  public String[] categoryContent =  new String[categoryNames.length];
+
+  public static String[] fieldsNameStr =  new String[]{"品种名称","申请日","申请号","授权日","品种权号","公告日","公告号","培育人","品种权人","品种权人地址","代理公司","代理公司地址","代理人","公告名称"};
+//  public static String[] fieldsName =  new String[]{"variety_name","application_date","application_num","authorize_date","right_no","publish_date","publish_num","cultivate_people","right_owner_name","right_owner_address","agent_company","agent_company_address","agent_people","page_title"};
 
 //  public HTMLParser(String urlString) throws IOException, Exception {
 //    HTMLTractor tr = new HTMLTractor(urlString);
 //    content = tr.getSource();
 //  }
+
+  private  Object[] getVariety(String item, String categoryName,String title) {
+   // System.out.println(categoryID);
+   // System.out.println(item);
+    if(item.indexOf("品种名称")==-1)
+      return null;
+    Object[] row=new Object[fieldsNameStr.length+1];
+    Variety variety = new Variety();
+    int startIndex,endIndex;
+    Pattern pattern = Pattern.compile("^\\d+[年]\\d+[月]\\d+[日]?$");
+    for(int i=0;i<fieldsNameStr.length;i++) {
+      startIndex = item.indexOf(fieldsNameStr[i]);
+      if (startIndex > -1) {
+        endIndex = getEndIndex(startIndex, item);
+        row[i] = item.substring(startIndex+fieldsNameStr[i].length(), endIndex);
+        Matcher match =  pattern.matcher(row[i].toString());
+        if(match.find()) {
+          row[i] = converDate(row[i].toString());
+        }
+      }
+      if(i==fieldsNameStr.length-1)
+      {
+        row[i] = title;
+      }
+    }
+    row[fieldsNameStr.length]=categoryName;
+    //variety.variety_name= variety_name;
+    return row;
+  }
+
+  /**
+   * convert xxxx年x月x日 to yyyy-MM-dd
+   *         xxxx年x月x  to yyyy-MM-dd
+   * @param str
+   * @return
+   */
+  private Object converDate(String str) {
+    int yearIndex = str.indexOf("年");
+    int monthIndex = str.indexOf("月");
+    int dayIndex = str.indexOf("日");
+    if (yearIndex < 4 || monthIndex < 1 || dayIndex < 1) {
+      return null;
+    }
+
+    String yearStr = str.substring(yearIndex - 4, yearIndex);
+    String monthStr,dayStr;
+    Integer year,month,day;
+    try {
+       year = new Integer(yearStr).intValue();
+    } catch (Exception e) {
+      return null;
+    }
+
+    if (monthIndex > 1) {
+      monthStr = str.substring(monthIndex - 2, monthIndex);
+      try {
+        month = new Integer(monthStr).intValue();
+      } catch (Exception e) {
+        monthStr = str.substring(monthIndex - 1, monthIndex);
+        try {
+          month = new Integer(monthStr).intValue();
+        } catch (Exception e2) {
+          return null;
+        }
+      }
+    } else {
+      monthStr = str.substring(monthIndex - 1, monthIndex);
+      try {
+        month = new Integer(monthStr).intValue();
+      } catch (Exception e) {
+        return null;
+      }
+    }
+
+    if (dayIndex > 1) {
+      dayStr = str.substring(dayIndex - 2, dayIndex);
+      try {
+        day = new Integer(dayStr).intValue();
+      } catch (Exception e) {
+        dayStr = str.substring(dayIndex - 1, dayIndex);
+        try {
+          day = new Integer(dayStr).intValue();
+        } catch (Exception e2) {
+          return null;
+        }
+      }
+    } else if(dayIndex == 1)  {
+      dayStr = str.substring(dayIndex - 1, dayIndex);
+      try {
+        day = new Integer(dayStr).intValue();
+      } catch (Exception e) {
+        return null;
+      }
+    }
+    else if(dayIndex == -1) {//  xxxx年x月x 的格式
+      String dayPart2 = str.substring(str.length() - 1, str.length());
+      String dayPart1 = str.substring(str.length() - 2, str.length()-1);
+      if(isDigital(dayPart2.charAt(0)) && isDigital(dayPart1.charAt(0)))
+        day=new Integer(dayPart1+dayPart2).intValue();
+      else if(isDigital(dayPart2.charAt(0)) && !isDigital(dayPart1.charAt(0)))
+        day=new Integer(dayPart2).intValue();
+      else
+        day=1;
+    }else
+      day=1;
+
+    return year.toString()+"-"+ (month<10?"0"+month.toString():month.toString())+"-"+ (day<10?"0"+day.toString():day.toString());
+
+  }
+
+  private int getEndIndex(int startIndex, String item) {
+    int endIndex = item.length();
+    for(int i =0;i<fieldsNameStr.length;i++)
+    {
+      int fieldsIndex = item.indexOf(fieldsNameStr[i]);
+      if(fieldsIndex>-1 && fieldsIndex>startIndex && fieldsIndex<endIndex)
+      {
+        endIndex = fieldsIndex;
+      }
+    }
+    return endIndex;
+  }
 
   public HTMLParser(URL url) throws IOException, Exception {
     this(url,"utf-8");
@@ -80,6 +218,10 @@ public class HTMLParser {
 
   public HTMLParser(String c) {
     content = c;
+  }
+
+  public HTMLParser() {
+
   }
 
   public void setNestedLevel(int nestedLevel) {
@@ -145,7 +287,7 @@ public class HTMLParser {
     int index = getIndexOfTagContent(mark, offset);
     String result;
     if (index == -1) {
-      return ""; //û�иñ�־,���ؿ��ַ���
+      return ""; //
     }
     index++;
     int beginIndex = content.indexOf(this.startMark, index);
@@ -182,14 +324,14 @@ public class HTMLParser {
   /** mark is the content of an element, as the follong fomat
    *  "... > mark < ... "
    * this method can get the index of  "mark" in the content
-   * @param mark
-   * @param offset: the offset of mark in the string
+   * @param tagContent
+   * @param index: the offset of mark in the string
    * @return -1 if no mark in the string
    */
   public int getIndexOfTagContent(String tagContent, int index) {
     int offset = -1;
     int i = 0;
-    Pattern p = Pattern.compile(">" + "[\\s]*" + tagContent + "[:|��]{0,1}[\\s]*" + "<");
+    Pattern p = Pattern.compile(">" + "[\\s]*" + tagContent + "[:]{0,1}[\\s]*" + "<");
     Matcher matcher = p.matcher(content);
     while (matcher.find()) {
       if (i++ == index) {
@@ -204,22 +346,18 @@ public class HTMLParser {
   }
 
   /**
-   * ��� mark ��Ǻ���� tag ��ǩ������ݡ�
    *
    * @param mark: һ������ַ������磺 "�� Ȧ" , "�� ַ"
    * @param order: the order of tag after the mark, start from 0
    * @param tag: html tag without "<" or ">" ,such as "TD"
    * @return "" if no mark in the string
    *
-   * �� �ַ���
    * <td>��ַ</td> <td ><font size = 12>�йش�</td>
    *
-   * ����
    * mark �� ����ַ��
    * order �� 0
    * tag �� td
    *
-   * ���� �йش�
    */
   public String getTagContentAfterMark(String mark, int order, String tag) {
     int offset = getIndexOfTagContent(mark, 0);
@@ -351,14 +489,11 @@ public class HTMLParser {
       }
     }
     return content.substring(begin, end);
-
   }
 
   
   /**
-   * ���ָ����־����һ����ǩ�������
-   * @param index ��ʼ������λ��
-   * @param tag
+   *
    * @return
    *
    * �� <TD> phone </TD> <TD FONT = 12 >13261217005 <A>look up the phone</A></TD>
@@ -366,7 +501,6 @@ public class HTMLParser {
    * return:   13261217005 <A>look up the phone</A>
    */
   public String getNextTagContent(String mark) {
-	  
 	  int index = this.getIndexOfTagContent(mark, 0);
 	  if(index==-1)
 		  return null;
@@ -419,12 +553,12 @@ public class HTMLParser {
   }
 
   /**
-   * ȥ��һ���ַ����������Tag
+   * delete All Tags of a html htmlContent
    * @return String
    */
-  public static String deleteAllTags(String str) {
+  public static String deleteAllTags(String htmlContent) {
     StringBuffer result = new StringBuffer();
-    char[] array = str.toCharArray();
+    char[] array = htmlContent.toCharArray();
     //boolean tag = false;
     int level = 0;
     for (int i = 0; i < array.length; i++) {
@@ -446,6 +580,24 @@ public class HTMLParser {
   }
 
   /**
+   * remove specified tag and content in the tag from a html string
+   * @param htmlContent
+   * @param tagToRemove
+   * @return
+   */
+  private String deleteSpecifiedTags(String htmlContent, String tagToRemove) {
+    int startIndex = htmlContent.indexOf("<"+tagToRemove);
+    if(startIndex==-1)//not found tag in the content
+      return htmlContent;
+    else {
+      String endTag = "</"+tagToRemove+">";
+      int endIndex = htmlContent.indexOf(endTag);
+      int tagLength = endTag.length();
+      return htmlContent.substring(0,startIndex)+deleteSpecifiedTags(htmlContent.substring(endIndex+tagLength,htmlContent.length()),tagToRemove);
+    }
+  }
+
+  /**
    * getTunkedStringIndex
    *
    * @return int
@@ -460,7 +612,7 @@ public class HTMLParser {
 
   /**
    *
-   * @param s String: the <a> tag such as "<a href=shou.asp>"
+   * @param tag String: the <a> tag such as "<a href=shou.asp>"
    * @return String
    */
   public String getURLFromTagA(String tag) {
@@ -496,36 +648,163 @@ public class HTMLParser {
     return index;
   }
 
-//  public static void main(String[] args) {
-//    File file = new File("c:/news.txt");
-//    FileReader reader = null;
-//    StringWriter writer = new StringWriter();
-//    try {
-//      reader = new FileReader(file);
-//    }
-//    catch (FileNotFoundException ex) {
-//    }
-//    char[] buffer = new char[1024];
-//
-//    int length;
-//    try {
-//      length = reader.read(buffer, 0, 1024);
-//      while (length != -1) {
-//        writer.write(buffer, 0, length);
-//        length = reader.read(buffer, 0, 1024);
+  public static String removeAllWhiteSpace(String str)
+  {
+    char[] result = new char[str.length()];
+    int count=0;
+    //ArrayList<Char> result = new ArrayList();
+    for(int index =0;index<str.length();index++)
+    {
+      char c = str.charAt(index);
+      if(c>32 && c!=160 ) //160 is "nbsp"
+        result[count++]=c;
+    }
+    return new String(result).substring(0,count);
+
+  }
+
+    public static void main(String[] args) {
+//      File file = new File("/Users/jianjunchu/seed_authorization/16.html");
+//      File outputFile = new File("/Users/jianjunchu/seed_authorization/16.txt");
+//      HTMLParser parser = new HTMLParser();
+//      try {
+//        parser.parseFile(file,outputFile);
+//      } catch (IOException e) {
+//        throw new RuntimeException(e);
 //      }
-//    }
-//    catch (IOException ex1) {
-//    }
-//    String string = writer.toString();
-//    HTMLParser parser = new HTMLParser(string);
-//    parser.setOffSet(7);
-//    parser.setNestedLevel(1);
-//    parser.setStartMark("<table");
-//    parser.setEndMark("</table>");
-//    String content = parser.getTrunkedString();
-//    System.out.println(content);
-//  }
+
+      File dir = new File("/Users/jianjunchu/seed_authorization/");
+      File[] files = dir.listFiles(new FilenameFilter() {
+        @Override
+        public boolean accept(File dir, String name) {
+          if(name.indexOf("html")>-1)
+            return true;
+          else
+            return false;
+        }
+      });
+      for(int i=0;i<files.length;i++)
+      {
+        File file = files[i];
+        String destFileName;
+        try {
+           destFileName = file.getCanonicalPath().replace("html","txt");
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+        File outputFile = new File(destFileName);
+        HTMLParser parser = new HTMLParser();
+        try {
+          parser.parseFile(file,outputFile);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    }
+    public void parseFile(File file,File outputFile) throws IOException {
+      if(!outputFile.exists())
+        outputFile.createNewFile();
+      FileOutputStream fos = new FileOutputStream(outputFile);
+      FileReader reader = null;
+      StringWriter writer = new StringWriter();
+      try {
+        reader = new FileReader(file);
+      }
+      catch (FileNotFoundException ex) {
+      }
+      char[] buffer = new char[1024];
+
+      int length;
+      try {
+        length = reader.read(buffer, 0, 1024);
+        while (length != -1) {
+          writer.write(buffer, 0, length);
+          length = reader.read(buffer, 0, 1024);
+        }
+      }
+      catch (IOException ex1) {
+      }
+      ArrayList<Object[]> result = new ArrayList();
+      String pageHtmlContent = writer.toString();
+      content = pageHtmlContent;
+      this.setOffSet(7);
+      this.setNestedLevel(1);
+      this.setStartMark("<h3");
+      this.setEndMark("</h3>");
+      String content = this.getTrunkedString();
+      String title =  HTMLParser.deleteAllTags(content);
+
+      this.setOffSet(7);
+      this.setNestedLevel(1);
+      this.setStartMark("<body");
+      this.setEndMark("</body>");
+      String pageContent =  this.getTrunkedString();
+      String pageContent2 =  this.deleteSpecifiedTags(pageContent,"script");//remove script nodes
+      String pageContent3 =  removeAllWhiteSpace(HTMLParser.deleteAllTags(pageContent2));//remove script nodes
+      String pageContent4;
+      if(pageContent3.indexOf("关于我们")>-1)
+         pageContent4=  pageContent3.substring(0,pageContent3.indexOf("关于我们"));
+      else
+         pageContent4=  pageContent3;
+      //System.out.println(pageContent4);
+      for(int i = 0; i< categoryNamesForSearch.length; i++)
+      {
+        String categoryName = categoryNamesForSearch[i];
+        int startIndex = pageContent4.indexOf(categoryName);
+        if(startIndex>-1)
+        {
+          int endIndex = pageContent4.length();
+          for(int j = 0; j< categoryNamesForSearch.length; j++)
+          {
+            int nextCategoryIndex =pageContent4.indexOf(categoryNamesForSearch[j]);
+            if(nextCategoryIndex>startIndex && nextCategoryIndex< endIndex)
+              endIndex=nextCategoryIndex;
+          }
+          categoryContent[i] = pageContent4.substring(startIndex,endIndex);
+        }
+      }
+        for(int i=0;i<categoryContent.length;i++)
+        {
+          if(categoryContent[i]!=null)
+          {
+            String[] items = categoryContent[i].split("[*][*][*][*][*]");
+            for (int j =0;j<items.length;j++)
+            {
+              Object[] row = getVariety(items[j].replaceAll("[*]",""),categoryNames[i],title);
+              if(row != null)
+                result.add(row);
+            }
+          }
+        }
+      fos.write("variety_name;application_date;application_num;authorize_date;right_no;publish_date;publish_num;cultivate_people;right_owner_name;right_owner_address;agent_company;agent_company_address;agent_people;page_title".getBytes());
+      fos.write("\n".getBytes());
+        for(int i=0;i<result.size();i++)
+        {
+          Object[] row = result.get(i);
+          if(row !=null) {
+            for (int j = 0; j < row.length; j++) {
+              if(row[j]!=null) {
+                if(j== row.length-1){ //last column without ';'
+                  System.out.print(row[j].toString() );
+                  fos.write((row[j].toString() ).getBytes());
+                }else {
+                  System.out.print(row[j].toString() + ";");
+                  fos.write((row[j].toString() + ";").getBytes());
+                }
+              }
+              else {
+                System.out.print( ";");
+                fos.write(";".getBytes());
+              }
+            }
+            fos.write(( "\n").getBytes());
+            System.out.println();
+          }
+        }
+      fos.flush();
+  }
+
+
 
   public static boolean isDigital(char c) {
     return c <= 57 && c >= 48;
@@ -557,4 +836,11 @@ public boolean includeTag(String value) {
 		  return false;
 }
 
+  public class Variety
+  {
+    public String variety_name,application_date,application_num,authorize_date,right_no,publish_date,publish_num,cultivate_people,right_owner_name,right_owner_address,agent_company,agent_company_address,agent_people,page_title;
+  }
+
 }
+
+

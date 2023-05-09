@@ -1,11 +1,8 @@
-package org.pentaho.di.trans.steps.crawler2020.cookie;
+package org.pentaho.di.trans.steps.crawlerinput.cookie;
 /*********************************************
     Copyright (c) 2001 by Daniel Matuschek
 *********************************************/
 
-import org.pentaho.di.trans.steps.crawler2020.cookie.Cookie;
-
-import java.util.Vector;
 import java.net.URL;
                                          
 /**

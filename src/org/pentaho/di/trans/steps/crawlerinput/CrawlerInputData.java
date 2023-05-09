@@ -10,7 +10,7 @@
   * the license for the specific language governing your rights and limitations.*/
 
 
- package org.pentaho.di.trans.steps.crawler2020;
+ package org.pentaho.di.trans.steps.crawlerinput;
 
  import org.pentaho.di.core.row.RowMetaInterface;
  import org.pentaho.di.trans.step.BaseStepData;
@@ -30,11 +30,19 @@
  public class CrawlerInputData extends BaseStepData implements StepDataInterface
  {
 
-	 public RowMetaInterface ouputRowMeta;
 	 public int rowCount;
 	 public HashSet<String> allListPage=  new HashSet();
 	 public Queue<String> listPageQueue = new LinkedList();
-	 /**
+
+     public Queue<Object[]> contentRowQueue = new LinkedList<>();
+
+     public int id=0;
+     public RowMetaInterface outputRowMeta;
+     public int rowsWritten;
+     public int rowLimit=10000;
+     //public Object[] outputRowData;
+
+     /**
 	  *
 	  */
 	 public CrawlerInputData()

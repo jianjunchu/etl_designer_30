@@ -9,7 +9,7 @@
   * basis, WITHOUT WARRANTY OF ANY KIND, either express or  implied. Please refer to
   * the license for the specific language governing your rights and limitations.*/
 
- package org.pentaho.di.trans.steps.crawler2020;
+ package org.pentaho.di.trans.steps.crawlerinput;
 
  import java.util.List;
  import java.util.Map;
@@ -22,6 +22,8 @@
  import org.pentaho.di.core.exception.KettleStepException;
  import org.pentaho.di.core.exception.KettleXMLException;
  import org.pentaho.di.core.row.RowMetaInterface;
+ import org.pentaho.di.core.row.ValueMeta;
+ import org.pentaho.di.core.row.ValueMetaInterface;
  import org.pentaho.di.core.variables.VariableSpace;
  import org.pentaho.di.core.xml.XMLHandler;
  import org.pentaho.di.repository.Repository;
@@ -34,8 +36,6 @@
  import org.pentaho.di.trans.step.StepMetaInterface;
  import org.pentaho.di.repository.ObjectId;
  import org.pentaho.di.i18n.BaseMessages;
- import org.pentaho.di.trans.steps.socketwriter.SocketWriter;
- import org.pentaho.di.trans.steps.socketwriter.SocketWriterData;
  import org.w3c.dom.Node;
 
 
@@ -56,7 +56,9 @@
   private String startPageURL;
   private String listPageURLPattern;
   private String contentPageURLPattern;
-  private boolean compressed;
+  private int rowLimit=-1;
+
+  private int contentQueueBufferSize=100;
 
   public CrawlerInputMeta()
   {
@@ -78,12 +80,11 @@
   public String getXML()
   {
    StringBuffer xml = new StringBuffer();
-
    xml.append("     "+XMLHandler.addTagValue("start_page_url", startPageURL));
    xml.append("     "+XMLHandler.addTagValue("content_page_url_pattern", contentPageURLPattern));
    xml.append("     "+XMLHandler.addTagValue("list_page_url_pattern", listPageURLPattern));
-   xml.append("     "+XMLHandler.addTagValue("compressed", compressed));
-
+   xml.append("     "+XMLHandler.addTagValue("row_limit", rowLimit));
+   xml.append("     "+XMLHandler.addTagValue("queue_size", contentQueueBufferSize));
    return xml.toString();
   }
 
@@ -92,14 +93,15 @@
    contentPageURLPattern = XMLHandler.getTagValue(stepnode, "content_page_url_pattern");
    startPageURL = XMLHandler.getTagValue(stepnode, "start_page_url");
    listPageURLPattern = XMLHandler.getTagValue(stepnode, "list_page_url_pattern");
-   compressed = "Y".equalsIgnoreCase( XMLHandler.getTagValue(stepnode, "compressed") );
+   rowLimit = new Integer(XMLHandler.getTagValue(stepnode, "row_limit")).intValue();
+   contentQueueBufferSize = new Integer(XMLHandler.getTagValue(stepnode, "queue_size")).intValue();
   }
 
   public void setDefault()
   {
    startPageURL = "2000";
    listPageURLPattern = "5000";
-   compressed = true;
+   rowLimit = -1;
   }
 
   public void readRep(Repository rep, ObjectId id_step, List<DatabaseMeta> databases, Map<String, Counter> counters) throws KettleException
@@ -107,7 +109,8 @@
    contentPageURLPattern = rep.getStepAttributeString (id_step, "content_page_url_pattern");
    startPageURL = rep.getStepAttributeString (id_step, "start_page_url");
    listPageURLPattern = rep.getStepAttributeString (id_step, "list_page_url_pattern");
-   compressed    = rep.getStepAttributeBoolean(id_step, "compressed");
+   rowLimit    = new Integer(rep.getStepAttributeString(id_step, "row_limit")).intValue();
+   contentQueueBufferSize    = new Integer(rep.getStepAttributeString(id_step, "queue_size")).intValue();
   }
 
   public void saveRep(Repository rep, ObjectId id_transformation, ObjectId id_step) throws KettleException
@@ -115,11 +118,23 @@
    rep.saveStepAttribute(id_transformation, id_step, "content_page_url_pattern", contentPageURLPattern);
    rep.saveStepAttribute(id_transformation, id_step, "start_page_url", startPageURL);
    rep.saveStepAttribute(id_transformation, id_step, "list_page_url_pattern", listPageURLPattern);
-   rep.saveStepAttribute(id_transformation, id_step, "compressed", compressed);
+   rep.saveStepAttribute(id_transformation, id_step, "row_limit", rowLimit);
+   rep.saveStepAttribute(id_transformation, id_step, "queue_size", contentQueueBufferSize);
   }
 
   public void getFields(RowMetaInterface rowMeta, String origin, RowMetaInterface[] info, StepMeta nextStep, VariableSpace space) throws KettleStepException
   {
+//   ValueMetaInterface idMeta = new ValueMeta( "id", ValueMeta.TYPE_INTEGER);
+//   idMeta.setOrigin(origin);
+   ValueMetaInterface urlMeta = new ValueMeta("url", ValueMeta.TYPE_STRING);
+   urlMeta.setOrigin(origin);
+   ValueMetaInterface nameMeta = new ValueMeta("file_name", ValueMeta.TYPE_STRING);
+   nameMeta.setOrigin(origin);
+   ValueMetaInterface contentMeta = new ValueMeta("content", ValueMeta.TYPE_STRING);
+   contentMeta.setOrigin(origin);
+   //rowMeta.addValueMeta(idMeta);
+   rowMeta.addValueMeta(urlMeta);rowMeta.addValueMeta(nameMeta);   rowMeta.addValueMeta(contentMeta);
+
    // Default: nothing changes to rowMeta
   }
 
@@ -152,12 +167,12 @@
 
   public StepInterface getStep(StepMeta stepMeta, StepDataInterface stepDataInterface, int cnr, TransMeta tr, Trans trans)
   {
-   return new SocketWriter(stepMeta, stepDataInterface, cnr, tr, trans);
+   return new CrawlerInput(stepMeta, stepDataInterface, cnr, tr, trans);
   }
 
   public StepDataInterface getStepData()
   {
-   return new SocketWriterData();
+   return new CrawlerInputData();
   }
 
   /**
@@ -196,21 +211,26 @@
    this.listPageURLPattern = listPageURLPattern;
   }
 
-  /**
-   * @return the compressed
-   */
-  public boolean isCompressed()
-  {
-   return compressed;
-  }
+
 
   /**
-   * @param compressed the compressed to set
+   * @param
    */
-  public void setCompressed(boolean compressed)
+  public void setRowLimit(int rowLimit)
   {
-   this.compressed = compressed;
+   this.rowLimit = rowLimit;
   }
 
 
+  public int getRowLimit() {
+   return rowLimit;
+  }
+
+  public int getContentQueueBufferSize() {
+   return contentQueueBufferSize;
+  }
+
+  public void setContentQueueBufferSize(int contentQueueBufferSize) {
+   this.contentQueueBufferSize = contentQueueBufferSize;
+  }
  }

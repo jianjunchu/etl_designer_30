@@ -1,15 +1,12 @@
-package org.pentaho.di.trans.steps.crawler2020.cookie;
+package org.pentaho.di.trans.steps.crawlerinput.cookie;
 /*********************************************
     Copyright (c) 2001 by Daniel Matuschek
 *********************************************/
                                          
-import org.pentaho.di.trans.steps.crawler2020.cookie.CookieException;
-
 import java.net.URL;
 import java.util.Date;
 import java.util.Locale;
 import java.util.StringTokenizer;
-import java.util.NoSuchElementException;
 
 /**
  * This object represents an HTTP cookie for a browser.
