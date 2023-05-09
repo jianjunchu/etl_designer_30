@@ -16,7 +16,7 @@
  *
  */
 
-package org.pentaho.di.ui.trans.steps.crawler2020;
+package org.pentaho.di.ui.trans.steps.crawlerinput;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -74,8 +74,8 @@ public class CrawlerInputDialog extends BaseStepDialog implements StepDialogInte
 	private TextVar wContentPageURLPattern;
 	private TextVar wStartPageURL;
 	private TextVar wListPageURLPattern;
-	private Button wCompressed;
-
+	private TextVar wRowLimit;
+	private TextVar wQueueSize;
 	public CrawlerInputDialog(Shell parent, Object in, TransMeta tr, String sname)
 	{
 		super(parent, (BaseStepMeta)in, tr, sname);
@@ -168,7 +168,7 @@ public class CrawlerInputDialog extends BaseStepDialog implements StepDialogInte
 		wContentPageURLPattern.setLayoutData(fdContentPageURLPattern);
 
 
-		// FlushInterval line
+		// ListPageURLPattern
 		Label wlListPageURLPattern = new Label(shell, SWT.RIGHT);
 		wlListPageURLPattern.setText(BaseMessages.getString(PKG, "CrawlerInputDialog.ListPageURLPattern.Label")); //$NON-NLS-1$
 		props.setLook(wlListPageURLPattern);
@@ -187,23 +187,39 @@ public class CrawlerInputDialog extends BaseStepDialog implements StepDialogInte
 		fdListPageURLPattern.right= new FormAttachment(100, 0);
 		wListPageURLPattern.setLayoutData(fdListPageURLPattern);
 
-		// Compress data?
-		Label wlCompressed = new Label(shell, SWT.RIGHT);
-		props.setLook(wlCompressed);
-		wlCompressed.setText(BaseMessages.getString(PKG, "CrawlerInputDialog.Compressed.Label"));
-		FormData fdlCompressed = new FormData();
-		fdlCompressed.top   = new FormAttachment(wListPageURLPattern, margin);
-		fdlCompressed.left  = new FormAttachment(0, 0);  // First one in the left top corner
-		fdlCompressed.right = new FormAttachment(middle, 0);
-		wlCompressed.setLayoutData(fdlCompressed);
-		wCompressed = new Button(shell, SWT.CHECK );
-		props.setLook(wCompressed);
-		FormData fdCompressed = new FormData();
-		fdCompressed.top  = new FormAttachment(wListPageURLPattern, margin);
-		fdCompressed.left = new FormAttachment(middle, margin); // To the right of the label
-		fdCompressed.right= new FormAttachment(95, 0);
-		wCompressed.setLayoutData(fdCompressed);
+		// row limit
+		Label wlRowLimit = new Label(shell, SWT.RIGHT);
+		props.setLook(wlRowLimit);
+		wlRowLimit.setText(BaseMessages.getString(PKG, "CrawlerInputDialog.Rowlimit.Label"));
+		FormData fdlRowLimit = new FormData();
+		fdlRowLimit.top   = new FormAttachment(wListPageURLPattern, margin);
+		fdlRowLimit.left  = new FormAttachment(0, 0);  // First one in the left top corner
+		fdlRowLimit.right = new FormAttachment(middle, 0);
+		wlRowLimit.setLayoutData(fdlRowLimit);
+		wRowLimit = new TextVar(transMeta, shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+		props.setLook(wRowLimit);
+		FormData fdRowLimit = new FormData();
+		fdRowLimit.top  = new FormAttachment(wListPageURLPattern, margin);
+		fdRowLimit.left = new FormAttachment(middle, margin); // To the right of the label
+		fdRowLimit.right= new FormAttachment(95, 0);
+		wRowLimit.setLayoutData(fdRowLimit);
 
+		// row limit
+		Label wlQueueSize = new Label(shell, SWT.RIGHT);
+		props.setLook(wlQueueSize);
+		wlQueueSize.setText(BaseMessages.getString(PKG, "CrawlerInputDialog.QueueSize.Label"));
+		FormData fdlQueueSize = new FormData();
+		fdlQueueSize.top   = new FormAttachment(wRowLimit, margin);
+		fdlQueueSize.left  = new FormAttachment(0, 0);  // First one in the left top corner
+		fdlQueueSize.right = new FormAttachment(middle, 0);
+		wlQueueSize.setLayoutData(fdlQueueSize);
+		wQueueSize = new TextVar(transMeta, shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+		props.setLook(wQueueSize);
+		FormData fdQueueSize = new FormData();
+		fdQueueSize.top  = new FormAttachment(wRowLimit, margin);
+		fdQueueSize.left = new FormAttachment(middle, margin); // To the right of the label
+		fdQueueSize.right= new FormAttachment(95, 0);
+		wQueueSize.setLayoutData(fdQueueSize);
 
 		// Some buttons
 		wOK=new Button(shell, SWT.PUSH);
@@ -211,7 +227,7 @@ public class CrawlerInputDialog extends BaseStepDialog implements StepDialogInte
 		wCancel=new Button(shell, SWT.PUSH);
 		wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel")); //$NON-NLS-1$
 
-		setButtonPositions(new Button[] { wOK, wCancel }, margin, wCompressed);
+		setButtonPositions(new Button[] { wOK, wCancel }, margin, wQueueSize);
 
 		// Add listeners
 		lsCancel   = new Listener() { public void handleEvent(Event e) { cancel(); } };
@@ -254,8 +270,8 @@ public class CrawlerInputDialog extends BaseStepDialog implements StepDialogInte
 		wContentPageURLPattern.setText(Const.NVL(input.getContentPageURLPattern(), ""));
 		wStartPageURL.setText(Const.NVL(input.getStartPageURL(), ""));
 		wListPageURLPattern.setText(Const.NVL(input.getListPageURLPattern(), ""));
-		wCompressed.setSelection(input.isCompressed());
-
+		wRowLimit.setText(new Integer(input.getRowLimit()).toString());
+		wQueueSize.setText(new Integer(input.getContentQueueBufferSize()).toString());
 		wStepname.selectAll();
 	}
 
@@ -271,8 +287,8 @@ public class CrawlerInputDialog extends BaseStepDialog implements StepDialogInte
 		input.setContentPageURLPattern(wContentPageURLPattern.getText());
 		input.setStartPageURL(wStartPageURL.getText());
 		input.setListPageURLPattern(wListPageURLPattern.getText());
-		input.setCompressed(wCompressed.getSelection());
-
+		input.setRowLimit(Const.toInt(wRowLimit.getText(), -1));
+		input.setContentQueueBufferSize(Const.toInt(wQueueSize.getText(), 100));
 		stepname = wStepname.getText(); // return value
 
 		dispose();

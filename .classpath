@@ -86,7 +86,7 @@
 	<classpathentry exported="true" kind="lib" path="libext/log4j-1.2.16.jar"/>
 	<classpathentry exported="true" kind="lib" path="libext/xercesImpl-2.9.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="libext/feeds/rome-1.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="libext/webservices/xalan-2.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libext/webservices/xalan-2.7.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="libext/secondstring.jar"/>
 	<classpathentry exported="true" kind="lib" path="libext/webservices/wstx-asl-3.2.9.jar"/>
 	<classpathentry exported="true" kind="lib" path="libext/rules/antlr-runtime-3.1.1.jar"/>
@@ -237,7 +237,7 @@
 	<classpathentry kind="lib" path="libext/JDBC/kingbasejdbc4.jar"/>
 	<classpathentry kind="lib" path="libext/login/kdi-platform.jar"/>
 	<classpathentry kind="lib" path="libext/login/json-simple-1.1.1.jar"/>
-	<classpathentry kind="lib" path="libswt/win64/swt.jar"/>
+	<classpathentry kind="lib" path="libswt/osx64/swt.jar"/>
 	<classpathentry kind="lib" path="libext/pentaho/pentaho-s3-vfs-TRUNK-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="libext/pentaho/pentaho-vfs-browser-TRUNK-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="libext/sigar/sigar.jar"/>
