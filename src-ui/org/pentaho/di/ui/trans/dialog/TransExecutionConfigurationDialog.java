@@ -59,8 +59,6 @@ import org.pentaho.di.ui.core.widget.ColumnInfo;
 import org.pentaho.di.ui.core.widget.TableView;
 import org.pentaho.di.ui.trans.step.BaseStepDialog;
 
-
-
 public class TransExecutionConfigurationDialog extends Dialog
 {
     private static Class<?> PKG = TransDialog.class; // for i18n purposes, needed by Translator2!!   $NON-NLS-1$
@@ -418,9 +416,9 @@ public class TransExecutionConfigurationDialog extends Dialog
         wlParams.setLayoutData(fdlParams);
 
         ColumnInfo[] cParams = {
-            new ColumnInfo( BaseMessages.getString(PKG, "TransExecutionConfigurationDialog.ParamsColumn.Argument"), ColumnInfo.COLUMN_TYPE_TEXT, false, true ), //Stepname
-            new ColumnInfo( BaseMessages.getString(PKG, "TransExecutionConfigurationDialog.ParamsColumn.Value"), ColumnInfo.COLUMN_TYPE_TEXT, false, false), //Preview size
-            new ColumnInfo( BaseMessages.getString(PKG, "TransExecutionConfigurationDialog.ParamsColumn.Default"), ColumnInfo.COLUMN_TYPE_TEXT, false, true), //Preview size
+            new ColumnInfo( BaseMessages.getString(PKG, "TransExecutionConfigurationDialog.ParamsColumn.Argument"), ColumnInfo.COLUMN_TYPE_TEXT, false, false ), //Parameter name
+            new ColumnInfo( BaseMessages.getString(PKG, "TransExecutionConfigurationDialog.ParamsColumn.Value"), ColumnInfo.COLUMN_TYPE_TEXT, false, false), //value
+            new ColumnInfo( BaseMessages.getString(PKG, "TransExecutionConfigurationDialog.ParamsColumn.Default"), ColumnInfo.COLUMN_TYPE_TEXT, false, false), //Default Value
           };
               
         String[] namedParams = transMeta.listParameters();

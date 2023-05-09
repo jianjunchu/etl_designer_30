@@ -130,6 +130,8 @@ public class NamedParamsDefault implements NamedParams
 	}
 
 	public void setParameterValue(String key, String value) {
+		if(!params.containsKey(key))
+			try{addParameterDefinition(key,"","");}catch(Exception e){}//no duplicate, do nothing
 		OneNamedParam theParam = params.get(key);
 		if ( theParam != null )  {
 			theParam.value = value;

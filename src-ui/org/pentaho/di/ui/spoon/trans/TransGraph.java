@@ -3309,7 +3309,7 @@ public class TransGraph extends AbstractGraph implements XulEventHandler, Redraw
             	transMeta.setParameterValue(key, Const.NVL(paramMap.get(key), "")); //$NON-NLS-1$
             }
             
-            transMeta.activateParameters();
+            transMeta.activateParameters();//put parameter to variable space
             
             // Do we need to clear the log before running?
             //
