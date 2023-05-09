@@ -437,7 +437,7 @@ public class WordInput extends BaseStep implements StepInterface
 			outputRowData[0] = result;
 		}else if(fileName!= null && fileName.endsWith(".doc")){
 
-			File fdoc = new File("C:/Users/Administrator/Desktop/wordImport/POITest/src/resources/" + fileName);
+			File fdoc = new File(  fileName);
 			FileInputStream fio = new FileInputStream(fdoc);
 			HWPFDocument doc = new HWPFDocument(fio);
 			Range  range  = doc.getRange();
