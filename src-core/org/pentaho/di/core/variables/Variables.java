@@ -60,10 +60,10 @@ public class Variables implements VariableSpace
 
         // The Kettle build date
         properties.put(Const.INTERNAL_VARIABLE_KETTLE_BUILD_DATE, BuildVersion.getInstance().getBuildDate() );
-		properties.put("YYYY", new SimpleDateFormat("yyyy").format(Calendar.getInstance()));
-		properties.put("YYYYMM", new SimpleDateFormat("yyyyMM").format(Calendar.getInstance()));
-		properties.put("YYYYMMDD", new SimpleDateFormat("yyyyMMdd").format(Calendar.getInstance()));
-		properties.put("YYYYMMDDHH", new SimpleDateFormat("yyyyMMddHH").format(Calendar.getInstance()));
+		properties.put("YYYY", new SimpleDateFormat("yyyy").format(Calendar.getInstance().getTime()));
+		properties.put("YYYYMM", new SimpleDateFormat("yyyyMM").format(Calendar.getInstance().getTime()));
+		properties.put("YYYYMMDD", new SimpleDateFormat("yyyyMMdd").format(Calendar.getInstance().getTime()));
+		properties.put("YYYYMMDDHH", new SimpleDateFormat("yyyyMMddHH").format(Calendar.getInstance().getTime()));
     }
 
 	public void copyVariablesFrom(VariableSpace space) {
