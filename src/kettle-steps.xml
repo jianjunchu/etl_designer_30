@@ -28,6 +28,15 @@
     <iconfile>ui/images/TIP.png</iconfile>
   </step>
 
+
+  <step id="CrawlerInput">
+    <description>i18n:org.pentaho.di.trans.step:BaseStep.TypeLongDesc.CrawlerInput</description>
+    <classname>org.pentaho.di.trans.steps.crawlerinput.CrawlerInputMeta</classname>
+    <category>i18n:org.pentaho.di.trans.step:BaseStep.Category.Input</category>
+    <tooltip>i18n:org.pentaho.di.trans.step:BaseStep.TypeTooltipDesc.CrawlerInput</tooltip>
+    <iconfile>ui/images/CRI.png</iconfile>
+  </step>
+
   <step id="SocketReader">
     <description>i18n:org.pentaho.di.trans.step:BaseStep.TypeLongDesc.SocketReader</description>
     <classname>org.pentaho.di.trans.steps.socketreader.SocketReaderMeta</classname>
