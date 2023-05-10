@@ -26,7 +26,7 @@ public class FunctionUtil {
 
 
 	protected LogChannelInterface        log;
-	private static ExpressRunner runner = null;
+	private static ExpressRunner runner = null; //ExpressRunner is thread safety.
 	public FunctionUtil(LogChannelInterface        log)  {
 		this.log = log;
 		try {
@@ -49,7 +49,7 @@ public class FunctionUtil {
 		return runner.execute(exp,context,null,true,false);
 	}
 
-	private ExpressRunner getRunner() throws Exception {
+	private static synchronized ExpressRunner  getRunner() throws Exception {
 		if(runner ==null){
 			runner = new ExpressRunner();
 			runner.addOperatorWithAlias("If","if",null);
@@ -163,18 +163,16 @@ public class FunctionUtil {
 		return runner;
 	}
 
-	private void loadFuncitonPlugins() {
+	private static synchronized void  loadFuncitonPlugins() throws Exception {
 
 		PluginRegistry registry = PluginRegistry.getInstance();
 		List<PluginInterface> plugins = registry.getPlugins(FunctionPluginType.class);
 		for (PluginInterface plugin : plugins) {
 			try {
 				FunctionInterface functionInterface = (FunctionInterface)registry.loadClass(plugin);
-				//OperatorBase operatorBase = (OperatorBase) Class.forName(plugin.getClassMap().get(plugin)).newInstance();
 				runner.addFunction(plugin.getIds()[0], (OperatorBase)functionInterface);
 			}  catch(Exception e) {
-			    log.logError(e.getMessage());
-				//logger.error("Error loading plugin: " + plugin, e); //$NON-NLS-1$
+			    throw e;
 			}
 		}
 	}
