@@ -1,4 +1,4 @@
-# auphi_designer
+# Auphi_Designer
 
 傲飞Kettle 设计器 3.x 是在 Kettle 5.0 基础上，定制开发的一款设计器.
 傲飞 Kettle 设计器可以独立运行，也可以结合傲飞数据整合平台使用。
@@ -9,6 +9,18 @@ https://github.com/jianjunchu/etl_designer_30
 
 
 傲飞 Kettle 设计器的版本说明：
+
+  Version 3.4.5   发布时间：2022-07-20  下载：
+
+      1.  kettle.properties 增加是否加载某些插件类型的参数，通过不加载部分插件，优化启动速度。
+      2.  管理平台监控增加【运行日志】可监控通过命令行、设计器、SDK方式启动的转换。
+      3.  Http 客户端步骤，增加二进制文件下载选项。
+
+   Version 3.4.4   发布时间：2019-12-15  下载： 
+
+      1.  增加word input，pdf input 等步骤
+      2.  bug: select 1 自动测试移除。
+      
    Version 4.0.0   发布时间：2019-05-25  下载： https://pan.baidu.com/s/1K5MgLv1pyr4aWfHoG4p0QA
 
       1.  设计器可以和新管理平台连接。新管理平台使用 vue 架构，前后台分离，增加了 Web 设计器（没有大数据相关组件，主要面向小企业应用）
