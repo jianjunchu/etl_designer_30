@@ -384,7 +384,7 @@ public class Job extends Thread implements VariableSpace, NamedParams, HasLogCha
         
         // synchronize this to a parent job if needed.
         //
-        Object syncObject=this;
+        Object syncObject=Const.VERSION;
         if (parentJob!=null) syncObject=parentJob; // parallel execution in a job
         synchronized(syncObject) {
           beginProcessing();

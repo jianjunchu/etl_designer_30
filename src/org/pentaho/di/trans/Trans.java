@@ -71,6 +71,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 /**
@@ -106,6 +107,7 @@ public class Trans implements VariableSpace, NamedParams, HasLogChannelInterface
 	 * The repository we are referencing.
 	 */
 	private Repository repository;
+
 
     /** The job that's launching this transformation. This gives us access to the whole chain, including the parent variables, etc. */
     private Job parentJob;
@@ -194,6 +196,8 @@ public class Trans implements VariableSpace, NamedParams, HasLogChannelInterface
     
     private AtomicInteger errors;
 
+    private String uuid = "";
+
     private boolean readyToStart;    
     
     private Map<String,List<StepPerformanceSnapShot>> stepPerformanceSnapShots;
@@ -228,6 +232,7 @@ public class Trans implements VariableSpace, NamedParams, HasLogChannelInterface
   private ArrayBlockingQueue<Object> transFinishedBlockingQueue;
 	
 	public Trans() {
+		uuid = UUID.randomUUID().toString();
 		finished = new AtomicBoolean(false);
 	    paused = new AtomicBoolean(false);
 	    stopped = new AtomicBoolean(false);
@@ -629,7 +634,8 @@ public class Trans implements VariableSpace, NamedParams, HasLogChannelInterface
 		// Now (optionally) write start log record!
     // Make sure we synchronize appropriately to avoid duplicate batch IDs.
     //
-    Object syncObject=this;
+
+    Object syncObject= Const.VERSION;
     if (parentJob!=null) syncObject=parentJob; // parallel execution in a job
     if (parentTrans!=null)  syncObject=parentTrans; // multiple sub-transformations
     synchronized(syncObject) {
@@ -1509,15 +1515,22 @@ public class Trans implements VariableSpace, NamedParams, HasLogChannelInterface
 			    if(log.isDetailed()) log.logDetailed(BaseMessages.getString(PKG, "Trans.Log.OpeningLogConnection",""+logConnection)); //$NON-NLS-1$ //$NON-NLS-2$
 			    transLogTableDatabaseConnection.connect();
              transLogTableDatabaseConnection.setCommit(logCommitSize);
-				
+
 				// See if we have to add a batch id...
 				// Do this first, before anything else to lock the complete table exclusively
 				//
-				if (transLogTable.isBatchIdUsed())
-				{
-					Long id_batch = logConnection.getNextBatchId(transLogTableDatabaseConnection, logSchema, logTable, transLogTable.getKeyField().getFieldName());
-					setBatchId( id_batch.longValue() );
+
+				try {
+					transLogTableDatabaseConnection.lockTables(new String[]{logSchemaAndTable});
+					if (transLogTable.isBatchIdUsed())
+					{
+						Long id_batch = logConnection.getNextBatchId(transLogTableDatabaseConnection, logSchema, logTable, transLogTable.getKeyField().getFieldName());
+						setBatchId( id_batch.longValue() );
+					}
+				}catch (Exception e){
+					e.printStackTrace();
 				}
+
 
 				//
 				// Get the date range from the logging table: from the last end_date to now. (currentDate)
@@ -2001,7 +2014,7 @@ public class Trans implements VariableSpace, NamedParams, HasLogChannelInterface
 			{
 				if (intervalInSeconds<=0 || (status.equals(LogStatus.END) || status.equals(LogStatus.STOP)) ) {
 					ldb.disconnect();
-					CentralLogStore.discardLines(getLogChannelId());
+					//CentralLogStore.discardLines(getLogChannelId());
 					transLogTableDatabaseConnection = null; // disconnected
 				} 
 			}

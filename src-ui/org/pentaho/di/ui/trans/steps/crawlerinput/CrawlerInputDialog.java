@@ -41,7 +41,7 @@ import org.pentaho.di.ui.trans.step.BaseStepDialog;
 import org.pentaho.di.trans.step.BaseStepMeta;
 import org.pentaho.di.trans.step.StepDialogInterface;
 import org.pentaho.di.ui.core.widget.TextVar;
-import org.pentaho.di.trans.steps.crawlerinput.CrawlerInputMeta;
+import org.pentaho.di.trans.steps.crawler2020.CrawlerInputMeta;
 import org.pentaho.di.i18n.BaseMessages;
 
 /*******************************************************************************
