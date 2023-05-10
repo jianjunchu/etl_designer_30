@@ -22,10 +22,8 @@
 
 package org.pentaho.di.core.variables;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleValueException;
@@ -62,6 +60,10 @@ public class Variables implements VariableSpace
 
         // The Kettle build date
         properties.put(Const.INTERNAL_VARIABLE_KETTLE_BUILD_DATE, BuildVersion.getInstance().getBuildDate() );
+		properties.put("YYYY", new SimpleDateFormat("yyyy").format(Calendar.getInstance()));
+		properties.put("YYYYMM", new SimpleDateFormat("yyyyMM").format(Calendar.getInstance()));
+		properties.put("YYYYMMDD", new SimpleDateFormat("yyyyMMdd").format(Calendar.getInstance()));
+		properties.put("YYYYMMDDHH", new SimpleDateFormat("yyyyMMddHH").format(Calendar.getInstance()));
     }
 
 	public void copyVariablesFrom(VariableSpace space) {
