@@ -742,6 +742,12 @@ public class JobEntryFTPPUT extends JobEntryBase implements Cloneable, JobEntryI
 			
 			File localFiles = new File(realLocalDirectory);
 			File[] children = localFiles.listFiles();
+			if(children==null)
+			{
+				if ( log.isDetailed() )
+					logDetailed("No file found in "+realLocalDirectory);
+				return result;
+			}
 			for (int i=0; i<children.length; i++) {
 	            // Get filename of file or directory
 				if (!children[i].isDirectory()) {
