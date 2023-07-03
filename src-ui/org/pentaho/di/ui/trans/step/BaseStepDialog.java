@@ -648,12 +648,12 @@ public class BaseStepDialog extends Dialog {
 
   /**
    * Gets unused fields from previous steps and inserts them as rows into a table view.
-   * @param r
-   * @param fields
-   * @param i
-   * @param js the column in the table view to match with the names of the fields, checks for existance if >0 
+   * @param transMeta
+   * @param stepMeta
+   * @param tableView
+   * @param keyColumn the column in the table view to match with the names of the fields, checks for existance if >0
    * @param nameColumn
-   * @param j
+   * @param dataTypeColumn
    * @param lengthColumn
    * @param listener
    */
@@ -770,8 +770,8 @@ public class BaseStepDialog extends Dialog {
   /**
    * Gets fields from previous steps and populate a ComboVar.
    * @param comboVar the comboVar to populate
-   * @param TransMeta the source transformation
-   * @param StepMeta the source step 
+   * @param transMeta the source transformation
+   * @param stepMeta the source step
    */
   public static final void getFieldsFromPrevious(ComboVar comboVar,TransMeta transMeta,StepMeta stepMeta)
 	 {

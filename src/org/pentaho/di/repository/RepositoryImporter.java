@@ -212,7 +212,7 @@ public class RepositoryImporter implements IRepositoryImporter {
 
   /**
    * Validates the repository element that is about to get imported against the list of import rules.
-   * @param the import rules to validate against.
+   * @param importRules the import rules to validate against.
    * @param subject
    * @throws KettleException
    */
@@ -636,7 +636,7 @@ public class RepositoryImporter implements IRepositoryImporter {
         return false;
       }
       transformationNumber++;
-    } catch (Exception e) {
+    } catch (Exception e) {e.printStackTrace();
       // Some unexpected error occurred during transformation import
       // This is usually a problem with a missing plugin or something
       // like that...
