@@ -300,7 +300,7 @@ public class KettleDatabaseRepository extends KettleDatabaseRepositoryBase imple
 	 * 
 	 * @param jobname The name of the job
 	 * @param repdir The directory in which the job resides.
-	 * @param the monitor to use as feedback in a UI (or null if not used)
+	 * @param monitor the monitor to use as feedback in a UI (or null if not used)
 	 * @throws KettleException
 	 */
 	public JobMeta loadJob(String jobname, RepositoryDirectoryInterface repdir, ProgressMonitorListener monitor, String versionName) throws KettleException {
