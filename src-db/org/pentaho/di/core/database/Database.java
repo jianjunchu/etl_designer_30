@@ -23,8 +23,14 @@
 package org.pentaho.di.core.database;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.sql.BatchUpdateException;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -409,30 +415,173 @@ public class Database implements VariableSpace, LoggingObjectInterface
 		  initWithNamedDataSource( environmentSubstitute(databaseMeta.getDatabaseName()) );
 			return;
 		}
-		
-		try 
-		{
-		  synchronized(java.sql.DriverManager.class) {
-		    Class.forName(classname);
-		  }
-		}
-		catch(NoClassDefFoundError e)
-		{ 
-			throw new KettleDatabaseException("Exception while loading class", e);
-		}
-		catch(ClassNotFoundException e)
-		{
-			throw new KettleDatabaseException("Exception while loading class", e);
-		}
-		catch(Exception e)
-		{ 
-			throw new KettleDatabaseException("Exception while loading class", e);
-		}
+        //get mysql5 or mysql8 connection by different classloader! 20230610
+        if( this.getDatabaseMeta().getDatabaseInterface().getPluginId().equals("MYSQL") ) {
+            connectMysql5UsingClass(classname,partitionId);
+        }else if (this.getDatabaseMeta().getDatabaseInterface().getPluginId().equals("MYSQL8") )
+        {
+            connectMysql8UsingClass(classname,partitionId);
+        }
+        else { //other databases except mysql5 and mysql8
+            try {
+                synchronized (java.sql.DriverManager.class) {
+                    Class.forName(classname);
+                }
+            } catch (NoClassDefFoundError e) {
+                throw new KettleDatabaseException("Exception while loading class", e);
+            } catch (ClassNotFoundException e) {
+                throw new KettleDatabaseException("Exception while loading class", e);
+            } catch (Exception e) {
+                throw new KettleDatabaseException("Exception while loading class", e);
+            }
 
-		try 
-		{
+            try {
+                String url;
+
+                if (databaseMeta.isPartitioned() && !Const.isEmpty(partitionId)) {
+                    url = environmentSubstitute(databaseMeta.getURL(partitionId));
+                } else {
+                    url = environmentSubstitute(databaseMeta.getURL());
+                }
+                String clusterUsername = null;
+                String clusterPassword = null;
+                if (databaseMeta.isPartitioned() && !Const.isEmpty(partitionId)) {
+                    // Get the cluster information...
+                    PartitionDatabaseMeta partition = databaseMeta.getPartitionMeta(partitionId);
+                    if (partition != null) {
+                        clusterUsername = partition.getUsername();
+                        clusterPassword = Encr.decryptPasswordOptionallyEncrypted(partition.getPassword());
+                    }
+                }
+
+                String username;
+                String password;
+                if (!Const.isEmpty(clusterUsername)) {
+                    username = clusterUsername;
+                    password = clusterPassword;
+                } else {
+                    username = environmentSubstitute(databaseMeta.getUsername());
+                    password = Encr.decryptPasswordOptionallyEncrypted(environmentSubstitute(databaseMeta.getPassword()));
+                }
+
+                if (databaseMeta.supportsOptionsInURL()) {
+                    if (!Const.isEmpty(username) || !Const.isEmpty(password)) {
+                        if (databaseMeta.getDatabaseInterface() instanceof MSSQLServerNativeDatabaseMeta) {
+                            // Needs user & password in the URL
+                            //
+                            //String instance = environmentSubstitute(databaseMeta.getSQLServerInstance());
+                            String instance = environmentSubstitute(databaseMeta.getInstanceName());
+                            if (Const.isEmpty(instance)) {
+                                connection = DriverManager.getConnection(url + ";user=" + username + ";password=" + password);
+                            } else {
+                                connection = DriverManager.getConnection(url + ";user=" + username + ";password=" + password + ";instanceName=" + instance);
+                            }
+                        } else {
+                            // also allow for empty username with given password, in this case username must be given with one space
+                            //  System.out.println("start to connect: url="+url+"   username="+username+"   password="+password );
+                            connection = DriverManager.getConnection(url, Const.NVL(username, " "), Const.NVL(password, ""));
+                        }
+                    } else {
+                        // Perhaps the username is in the URL or no username is required...
+                        connection = DriverManager.getConnection(url);
+                    }
+                } else {
+                    Properties properties = databaseMeta.getConnectionProperties();
+                    if (!Const.isEmpty(username)) properties.put("user", username);
+                    if (!Const.isEmpty(password)) properties.put("password", password);
+
+                    connection = DriverManager.getConnection(url, properties);
+                }
+            } catch (SQLException e) {
+                throw new KettleDatabaseException("Error connecting to database: (using class " + classname + ")", e);
+            } catch (Throwable e) {
+                throw new KettleDatabaseException("Error connecting to database: (using class " + classname + ")", e);
+            }
+        }
+	}
+
+    public void connectMysql5UsingClass(String classname, String partitionId) throws KettleDatabaseException
+    {
+        File file =new File("./libjdbc/mysql5");
+        File[] files = file.listFiles();
+        if(files==null || files.length==0)
+            throw new KettleDatabaseException("No JDBC driver found in "+getCurrentDirecrotyFullName()+"/"+"libjdbc/mysql5");
+        String fileName = files[0].getName();
+        String driverJar = getCurrentDirecrotyFullName()+"/"+"libjdbc/mysql5/"+fileName;
+        //String driverJar = getCurrentDirecrotyFullName()+"/"+"libjdbc/mysql5/mysql-connector-java-5.1.41.jar";
+        String connectionJar = getCurrentDirecrotyFullName()+"/"+"libjdbc/dbutil.jar";
+        URL driverJarURL = null;
+        URL connectionJarURL = null;
+        try {
+            driverJarURL = new URL( driverJar.replace ( '\\' , '/' ) );
+            connectionJarURL = new URL ( connectionJar.replace ( '\\' , '/' ) );
+
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+        URL[] urls = new URL[] {driverJarURL , connectionJarURL};
+        ClassLoader cl = new URLClassLoader(urls);
+        connectUsingClassLoader(classname,partitionId,cl);
+    }
+
+    public void connectMysql8UsingClass(String classname, String partitionId) throws KettleDatabaseException
+    {
+        File file =new File("./libjdbc/mysql8");
+        File[] files = file.listFiles();
+        if(files==null || files.length==0)
+            throw new KettleDatabaseException("No JDBC driver found in "+getCurrentDirecrotyFullName()+"/"+"libjdbc/mysql8");
+        String fileName = files[0].getName();
+        String driverJar = getCurrentDirecrotyFullName()+"/"+"libjdbc/mysql8/"+fileName;
+        //String driverJar = getCurrentDirecrotyFullName()+"/"+"libjdbc/mysql8/mysql-connector-java-8.0.29.jar";
+        String connectionJar = getCurrentDirecrotyFullName()+"/"+"libjdbc/dbutil.jar";
+        URL driverJarURL = null;
+        URL connectionJarURL = null;
+        try {
+            driverJarURL = new URL( driverJar.replace ( '\\' , '/' ) );
+            connectionJarURL = new URL ( connectionJar.replace ( '\\' , '/' ) );
+
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+        URL[] urls = new URL[] {driverJarURL , connectionJarURL};
+        ClassLoader cl = new URLClassLoader(urls);
+        connectUsingClassLoader(classname,partitionId,cl);
+    }
+
+    /**
+     * Connect using the correct classname
+     * @param classname for example "org.gjt.mm.mysql.Driver"
+     * @return true if the connect was succesfull, false if something went wrong.
+     */
+    public void connectUsingClassLoader(String classname, String partitionId,ClassLoader cl) throws KettleDatabaseException
+    {
+
+        Class connectionUtil=null;
+        try
+        {
+            synchronized(java.sql.DriverManager.class) {
+                Class.forName(classname,true,cl);
+                connectionUtil = Class.forName (
+                        "com.aofei.util.ConnectionUtil" , true , cl );
+            }
+        }
+        catch(NoClassDefFoundError e)
+        {
+            throw new KettleDatabaseException("Exception while loading class", e);
+        }
+        catch(ClassNotFoundException e)
+        {
+            throw new KettleDatabaseException("Exception while loading class", e);
+        }
+        catch(Exception e)
+        {
+            throw new KettleDatabaseException("Exception while loading class", e);
+        }
+
+        try
+        {
             String url;
-            
+
             if (databaseMeta.isPartitioned() && !Const.isEmpty(partitionId))
             {
                 url = environmentSubstitute(databaseMeta.getURL(partitionId));
@@ -453,13 +602,13 @@ public class Database implements VariableSpace, LoggingObjectInterface
                     clusterPassword = Encr.decryptPasswordOptionallyEncrypted(partition.getPassword());
                 }
             }
-            
-			String username;
+
+            String username;
             String password;
             if (!Const.isEmpty(clusterUsername))
             {
                 username = clusterUsername;
-                password = clusterPassword; 
+                password = clusterPassword;
             }
             else
             {
@@ -471,21 +620,61 @@ public class Database implements VariableSpace, LoggingObjectInterface
             {
                 if (!Const.isEmpty(username) || !Const.isEmpty(password))
                 {
-                  if (databaseMeta.getDatabaseInterface() instanceof MSSQLServerNativeDatabaseMeta) {
-                    // Needs user & password in the URL
-                    //
-                    //String instance = environmentSubstitute(databaseMeta.getSQLServerInstance());
-                      String instance = environmentSubstitute(databaseMeta.getInstanceName());
-                    if (Const.isEmpty(instance)) {
-                      connection = DriverManager.getConnection(url+";user="+username+";password="+password);
-                    } else {
-                      connection = DriverManager.getConnection(url+";user="+username+";password="+password+";instanceName="+instance);
+                    //connection = DriverManager.getConnection(url, Const.NVL(username, " "), Const.NVL(password, ""));
+                    Method connectionMethod = null;
+                    try
+                    {
+                        connectionMethod = connectionUtil.getMethod ( "getConnection" ,
+                                new Class[]
+                                        {"string".getClass () , "string".getClass () ,
+                                                "string".getClass ()} );
                     }
-                  } else {
-                    // also allow for empty username with given password, in this case username must be given with one space 
-                	//  System.out.println("start to connect: url="+url+"   username="+username+"   password="+password );
-                    connection = DriverManager.getConnection(url, Const.NVL(username, " "), Const.NVL(password, ""));
-                  }
+                    catch ( Exception ex )
+                    {
+                        ex.printStackTrace();
+                        throw new KettleDatabaseException("Error load connectionMethod", ex);
+                    }
+                    try
+                    {
+                        Object obj = connectionUtil.newInstance ();
+                        connection = ( Connection ) connectionMethod.invoke ( obj , new String[]{url , username , password} );
+                    }
+                    catch ( InstantiationException ex )
+                    {
+                        ex.printStackTrace();
+                        throw new KettleDatabaseException("Error connecting to database: (using class "+classname+")", ex);
+                    }
+                    catch ( InvocationTargetException ex )
+                    {
+                        ex.printStackTrace();
+                        throw new KettleDatabaseException("Error connecting to database: (using class "+classname+")", ex);
+
+                    }
+                    catch ( IllegalArgumentException ex )
+                    {
+                        ex.printStackTrace();
+                        throw new KettleDatabaseException("Error connecting to database: (using class "+classname+")", ex);
+
+                    }
+                    catch ( IllegalAccessException ex )
+                    {
+                        ex.printStackTrace();
+                        throw new KettleDatabaseException("Error connecting to database: (using class "+classname+")", ex);
+                    }
+                    catch ( Exception ex )
+                    {
+
+                        //ex.printStackTrace();
+
+                        throw new KettleDatabaseException("Error connecting to database: (using class "+classname+")", ex);
+
+                    }
+
+                    if(connection == null)
+                    {
+                        throw new KettleDatabaseException("Error connecting to database: "+databaseMeta.getDatabaseName()+"( using class "+classname+")");
+
+                    }
                 }
                 else
                 {
@@ -498,19 +687,44 @@ public class Database implements VariableSpace, LoggingObjectInterface
                 Properties properties = databaseMeta.getConnectionProperties();
                 if (!Const.isEmpty(username)) properties.put("user", username);
                 if (!Const.isEmpty(password)) properties.put("password", password);
-                
+
                 connection = DriverManager.getConnection(url, properties);
             }
-		} 
-		catch(SQLException e) 
-		{
-			throw new KettleDatabaseException("Error connecting to database: (using class "+classname+")", e);
-		}
+        }
+        catch(SQLException e)
+        {
+            throw new KettleDatabaseException("Error connecting to database: (using class "+classname+")", e);
+        }
         catch(Throwable e)
         {
             throw new KettleDatabaseException("Error connecting to database: (using class "+classname+")", e);
         }
-	}
+    }
+
+    public String getCurrentDirecrotyFullName()
+    {
+        File directory = new File ( "." );
+        StringBuffer fileNameBuffer = new StringBuffer ( "file:/" );
+        String fileName = null; //获得带路径的文件全名
+        try
+        {
+            fileName = directory.getCanonicalPath ();
+        }
+        catch ( Exception e )
+        {
+            e.printStackTrace();
+        }
+
+        if ( fileName.startsWith ( "/" ) ) //在LINUX下，去掉文件全名的 "/" 符合。
+        {
+            fileNameBuffer.append ( fileName.substring ( 1  ) );
+        }
+        else
+        {
+            fileNameBuffer.append ( fileName );
+        }
+        return fileNameBuffer.toString();
+    }
 
 	/**
 	 * Disconnect from the database and close all open prepared statements.
@@ -655,7 +869,7 @@ public class Database implements VariableSpace, LoggingObjectInterface
             if(log.isDetailed()) log.logDetailed("Auto commit "+onOff);
         }
         catch(Exception e)
-        {
+        {e.printStackTrace();
             if (log.isDebug()) log.logDebug("Can't turn auto commit "+onOff+Const.CR+Const.getStackTracker(e));
         }
 	}
@@ -697,8 +911,9 @@ public class Database implements VariableSpace, LoggingObjectInterface
             }
 			if (getDatabaseMetaData().supportsTransactions() || databaseMeta.getDriverClass().equals("org.apache.phoenix.jdbc.PhoenixDriver"))
 			{
-				if (log.isDebug()) log.logDebug("Commit on database connection ["+toString()+"]");
-				connection.commit();
+				if (log.isBasic()) log.logDebug("Commit on database connection ["+toString()+"]");
+                //if(!connection.getAutoCommit())
+                connection.commit();
 				nrExecutedCommits++;
 			}
 			else
@@ -708,7 +923,14 @@ public class Database implements VariableSpace, LoggingObjectInterface
 		}
 		catch(Exception e)
 		{
-			if (databaseMeta.supportsEmptyTransactions())
+            if (log.isBasic()) {
+                try {
+                    log.logDebug("Database connection ["+toString()+"] is autocommit? "+connection.getAutoCommit());
+                } catch (SQLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+            if (databaseMeta.supportsEmptyTransactions())
 				throw new KettleDatabaseException("Error comitting connection", e);
 		}
 	}
@@ -1926,7 +2148,7 @@ public class Database implements VariableSpace, LoggingObjectInterface
 				{
 					debug = "Set fetchsize";
                     int fs = Const.FETCH_SIZE<=sel_stmt.getMaxRows()?sel_stmt.getMaxRows():Const.FETCH_SIZE;
-                    if (databaseMeta.getDatabaseInterface() instanceof MySQLDatabaseMeta && databaseMeta.isStreamingResults())
+                    if (databaseMeta.isMySQLVariant() && databaseMeta.isStreamingResults())
                     {
                         sel_stmt.setFetchSize(Integer.MIN_VALUE);
                     }
@@ -1974,7 +2196,7 @@ public class Database implements VariableSpace, LoggingObjectInterface
         return databaseMeta.isFetchSizeSupported() && 
             ( statement.getMaxRows()>0 || 
               databaseMeta.getDatabaseInterface() instanceof PostgreSQLDatabaseMeta || 
-              ( databaseMeta.getDatabaseInterface() instanceof MySQLDatabaseMeta && databaseMeta.isStreamingResults() ) 
+              ( databaseMeta.isMySQLVariant() && databaseMeta.isStreamingResults() )
             );     
     }
     
@@ -1993,7 +2215,7 @@ public class Database implements VariableSpace, LoggingObjectInterface
 			{
 				debug = "OQ Set fetchsize";
                 int fs = Const.FETCH_SIZE<=ps.getMaxRows()?ps.getMaxRows():Const.FETCH_SIZE;
-                if (databaseMeta.getDatabaseInterface() instanceof MySQLDatabaseMeta && databaseMeta.isStreamingResults())
+                if (databaseMeta.isMySQLVariant() && databaseMeta.isStreamingResults())
                 {
                     ps.setFetchSize(Integer.MIN_VALUE);
                 }

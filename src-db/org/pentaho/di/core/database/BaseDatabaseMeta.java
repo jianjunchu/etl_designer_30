@@ -1312,7 +1312,7 @@ public abstract class BaseDatabaseMeta implements Cloneable
     }
     
     /**
-     * @param useStreaming true if we want the database to stream results (normally this is an option just for MySQL).
+     * @param quoteAllFields true if we want the database to stream results (normally this is an option just for MySQL).
      */
     public void setQuoteAllFields(boolean quoteAllFields)
     {
