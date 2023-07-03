@@ -261,7 +261,7 @@ public class GUIResource
     private Image imageRegExSmall;
   
     private Image imageCollapseAll;
-
+	private Image imageRefreshAll;
     private Image imageStepError;
 
     private Image imageCopyHop;
@@ -470,6 +470,7 @@ public class GUIResource
 		    imageShowResults.dispose();
 		    imageHideResults.dispose();
 		    imageCollapseAll.dispose();
+			imageRefreshAll.dispose();
 		    imageStepError.dispose();
 		    imageCopyHop.dispose();
 		    imageErrorHop.dispose();
@@ -708,7 +709,8 @@ public class GUIResource
     imageViewPanel = ImageUtil.getImageAsResource(display, BasePropertyHandler.getProperty("ViewPanel_image")); // , "ui/images/View.png;
     imageExpandAll = ImageUtil.getImageAsResource(display, BasePropertyHandler.getProperty("ExpandAll_image")); // , "ui/images/ExpandAll.png;
     imageCollapseAll = ImageUtil.getImageAsResource(display, BasePropertyHandler.getProperty("CollapseAll_image")); // , "ui/images/CollapseAll.png;
-    imageStepError = ImageUtil.getImageAsResource(display, BasePropertyHandler.getProperty("StepErrorLines_image")); // , "ui/images/show-error-lines.png;
+	imageRefreshAll = ImageUtil.getImageAsResource(display, BasePropertyHandler.getProperty("RefreshAll_image")); // , "ui/images/RefreshAll.png;
+	imageStepError = ImageUtil.getImageAsResource(display, BasePropertyHandler.getProperty("StepErrorLines_image")); // , "ui/images/show-error-lines.png;
     imageCopyHop = ImageUtil.getImageAsResource(display, BasePropertyHandler.getProperty("CopyHop_image")); // , "ui/images/copy-hop.png;
     imageErrorHop = ImageUtil.getImageAsResource(display, BasePropertyHandler.getProperty("ErrorHop_image")); // , "ui/images/error-hop.png;
     imageInfoHop = ImageUtil.getImageAsResource(display, BasePropertyHandler.getProperty("InfoHop_image")); // , "ui/images/info-hop.png;
@@ -1741,6 +1743,10 @@ public class GUIResource
   public Image getImageCollapseAll(){
     return imageCollapseAll;
   }
+
+	public Image getImageRefreshAll(){
+		return imageRefreshAll;
+	}
 
   public Image getImageStepError(){
 	    return imageStepError;
