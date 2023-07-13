@@ -1756,8 +1756,8 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
           tidyBranches(coreObjectsTree.getItems(), true);
         }
         if (viewSelected) {
-          if(selectionTree!=null)
-            tidyBranches(selectionTree.getItems(), true);
+//          if(selectionTree!=null)
+//            tidyBranches(selectionTree.getItems(), true);
           if(repositoryTree!=null)
             tidyBranches(repositoryTree.getItems(), true);
         }
@@ -1770,8 +1770,8 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
           tidyBranches(coreObjectsTree.getItems(), false);
         }
         if (viewSelected) {
-          if(selectionTree!=null)
-            tidyBranches(selectionTree.getItems(), false);
+//          if(selectionTree!=null)
+//            tidyBranches(selectionTree.getItems(), false);
           if(repositoryTree!=null)
             tidyBranches(repositoryTree.getItems(), false);
         }
@@ -3017,7 +3017,8 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
           String parentName = path.substring(path.lastIndexOf("/") + 1, path.length());
           TreeItem jobItem = ConstUI.findTreeItem(repositoryTree.getItem(0), null, STRING_JOBS);
           ti = ConstUI.findTreeItem(jobItem, parentName, name);
-          repositoryTree.setSelection(ti);
+          if(ti!=null)
+            repositoryTree.setSelection(ti);
           openedObjects.put(path + "/" + name, ti);
         }
       }
