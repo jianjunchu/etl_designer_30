@@ -55,7 +55,7 @@ import org.pentaho.di.trans.step.StepMetaInterface;
 
 /**
  * Writes rows to a database table.
- * 
+ *
  * @author Matt Casters
  * @since 6-apr-2003
  */
@@ -593,7 +593,7 @@ public class TableOutput extends BaseStep implements StepInterface
         {
             // If we don't have update counts, it probably means the DB doesn't support it.
             // In this case we don't have a choice but to consider all inserted rows to be error rows.
-            // 
+            //
             for (int i=0;i<data.batchBuffer.size();i++)
             {
                 Object[] row = (Object[]) data.batchBuffer.get(i);

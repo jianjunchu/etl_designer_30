@@ -708,8 +708,10 @@ public class Database implements VariableSpace, LoggingObjectInterface
 		}
 		catch(Exception e)
 		{
-			if (databaseMeta.supportsEmptyTransactions())
-				throw new KettleDatabaseException("Error comitting connection", e);
+		    e.printStackTrace();
+
+			//if (databaseMeta.supportsEmptyTransactions())
+				//throw new KettleDatabaseException("Error comitting connection", e);
 		}
 	}
 
@@ -4729,6 +4731,7 @@ public class Database implements VariableSpace, LoggingObjectInterface
 
     public boolean isAutoCommit()
     {
+        System.out.println("isAutoCommit - commitsize ==>"+commitsize);
         return commitsize<=0;
     }
 
