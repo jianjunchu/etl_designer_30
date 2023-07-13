@@ -57,9 +57,9 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 
 /**
- * Executes a JavaScript on the values in the input stream. 
+ * Executes a JavaScript on the values in the input stream.
  * Selected calculated values can then be put on the output stream.
- * 
+ *
  * @author Matt
  * @since 5-April-2003
  */
@@ -151,7 +151,7 @@ public class ScriptValuesMod extends BaseStep implements StepInterface {
       // Determine the indexes of the fields used!
       //
       determineUsedFields(rowMeta);
-      
+
       // Get the indexes of the replaced fields...
       //
       data.replaceIndex = new int[meta.getFieldname().length];
@@ -174,7 +174,7 @@ public class ScriptValuesMod extends BaseStep implements StepInterface {
 
       // set the optimization level
       data.cx = ContextFactory.getGlobal().enterContext();
-      
+
     	  try {
          String optimizationLevelAsString = environmentSubstitute(meta.getOptimizationLevel());
          if (!Const.isEmpty(Const.trim(optimizationLevelAsString))) {
@@ -191,7 +191,7 @@ public class ScriptValuesMod extends BaseStep implements StepInterface {
       catch (IllegalArgumentException iae) {
          throw new KettleException(iae.getMessage());
       }
-      
+
       data.scope = data.cx.initStandardObjects(null, false);
 
       bFirstRun = true;
@@ -313,7 +313,7 @@ public class ScriptValuesMod extends BaseStep implements StepInterface {
     }
 
     // Filling the defined TranVars with the Values from the Row
-    // 
+    //
     Object[] outputRow = RowDataUtil.resizeArray(row, data.outputRowMeta.size());
 
     // Keep an index...
@@ -355,7 +355,7 @@ public class ScriptValuesMod extends BaseStep implements StepInterface {
             Scriptable jsarg = Context.toObject(data.values_used[i], data.scope);
             data.scope.put(valueMeta.getName(), data.scope, jsarg);
           } else {
-        	Object normalStorageValueData = valueMeta.convertToNormalStorageType(valueData); 
+        	Object normalStorageValueData = valueMeta.convertToNormalStorageType(valueData);
             Scriptable jsarg;
             if (normalStorageValueData != null) {
               jsarg = Context.toObject(normalStorageValueData, data.scope);
@@ -370,7 +370,7 @@ public class ScriptValuesMod extends BaseStep implements StepInterface {
         Scriptable jsrowMeta = Context.toObject(rowMeta, data.scope);
         data.scope.put("rowMeta", data.scope, jsrowMeta); //$NON-NLS-1$
       } catch (Exception e) {
-        throw new KettleValueException(BaseMessages.getString(PKG, "ScriptValuesMod.Log.UnexpectedeError"), e); //$NON-NLS-1$ //$NON-NLS-2$				
+        throw new KettleValueException(BaseMessages.getString(PKG, "ScriptValuesMod.Log.UnexpectedeError"), e); //$NON-NLS-1$ //$NON-NLS-2$
       }
 
       // Executing our Script
@@ -672,7 +672,7 @@ public class ScriptValuesMod extends BaseStep implements StepInterface {
           }
         }
       } catch (Exception e) {
-        logError(BaseMessages.getString(PKG, "ScriptValuesMod.Log.UnexpectedeError") + " : " + e.toString()); //$NON-NLS-1$ //$NON-NLS-2$				
+        logError(BaseMessages.getString(PKG, "ScriptValuesMod.Log.UnexpectedeError") + " : " + e.toString()); //$NON-NLS-1$ //$NON-NLS-2$
         logError(BaseMessages.getString(PKG, "ScriptValuesMod.Log.ErrorStackTrace") + Const.CR + Const.getStackTracker(e)); //$NON-NLS-1$
         setErrors(1);
         stopAll();
@@ -691,7 +691,7 @@ public class ScriptValuesMod extends BaseStep implements StepInterface {
       String location = null;
       if (e.getCause() instanceof EvaluatorException) {
         EvaluatorException ee = (EvaluatorException) e.getCause();
-        location = "--> " + ee.lineNumber() + ":" + ee.columnNumber(); // $NON-NLS-1$ $NON-NLS-2$  
+        location = "--> " + ee.lineNumber() + ":" + ee.columnNumber(); // $NON-NLS-1$ $NON-NLS-2$
       }
 
       if (getStepMeta().isDoingErrorHandling()) {
@@ -729,7 +729,7 @@ public class ScriptValuesMod extends BaseStep implements StepInterface {
             break;
         }
       }
-      
+
       return true;
     }
     return false;
@@ -747,5 +747,5 @@ public class ScriptValuesMod extends BaseStep implements StepInterface {
 
     super.dispose(smi, sdi);
   }
-  
+
 }
