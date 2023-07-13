@@ -133,7 +133,12 @@
   <database-type id="MYSQL">
     <description>MySQL</description>
     <classname>org.pentaho.di.core.database.MySQLDatabaseMeta</classname>
-  </database-type>                                                       
+  </database-type>
+
+  <database-type id="MYSQL8">
+    <description>MySQL8</description>
+    <classname>org.pentaho.di.core.database.MySQL8DatabaseMeta</classname>
+  </database-type>
 
   <database-type id="NEOVIEW">
     <description>Neoview</description>

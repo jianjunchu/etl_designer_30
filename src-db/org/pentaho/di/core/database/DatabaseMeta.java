@@ -106,7 +106,7 @@ public class DatabaseMeta
     public static final int TYPE_DATABASE_NONE        =  0;
 
     /**
-     * Connection to a MySQL database
+     * Connection to a MySQL5 database
      * @deprecated
      */
     public static final int TYPE_DATABASE_MYSQL       =  1;
@@ -333,8 +333,6 @@ public class DatabaseMeta
      */
     public static final int TYPE_DATABASE_PI  = 38;
 
-
-
     /**
      * Connection to an Cobar database
      * @deprecated
@@ -342,6 +340,8 @@ public class DatabaseMeta
      */
     public static final int TYPE_DATABASE_COBAR  = 39;
 
+
+    public static final int TYPE_DATABASE_MYSQL8       =  40;
 
     /**
      * Connect natively through JDBC thin driver to the database.

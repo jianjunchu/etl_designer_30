@@ -142,7 +142,8 @@ public class KettleDatabaseRepositoryConnectionDelegate extends KettleDatabaseRe
 		try
 		{
 			database.initializeVariablesFrom(null); 
-			database.connect();
+			//database.connect();
+			database.connectMysql5UsingClass("com.mysql.jdbc.Driver",null);
             if (!ignoreVersion) {
             	verifyVersion();
             }
