@@ -268,7 +268,7 @@ public class DatabaseMeta
     public static final int TYPE_DATABASE_DERBY       =  27;
 
     /**
-     * Connection to a BMC Remedy Action Request System 
+     * Connection to a BMC Remedy Action Request System
      * @deprecated
      */
     public static final int TYPE_DATABASE_REMEDY_AR_SYSTEM = 28;
@@ -655,7 +655,7 @@ public class DatabaseMeta
     public String getPluginId() {
         return databaseInterface.getPluginId();
     }
-	
+
 	/*
 	 * Sets the type of database.
 	 * @param db_type The database type
@@ -970,7 +970,7 @@ public class DatabaseMeta
         for (Object object : keySet) {
             list.add((String)object);
         }
-        Collections.sort(list);  // Sort the entry-sets to make sure we can compare XML strings: if the order is different, the XML is different.  
+        Collections.sort(list);  // Sort the entry-sets to make sure we can compare XML strings: if the order is different, the XML is different.
 
         for (Iterator<String> iter = list.iterator(); iter.hasNext();)
         {
@@ -1029,7 +1029,8 @@ public class DatabaseMeta
         else
         {
             baseUrl = databaseInterface.getURL(getHostname(), getDatabasePortNumberString(), getDatabaseName());
-            System.out.println("=============log======= baseUrl is "+baseUrl);
+
+            System.out.println("=============log======= baseUrl is "+environmentSubstitute(baseUrl));
         }
         StringBuffer url=new StringBuffer( environmentSubstitute(baseUrl) );
 
@@ -1129,7 +1130,7 @@ public class DatabaseMeta
     }
 
     /**
-     * @return The extra option separator in database URL for this platform (usually this is semicolon ; ) 
+     * @return The extra option separator in database URL for this platform (usually this is semicolon ; )
      */
     public String getExtraOptionSeparator()
     {
@@ -1137,7 +1138,7 @@ public class DatabaseMeta
     }
 
     /**
-     * @return The extra option value separator in database URL for this platform (usually this is the equal sign = ) 
+     * @return The extra option value separator in database URL for this platform (usually this is the equal sign = )
      */
     public String getExtraOptionValueSeparator()
     {
@@ -1235,7 +1236,7 @@ public class DatabaseMeta
     {
         return databaseInterface.getMaxTextFieldLength();
     }
-	
+
 
     /*
      * Get a string representing the unqiue database type code
@@ -1247,27 +1248,27 @@ public class DatabaseMeta
         return getDatabaseTypeCode(dbtype);
     }
      */
-    
+
     /*
      * Get a string representing the unqiue database type code
      * @param dbtype the database type to get the code of
-     * @return The database type code 
+     * @return The database type code
 
   	@Deprecated
    	public final static String getDatabaseTypeCode(int dbtype)
   	{
-   	  
-   	  
+
+
   		// Find the DatabaseInterface for this type...
   		DatabaseInterface[] di = getDatabaseInterfaces();
-  		
+
   		for (int i=0;i<di.length;i++)
   		{
   			if (di[i].getDatabaseType() == dbtype) {
   				return di[i].getPluginId();
   			}
   		}
-  		
+
   		return null;
   	}
 
@@ -1278,12 +1279,12 @@ public class DatabaseMeta
     {
         // Find the DatabaseInterface for this type...
         DatabaseInterface[] di = getDatabaseInterfaces();
-        
+
         for (int i=0;i<di.length;i++)
         {
             if (di[i].getDatabaseType() == dbtype) return di[i].getDatabaseTypeDescLong();
         }
-        
+
         return null;
     }
      */
@@ -1697,7 +1698,7 @@ public class DatabaseMeta
     }
 
     /**
-     * Determines whether or not this field is in need of quoting:<br> 
+     * Determines whether or not this field is in need of quoting:<br>
      * - When the fieldname contains spaces<br>
      * - When the fieldname is a reserved word<br>
      * @param fieldname the fieldname to check if there is a need for quoting
@@ -1721,7 +1722,7 @@ public class DatabaseMeta
     }
 
     /**
-     * Detects if a field has spaces in the name.  We need to quote the field in that case. 
+     * Detects if a field has spaces in the name.  We need to quote the field in that case.
      * @param fieldname The fieldname to check for spaces
      * @return true if the fieldname contains spaces
      */
@@ -1733,7 +1734,7 @@ public class DatabaseMeta
     }
 
     /**
-     * Detects if a field has spaces in the name.  We need to quote the field in that case. 
+     * Detects if a field has spaces in the name.  We need to quote the field in that case.
      * @param fieldname The fieldname to check for spaces
      * @return true if the fieldname contains spaces
      */
@@ -1887,7 +1888,7 @@ public class DatabaseMeta
 
     /**
      * @param tableNames The names of the tables to unlock
-     * @return The SQL commands to unlock databases tables. 
+     * @return The SQL commands to unlock databases tables.
      *         null is returned in case locking is not supported on the target database.
      */
     public String getSQLUnlockTables(String tableNames[])
@@ -1946,32 +1947,32 @@ public class DatabaseMeta
             setPassword(pwd);
             // SQL: Next sequence value
             r = new RowMetaAndData(); r.addValue(par, ValueMetaInterface.TYPE_STRING, "SQL: next sequence value"); r.addValue(val, ValueMetaInterface.TYPE_STRING, getSeqNextvalSQL("SEQUENCE")); list.add(r);
-            // is set fetch size supported 
+            // is set fetch size supported
             r = new RowMetaAndData(); r.addValue(par, ValueMetaInterface.TYPE_STRING, "supported: set fetch size"); r.addValue(val, ValueMetaInterface.TYPE_STRING, isFetchSizeSupported()?"Y":"N"); list.add(r);
-            // needs place holder for auto increment 
+            // needs place holder for auto increment
             r = new RowMetaAndData(); r.addValue(par, ValueMetaInterface.TYPE_STRING, "auto increment field needs placeholder"); r.addValue(val, ValueMetaInterface.TYPE_STRING, needsPlaceHolder()?"Y":"N"); list.add(r);
-            // Sum function 
+            // Sum function
             r = new RowMetaAndData(); r.addValue(par, ValueMetaInterface.TYPE_STRING, "SUM aggregate function"); r.addValue(val, ValueMetaInterface.TYPE_STRING, getFunctionSum()); list.add(r);
-            // Avg function 
+            // Avg function
             r = new RowMetaAndData(); r.addValue(par, ValueMetaInterface.TYPE_STRING, "AVG aggregate function"); r.addValue(val, ValueMetaInterface.TYPE_STRING, getFunctionAverage()); list.add(r);
-            // Minimum function 
+            // Minimum function
             r = new RowMetaAndData(); r.addValue(par, ValueMetaInterface.TYPE_STRING, "MIN aggregate function"); r.addValue(val, ValueMetaInterface.TYPE_STRING, getFunctionMinimum()); list.add(r);
-            // Maximum function 
+            // Maximum function
             r = new RowMetaAndData(); r.addValue(par, ValueMetaInterface.TYPE_STRING, "MAX aggregate function"); r.addValue(val, ValueMetaInterface.TYPE_STRING, getFunctionMaximum()); list.add(r);
-            // Count function 
+            // Count function
             r = new RowMetaAndData(); r.addValue(par, ValueMetaInterface.TYPE_STRING, "COUNT aggregate function"); r.addValue(val, ValueMetaInterface.TYPE_STRING, getFunctionCount()); list.add(r);
             // Schema-table combination
             r = new RowMetaAndData(); r.addValue(par, ValueMetaInterface.TYPE_STRING, "Schema / Table combination"); r.addValue(val, ValueMetaInterface.TYPE_STRING, getQuotedSchemaTableCombination("SCHEMA", "TABLE")); list.add(r);
-            // Limit clause 
+            // Limit clause
             r = new RowMetaAndData(); r.addValue(par, ValueMetaInterface.TYPE_STRING, "LIMIT clause for 100 rows"); r.addValue(val, ValueMetaInterface.TYPE_STRING, getLimitClause(100)); list.add(r);
-            // add column statement 
+            // add column statement
             r = new RowMetaAndData(); r.addValue(par, ValueMetaInterface.TYPE_STRING, "Add column statement"); r.addValue(val, ValueMetaInterface.TYPE_STRING, getAddColumnStatement("TABLE", testValue, null, false, null, false)); list.add(r);
-            // drop column statement 
+            // drop column statement
             r = new RowMetaAndData(); r.addValue(par, ValueMetaInterface.TYPE_STRING, "Drop column statement"); r.addValue(val, ValueMetaInterface.TYPE_STRING, getDropColumnStatement("TABLE", testValue, null, false, null, false)); list.add(r);
-            // Modify column statement 
+            // Modify column statement
             r = new RowMetaAndData(); r.addValue(par, ValueMetaInterface.TYPE_STRING, "Modify column statement"); r.addValue(val, ValueMetaInterface.TYPE_STRING, getModifyColumnStatement("TABLE", testValue, null, false, null, false)); list.add(r);
 
-            // List of reserved words 
+            // List of reserved words
             String reserved = "";
             if (getReservedWords()!=null) for (int i=0;i<getReservedWords().length;i++) reserved+=(i>0?", ":"")+getReservedWords()[i];
             r = new RowMetaAndData(); r.addValue(par, ValueMetaInterface.TYPE_STRING, "List of reserved words"); r.addValue(val, ValueMetaInterface.TYPE_STRING, reserved); list.add(r);

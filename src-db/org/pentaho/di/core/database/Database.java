@@ -559,6 +559,7 @@ public class Database implements VariableSpace, LoggingObjectInterface
         Class connectionUtil=null;
         try
         {
+
             synchronized(java.sql.DriverManager.class) {
                 Class.forName(classname,true,cl);
                 connectionUtil = Class.forName (
