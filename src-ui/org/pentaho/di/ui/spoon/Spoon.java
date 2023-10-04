@@ -1725,7 +1725,7 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
 
     selectionFilter.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent arg0) {
-        if (coreObjectsTree != null && !coreObjectsTree.isDisposed()) {
+        if (designSelected && coreObjectsTree != null && !coreObjectsTree.isDisposed()) {
           previousShowTrans = false;
           previousShowJob = false;
           refreshCoreObjects();
@@ -1735,16 +1735,25 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
         	  tidyBranches(coreObjectsTree.getItems(), false);
           }
         }
-        if (selectionTree != null && !selectionTree.isDisposed()) {
-          refreshTree();
+        if ( viewSelected && repositoryTree != null && !repositoryTree.isDisposed()) {
+          refreshRepositoryTree();
           if (!Const.isEmpty(selectionFilter.getText())) {
-            tidyBranches(selectionTree.getItems(), true); // expand all
-          } else { // no filter: collapse all
-            tidyBranches(selectionTree.getItems(), false);
+            tidyBranches(repositoryTree.getItems(), true); // expand all
+          } else {
+            tidyBranches(repositoryTree.getItems(), false);//no filter: collapse all
           }
           selectionFilter.setFocus();
-
         }
+//        if (selectionTree != null && !selectionTree.isDisposed()) {
+//          refreshTree();
+//          if (!Const.isEmpty(selectionFilter.getText())) {
+//            tidyBranches(selectionTree.getItems(), true); // expand all
+//          } else { // no filter: collapse all
+//            tidyBranches(selectionTree.getItems(), false);
+//          }
+//          selectionFilter.setFocus();
+//
+//        }
       }
     });
 
@@ -1859,7 +1868,14 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
       tidyBranches(item.getItems(), expand);
     }
   }
-
+//  private void tidyBranchesWithKeyword(TreeItem[] items, boolean expand,String keyword) {
+//    for (TreeItem item : items) {
+//      if(item.getText().toUpperCase().indexOf(keyword.toUpperCase())>-1)
+//        item.setExpanded(expand);
+//      //item.getParentItem().
+//      tidyBranchesWithKeyword(item.getItems(), expand,keyword);
+//    }
+//  }
   public void disposeVariableComposite(boolean tree, boolean shared, boolean core, boolean history) {
 
     viewSelected = tree;
@@ -5429,8 +5445,8 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
 
     if(rep!=null && rep.isConnected())// if repository is used , the selection tab is used for repository tree.
     {
-      if(selectionTree!=null)
-        selectionTree.dispose();
+//      if(selectionTree!=null)
+//        selectionTree.dispose();
       if (repositoryTree == null || repositoryTree.isDisposed())
         refreshRepositoryTree();
       view.setText(STRING_SPOON_REPOSITORY_TREE);
@@ -8586,6 +8602,9 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
 
   public void refreshRepositoryTree()
   {
+    if (!viewSelected)
+      return;
+
     int sortColumn=0;
     int ascending=0;
     RepositoryDirectoryInterface directoryTree=null;
@@ -8594,6 +8613,16 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
     } catch (KettleException e) {
       throw new RuntimeException(e);
     }
+
+    if(repositoryTree!=null && !repositoryTree.isDisposed()) {
+      TreeItem[] expandItems = repositoryTree.getItems();
+      for (int i = 0; i < expandItems.length; i++) {
+        TreeItem item = expandItems[i];
+        item.dispose();
+      }
+      repositoryTree.dispose();
+    }
+
 
     try
     {
@@ -8626,6 +8655,8 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
       String names[] = rep.getDatabaseNames(false);
       for (int i=0;i<names.length;i++)
       {
+        if (!filterMatch(names[i]))
+          continue;
         TreeItem newDB = new TreeItem(tiParent, SWT.NONE);
         newDB.setImage(GUIResource.getInstance().getImageConnection());
         newDB.setText(Const.NVL(names[i], ""));
@@ -8694,7 +8725,7 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
         TreeItem newCat = new TreeItem(tiTrans, SWT.NONE);
         newCat.setImage(GUIResource.getInstance().getImageLogoSmall());
         Color dircolor = GUIResource.getInstance().getColorDirectory();
-        RepositoryDirectoryUI.getTreeWithNames(newCat, rep, dircolor, sortColumn, false, true, true,false, directoryTree,null,null);
+        RepositoryDirectoryUI.getTreeWithNames(newCat, rep, dircolor, sortColumn, false, true, true,false, directoryTree,selectionFilter.getText(),null);
       }
 
       // The Jobs...
@@ -8708,7 +8739,8 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
         TreeItem newJob = new TreeItem(tiJob, SWT.NONE);
         newJob.setImage(GUIResource.getInstance().getImageLogoSmall());
         Color dircolor = GUIResource.getInstance().getColorDirectory();
-        RepositoryDirectoryUI.getTreeWithNames(newJob, rep, dircolor, sortColumn, false, true, false,true, directoryTree,null,null);
+
+        RepositoryDirectoryUI.getTreeWithNames(newJob, rep, dircolor, sortColumn, false, true, false,true, directoryTree,selectionFilter.getText(),null);
       }
 
       //
@@ -9620,7 +9652,7 @@ public class Spoon implements AddUndoPositionInterface, TabListener, SpoonInterf
       {
         repdir.setName(newname);
         try {
-          rep.renameRepositoryDirectory(repdir.getObjectId(), repdir, newname);
+          rep.renameRepositoryDirectory(repdir.getObjectId(), repdir.getParent(), newname);
           retval=true;
         } catch (Exception exception) {
           retval=false;
