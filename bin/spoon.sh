@@ -86,6 +86,10 @@ case `uname -s` in
 			LIBPATH=libswt/osx/
 			;;
 
+	  arm64)
+			LIBPATH=libswt/osxarm64/
+			;;
+
 		*)	
 			echo "I'm sorry, this Mac platform [$ARCH] is not yet supported!"
 			echo "Please try starting using 'Data Integration 32-bit' or"

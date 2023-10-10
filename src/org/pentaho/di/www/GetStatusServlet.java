@@ -25,6 +25,7 @@ package org.pentaho.di.www;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URLEncoder;
+import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,6 +33,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import cn.hutool.system.oshi.CpuInfo;
+import cn.hutool.system.oshi.OshiUtil;
 import org.hyperic.sigar.CpuPerc;
 import org.hyperic.sigar.Mem;
 import org.hyperic.sigar.Sigar;
@@ -42,6 +45,8 @@ import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.trans.Trans;
+import oshi.SystemInfo;
+import oshi.hardware.GlobalMemory;
 
 public class GetStatusServlet extends BaseHttpServlet implements CarteServletInterface {
   private static Class<?> PKG = GetStatusServlet.class; // for i18n purposes, needed by Translator2!! $NON-NLS-1$
@@ -70,21 +75,31 @@ public class GetStatusServlet extends BaseHttpServlet implements CarteServletInt
     	double memory_usage = 0.0;
     	
     	try{
-    		Sigar sigar = new Sigar();
-
+    		/*Sigar sigar = new Sigar();
     		CpuPerc cpu = sigar.getCpuPerc();
-    		
     		double idle = cpu.getIdle();
     		cpu_usage = (1 - idle) * 100;
-    		
     		Mem mem = sigar.getMem();
     		
     		double total = mem.getTotal();
     		double used = mem.getUsed();
-    		memory_usage = (used / total) * 100;
-    	}catch(SigarException e){
+    		memory_usage = (used / total) * 100;*/
+
+          CpuInfo cpuInfo = OshiUtil.getCpuInfo();
+          double free = cpuInfo.getFree();
+          DecimalFormat format = new DecimalFormat("#.00");
+          cpu_usage =  Double.parseDouble(format.format(100.0D - free));
+
+          long totalByte = OshiUtil.getMemory().getTotal();
+          long acaliableByte = OshiUtil.getMemory().getAvailable();
+          memory_usage = Double.parseDouble(format.format(((totalByte-acaliableByte)*1d/totalByte)*100));
+
+
+    	}catch(Exception e){
     		e.printStackTrace();
     	}
+
+
     	
       int running_jobs_num = 0;
       List<CarteObjectEntry> jobEntries = getJobMap().getJobObjects();

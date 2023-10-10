@@ -1,5 +1,7 @@
 package org.pentaho.di.www;
 
+import org.apache.commons.httpclient.util.DateUtil;
+
 import java.io.IOException;
 
 import javax.servlet.ServletException;
@@ -21,7 +23,10 @@ public class AddRepServlet extends BaseHttpServlet implements
 	}
 
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-	    if (isJettyMode() && !request.getRequestURI().startsWith(CONTEXT_PATH))
+	    if(log.isDebug())
+			log.logDebug("Add Rep Start" + System.currentTimeMillis());
+
+		if (isJettyMode() && !request.getRequestURI().startsWith(CONTEXT_PATH))
 	      return;
 	    
 	    repBean.setRepositoryName(request.getParameter("repName")==null?"":request.getParameter("repName"));
@@ -34,6 +39,9 @@ public class AddRepServlet extends BaseHttpServlet implements
 	    repBean.setPassword(request.getParameter("repDbPassword")==null?"":request.getParameter("repDbPassword"));
 	    repBean.setDbAccess("Native");
 	    repBean.setRepositoryID(0);
+
+		if(log.isDebug())
+			log.logDebug("Add Rep End" + System.currentTimeMillis());
 	    
 	    return;
 	}

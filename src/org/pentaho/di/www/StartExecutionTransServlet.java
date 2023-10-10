@@ -25,16 +25,33 @@ package org.pentaho.di.www;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
+import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import cn.hutool.core.date.DateUtil;
+import com.auphi.ktrl.ha.util.SlaveServerUtil;
+import com.auphi.ktrl.system.mail.util.MailUtil;
+import com.auphi.ktrl.system.user.bean.UserBean;
+import com.auphi.ktrl.system.user.util.UserUtil;
+import org.apache.commons.httpclient.Credentials;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.logging.CentralLogStore;
+import org.pentaho.di.core.util.StringUtil;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.trans.Trans;
+import org.pentaho.di.trans.TransListener;
 
 public class StartExecutionTransServlet extends BaseHttpServlet implements CarteServletInterface {
   private static Class<?> PKG = StartExecutionTransServlet.class; // for i18n purposes, needed by Translator2!! $NON-NLS-1$
@@ -56,6 +73,7 @@ public class StartExecutionTransServlet extends BaseHttpServlet implements Carte
     
     if (log.isDebug())
       logDebug("Start execution of transformation requested");
+
     response.setStatus(HttpServletResponse.SC_OK);
 
     String transName = request.getParameter("name");
@@ -147,6 +165,8 @@ public class StartExecutionTransServlet extends BaseHttpServlet implements Carte
       out.println("</BODY>");
       out.println("</HTML>");
     }
+    if (log.isDebug())
+      logDebug("Start execution of transformation requested end");
   }
 
   public String toString() {
@@ -158,6 +178,58 @@ public class StartExecutionTransServlet extends BaseHttpServlet implements Carte
   }
   
   protected void startThreads(Trans trans) throws KettleException {
+
+    trans.addTransListener(new TransListener() {
+      @Override
+      public void transActive(Trans trans) {
+        log.logBasic(trans.getContainerObjectId()+" :transActive");
+      }
+
+      @Override
+      public void transIdle(Trans trans) {
+        log.logBasic(trans.getContainerObjectId()+" :transIdle");
+      }
+
+      @Override
+      public void transFinished(Trans trans) throws KettleException {
+        String url = System.getProperty("SERVER_URL");
+        if(!StringUtil.isEmpty(url)){
+          callback(url,trans);
+        }
+
+      }
+    });
       trans.startThreads();
+  }
+
+  private void callback(String url, Trans trans) {
+
+    int lastLineNr = CentralLogStore.getLastBufferLineNr();
+    String logText = CentralLogStore.getAppender().getBuffer(trans.getLogChannel().getLogChannelId(), false, 0, lastLineNr).toString();
+
+    url = url+"/api/v1/schedule/transFinished.shtml";
+    PostMethod postMethod = new PostMethod(url);
+    postMethod.getParams().setParameter(HttpMethodParams.HTTP_CONTENT_CHARSET,"utf-8");
+    postMethod.addParameter("logmsg",logText);
+    postMethod.addParameter("carteObjectId",trans.getContainerObjectId());
+    postMethod.addParameter("errors",trans.getErrors()+"");
+    postMethod.addParameter("endDate", DateUtil.formatDateTime(trans.getEndDate()));
+
+    try{
+      MultiThreadedHttpConnectionManager manager = new MultiThreadedHttpConnectionManager();
+      manager.getParams().setConnectionTimeout(5000);
+      manager.getParams().setSoTimeout(50000);
+      HttpClient httpClient = new HttpClient(manager);
+      httpClient.executeMethod(postMethod);
+
+
+
+    }catch(Exception e){
+      log.logError("接口回调失败！");
+      e.printStackTrace();
+
+    }finally {
+      postMethod.releaseConnection();
+    }
   }
 }

@@ -51,7 +51,7 @@ public class GetTransStatusServlet extends BaseHttpServlet implements CarteServl
 
   public GetTransStatusServlet() {
   }
-  
+
   public GetTransStatusServlet(TransformationMap transformationMap) {
     super(transformationMap);
   }
@@ -147,6 +147,8 @@ public class GetTransStatusServlet extends BaseHttpServlet implements CarteServl
         //
         try {
           out.println(transStatus.getXML());
+          out.flush();
+          response.flushBuffer();
         } catch (KettleException e) {
           throw new ServletException("Unable to get the transformation status in XML format", e);
         }

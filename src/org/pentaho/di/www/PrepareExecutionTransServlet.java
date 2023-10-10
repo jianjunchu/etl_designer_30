@@ -164,6 +164,10 @@ public class PrepareExecutionTransServlet extends BaseHttpServlet implements Car
       out.println("</BODY>");
       out.println("</HTML>");
     }
+
+    if (log.isDebug())
+      logDebug("Prepare Exec End");
+
   }
 
   public String toString() {
