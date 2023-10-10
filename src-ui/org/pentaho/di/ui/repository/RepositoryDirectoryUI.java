@@ -51,7 +51,6 @@ public class RepositoryDirectoryUI {
 
      * @param ti The TreeItem to set the name on and to create the subdirectories
      * @param rep The repository
-     * @param objectMap The tree path to repository object mapping to populate.
      * @param dircolor The color in which the directories will be drawn.
      * @param sortPosition The sort position
      * @param ascending The ascending flag
@@ -205,7 +204,7 @@ public class RepositoryDirectoryUI {
     			Matcher matcher = pattern.matcher(name);
     			if(matcher.matches())  add=true;
     		} else {
-    			if (name.toUpperCase().indexOf(filter) >= 0) add=true;
+    			if (name.toUpperCase().indexOf(filter.toUpperCase()) >= 0) add=true;
     		}
 		}
 		return add;

@@ -444,8 +444,9 @@ public class GPBulkLoader extends BaseStep implements StepInterface
         }
         catch ( Exception ex )
         {
+			ex.printStackTrace();
         	// Don't throw the message upwards, the message contains the password.
-        	throw new KettleException("Error while executing psql \'" + createCommandLine(meta, false) + "\'");
+        	throw new KettleException("Error while executing psql [ " + createCommandLine(meta, false) + " ]"+ex.getMessage());
         }
         
         return true;

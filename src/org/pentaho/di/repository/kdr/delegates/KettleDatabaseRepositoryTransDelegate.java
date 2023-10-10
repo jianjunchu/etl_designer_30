@@ -121,7 +121,7 @@ public class KettleDatabaseRepositoryTransDelegate extends KettleDatabaseReposit
      *
      * @param transMeta the transformation metadata to store
      * @param monitor the way we report progress to the user, can be null if no UI is present
-     * @param overwrite Overwrite existing object(s)?
+     * @param overwriteAssociated Overwrite existing object(s)?
      * @throws KettleException if an error occurs.
      */
     public void saveTransformation(TransMeta transMeta, String versionComment, ProgressMonitorListener monitor, boolean overwriteAssociated) throws KettleException
@@ -546,7 +546,7 @@ public class KettleDatabaseRepositoryTransDelegate extends KettleDatabaseReposit
    /**      
     * Load the transformation name & other details from a repository.
     *
-    * @param rep The repository to load the details from.
+    * @param transMeta The repository to load the details from.
     */
    private void loadRepTrans(TransMeta transMeta) throws KettleException
    {
@@ -742,7 +742,7 @@ public class KettleDatabaseRepositoryTransDelegate extends KettleDatabaseReposit
    /**
     * Read all the databases from the repository, insert into the TransMeta object, overwriting optionally
     * 
-    * @param TransMeta The transformation to load into.
+    * @param transMeta The transformation to load into.
     * @param overWriteShared if an object with the same name exists, overwrite
     * @throws KettleException 
     */
@@ -836,7 +836,7 @@ public class KettleDatabaseRepositoryTransDelegate extends KettleDatabaseReposit
    }
    /**
     * Read the partitions in the repository and add them to this transformation if they are not yet present.
-    * @param TransMeta The transformation to load into.
+    * @param transMeta The transformation to load into.
     * @param overWriteShared if an object with the same name exists, overwrite
     * @throws KettleException 
     */
@@ -867,7 +867,7 @@ public class KettleDatabaseRepositoryTransDelegate extends KettleDatabaseReposit
 
    /**
     * Read the slave servers in the repository and add them to this transformation if they are not yet present.
-    * @param TransMeta The transformation to load into.
+    * @param transMeta The transformation to load into.
     * @param overWriteShared if an object with the same name exists, overwrite
     * @throws KettleException 
     */

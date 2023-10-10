@@ -1675,7 +1675,7 @@ public class KettleDatabaseRepository extends KettleDatabaseRepositoryBase imple
 	 * This method saves the object ID of the database object (if not null) in the step attributes
 	 * @param id_transformation
 	 * @param id_step
-	 * @param string
+	 * @param code
 	 * @param database
 	 */
 	public void saveDatabaseMetaStepAttribute(ObjectId id_transformation, ObjectId id_step, String code, DatabaseMeta database) throws KettleException {
@@ -1716,9 +1716,9 @@ public class KettleDatabaseRepository extends KettleDatabaseRepositoryBase imple
 	
 	/**
 	 * This method saves the object ID of the database object (if not null) in the step attributes
-	 * @param id_transformation
-	 * @param id_step
-	 * @param linkCode
+	 * @param id_job
+	 * @param id_jobentry
+	 * @param nameCode
 	 * @param nameCode
 	 * @param idCode
 	 * @param database
