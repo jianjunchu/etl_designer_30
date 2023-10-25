@@ -33,6 +33,8 @@ import org.pentaho.di.core.Counters;
 import org.pentaho.di.core.RowMetaAndData;
 import org.pentaho.di.core.database.Database;
 import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.core.database.MySQL8DatabaseMeta;
+import org.pentaho.di.core.database.MySQLDatabaseMeta;
 import org.pentaho.di.core.exception.KettleDatabaseException;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleValueException;
@@ -142,8 +144,15 @@ public class KettleDatabaseRepositoryConnectionDelegate extends KettleDatabaseRe
 		try
 		{
 			database.initializeVariablesFrom(null); 
-			//database.connect();
-			database.connectMysql5UsingClass("com.mysql.jdbc.Driver",null);
+
+			if(database.getDatabaseMeta().getDatabaseInterface() instanceof MySQL8DatabaseMeta){
+				database.connectMysql8UsingClass("com.mysql.cj.jdbc.Driver",null);
+			}else if(database.getDatabaseMeta().getDatabaseInterface() instanceof MySQLDatabaseMeta){
+				database.connectMysql5UsingClass("com.mysql.jdbc.Driver",null);
+			}else{
+				database.connect();
+			}
+
             if (!ignoreVersion) {
             	verifyVersion();
             }

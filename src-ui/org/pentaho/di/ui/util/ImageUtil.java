@@ -67,18 +67,20 @@ public class ImageUtil
     
     public static Image getImageAsResource(Display display, String location) {
     	// assume the classloader for the active thread
-    	ClassLoader cl = Thread.currentThread().getContextClassLoader();
-		URL res = cl.getResource(location);
-		if (res != null) {
-			try {
+		try {
+			ClassLoader cl = Thread.currentThread().getContextClassLoader();
+			URL res = cl.getResource(location);
+			if (res != null) {
 				java.io.InputStream s = res.openStream();
 				if (s != null) {
 					return new Image(display,s);
 				}
-			} catch (IOException e) {
-				//do nothing. just move on to trying to load via file system
 			}
+
+		} catch (Exception e) {
+			//do nothing. just move on to trying to load via file system
 		}
+
 		try {
 			FileObject imageFileObject = KettleVFS.getInstance().getFileSystemManager().resolveFile(base,location);
 			return new Image(display,KettleVFS.getInputStream(imageFileObject));

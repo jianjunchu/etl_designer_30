@@ -207,6 +207,8 @@ public class StartExecutionTransServlet extends BaseHttpServlet implements Carte
     int lastLineNr = CentralLogStore.getLastBufferLineNr();
     String logText = CentralLogStore.getAppender().getBuffer(trans.getLogChannel().getLogChannelId(), false, 0, lastLineNr).toString();
 
+
+
     url = url+"/api/v1/schedule/transFinished.shtml";
     PostMethod postMethod = new PostMethod(url);
     postMethod.getParams().setParameter(HttpMethodParams.HTTP_CONTENT_CHARSET,"utf-8");
@@ -214,6 +216,7 @@ public class StartExecutionTransServlet extends BaseHttpServlet implements Carte
     postMethod.addParameter("carteObjectId",trans.getContainerObjectId());
     postMethod.addParameter("errors",trans.getErrors()+"");
     postMethod.addParameter("endDate", DateUtil.formatDateTime(trans.getEndDate()));
+    postMethod.addParameter("isStopped", Boolean.toString(trans.isStopped()) );
 
     try{
       MultiThreadedHttpConnectionManager manager = new MultiThreadedHttpConnectionManager();
