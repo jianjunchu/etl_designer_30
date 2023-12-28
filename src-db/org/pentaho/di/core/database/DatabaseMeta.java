@@ -34,6 +34,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import cn.hutool.core.lang.Snowflake;
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pentaho.di.core.Const;
@@ -2644,8 +2647,9 @@ public class DatabaseMeta
         return databaseInterface.isMySQLVariant();
     }
 
-    public Long getNextBatchId(Database ldb, String schemaName, String tableName, String fieldName) throws KettleDatabaseException {
-        return databaseInterface.getNextBatchId(this, ldb, schemaName, tableName, fieldName);
+    public synchronized Long getNextBatchId(Database ldb, String schemaName, String tableName, String fieldName) throws KettleDatabaseException {
+        return IdUtil.getSnowflake(1).nextId();
+        //return databaseInterface.getNextBatchId(this, ldb, schemaName, tableName, fieldName);
     }
 
     public Object getValueFromResultSet(ResultSet rs, ValueMetaInterface val, int i) throws KettleDatabaseException {

@@ -57,6 +57,10 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
+import cn.hutool.core.lang.Snowflake;
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.Counter;
 import org.pentaho.di.core.DBCache;
@@ -4334,6 +4338,10 @@ public class Database implements VariableSpace, LoggingObjectInterface
 
     public synchronized Long getNextValue(Hashtable<String,Counter> counters, String schemaName, String tableName, String val_key) throws KettleDatabaseException
     {
+
+
+
+
         Long nextValue = null;
 
         String schemaTable = databaseMeta.getQuotedSchemaTableCombination(schemaName, tableName);

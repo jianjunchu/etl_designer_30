@@ -132,9 +132,9 @@ public class CarteSingleton {
     // in the background to clean
     //
     if (objectTimeout > 0) {
-
-      log.logBasic("Installing timer to purge stale objects after " + objectTimeout + " minutes.");
-
+      if(log.isDebug()) {
+        log.logDebug("Installing timer to purge stale objects after " + objectTimeout + " minutes.");
+      }
       Timer timer = new Timer(true);
 
       final AtomicBoolean busy = new AtomicBoolean(false);
@@ -166,8 +166,10 @@ public class CarteSingleton {
                     CentralLogStore.discardLines(trans.getLogChannelId(), false);
                     
                     // transformationMap.deallocateServerSocketPorts(entry);
-                    
-                    log.logMinimal("Cleaned up transformation "+entry.getName()+" with id "+entry.getId()+" from "+trans.getLogDate()+", diff="+diffInMinutes);
+                    if(log.isDebug()){
+                      log.logDebug("Cleaned up transformation "+entry.getName()+" with id "+entry.getId()+" from "+trans.getLogDate()+", diff="+diffInMinutes);
+                    }
+
                   }
                 }
               }
@@ -189,7 +191,10 @@ public class CarteSingleton {
                     // Let's remove this from the job map...
                     //
                     jobMap.removeJob(entry);
-                    log.logMinimal("Cleaned up job "+entry.getName()+" with id "+entry.getId()+" from "+job.getLogDate());
+                    if(log.isDebug()){
+                      log.logDebug("Cleaned up job "+entry.getName()+" with id "+entry.getId()+" from "+job.getLogDate());
+                    }
+
                   }
                 }
               }

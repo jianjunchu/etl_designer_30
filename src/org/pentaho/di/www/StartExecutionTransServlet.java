@@ -221,7 +221,7 @@ public class StartExecutionTransServlet extends BaseHttpServlet implements Carte
     try{
       MultiThreadedHttpConnectionManager manager = new MultiThreadedHttpConnectionManager();
       manager.getParams().setConnectionTimeout(5000);
-      manager.getParams().setSoTimeout(50000);
+      manager.getParams().setSoTimeout(5000);
       HttpClient httpClient = new HttpClient(manager);
       httpClient.executeMethod(postMethod);
 
