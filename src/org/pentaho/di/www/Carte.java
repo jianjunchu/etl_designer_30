@@ -38,6 +38,7 @@ import org.pentaho.di.core.logging.LoggingObjectType;
 import org.pentaho.di.core.logging.SimpleLoggingObject;
 import org.pentaho.di.core.row.ValueMeta;
 import org.pentaho.di.core.row.ValueMetaInterface;
+import org.pentaho.di.core.util.LicenseManager;
 import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.i18n.BaseMessages;
@@ -62,8 +63,9 @@ public class Carte
 		this.config = config;
 
 		this.log = new LogChannel("Carte");
-		
+
 		boolean allOK=true;
+
 		
         final TransformationMap transformationMap = new TransformationMap();
         transformationMap.setSlaveServerConfig(config);
@@ -130,6 +132,10 @@ public class Carte
 	
     public static void main(String[] args) throws Exception
     {
+        if(!LicenseManager.verifyLicense()){
+            System.err.println(BaseMessages.getString(PKG, "验证失败") + ": 请检查程序目录LICENSE.txt文件是否正确");
+            System.exit(1);
+        }
       KettleEnvironment.init();
       
     	// Load from an xml file that describes the complete configuration...

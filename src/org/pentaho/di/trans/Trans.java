@@ -180,7 +180,7 @@ public class Trans implements VariableSpace, NamedParams, HasLogChannelInterface
     public static final String STRING_WAITING      = "Waiting";
     public static final String STRING_STOPPED      = "Stopped";
     public static final String STRING_HALTING      = "Halting";
-
+	
 	public static final String	CONFIGURATION_IN_EXPORT_FILENAME	= "__job_execution_configuration__.xml";
 
 	private boolean safeModeEnabled;

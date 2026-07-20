@@ -25,7 +25,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.mortbay.jetty.security.Password;
+import org.eclipse.jetty.util.security.Password;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.util.StringUtil;
 

@@ -49,7 +49,18 @@ public class OracleDatabaseMeta extends BaseDatabaseMeta implements DatabaseInte
 		if (getAccessType()==DatabaseMeta.TYPE_ACCESS_NATIVE) return 1521;
 		return -1;
 	}
-	
+
+	/**
+	 * @param tableName The table to be truncated.
+	 * @return The SQL statement to truncate a table: remove all rows from it without a transaction
+	 */
+	@Override
+	public String getTruncateTableStatement(String tableName)
+	{
+		return "TRUNCATE TABLE "+tableName;
+	}
+
+
 	/**
 	 * @return Whether or not the database can use auto increment type of fields (pk)
 	 */

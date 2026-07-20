@@ -23,26 +23,27 @@
 package org.pentaho.di.www;
 
 import java.io.File;
-import java.util.Date;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.bio.SocketConnector;
-import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.plus.jaas.JAASUserRealm;
-import org.mortbay.jetty.security.Constraint;
-import org.mortbay.jetty.security.ConstraintMapping;
-import org.mortbay.jetty.security.HashUserRealm;
-import org.mortbay.jetty.security.SecurityHandler;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
+import java.util.*;
+import com.sun.jersey.spi.container.servlet.ServletContainer;
+import cn.hutool.core.util.StrUtil;
+import org.eclipse.jetty.jaas.JAASLoginService;
+import org.eclipse.jetty.security.*;
+import org.eclipse.jetty.security.authentication.BasicAuthenticator;
+import org.eclipse.jetty.server.*;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.security.Constraint;
+import org.eclipse.jetty.util.security.Credential;
+import org.eclipse.jetty.util.security.Password;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.logging.LogChannelInterface;
+import org.pentaho.di.core.plugins.PluginInterface;
+import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.i18n.BaseMessages;
 
 
@@ -97,8 +98,9 @@ public class WebServer
     {
         return server;
     }
+    private String passwordFile;
 
-    public void startServer() throws Exception
+    /*public void startServer() throws Exception
     {
         server = new Server();
 
@@ -106,7 +108,7 @@ public class WebServer
         constraint.setName(Constraint.__BASIC_AUTH);;
         constraint.setRoles( new String[] { Constraint.ANY_ROLE } );
         constraint.setAuthenticate(true);
-        
+
         ConstraintMapping constraintMapping = new ConstraintMapping();
         constraintMapping.setConstraint(constraint);
         constraintMapping.setPathSpec("/*");
@@ -114,154 +116,154 @@ public class WebServer
         // Set up the security handler, optionally with JAAS
         //
         SecurityHandler securityHandler = new SecurityHandler();
-        
+
         if(System.getProperty("loginmodulename") != null && System.getProperty("java.security.auth.login.config") != null){
-        	JAASUserRealm jaasRealm = new JAASUserRealm("Kettle");
-        	jaasRealm.setLoginModuleName(System.getProperty("loginmodulename"));
-        	securityHandler.setUserRealm(jaasRealm);
+            JAASUserRealm jaasRealm = new JAASUserRealm("Kettle");
+            jaasRealm.setLoginModuleName(System.getProperty("loginmodulename"));
+            securityHandler.setUserRealm(jaasRealm);
         } else {
-        	// See if there is a kettle.pwd file in the KETTLE_HOME directory:
-        	//
-        	File homePwdFile = new File(Const.getKettleCartePasswordFile());
-        	if (homePwdFile.exists()) {
-        		securityHandler.setUserRealm(new HashUserRealm("Kettle", Const.getKettleCartePasswordFile()));
-        	} else {
-        		securityHandler.setUserRealm(new HashUserRealm("Kettle", Const.getKettleLocalCartePasswordFile()));
-        	}
+            // See if there is a kettle.pwd file in the KETTLE_HOME directory:
+            //
+            File homePwdFile = new File(Const.getKettleCartePasswordFile());
+            if (homePwdFile.exists()) {
+                securityHandler.setUserRealm(new HashUserRealm("Kettle", Const.getKettleCartePasswordFile()));
+            } else {
+                securityHandler.setUserRealm(new HashUserRealm("Kettle", Const.getKettleLocalCartePasswordFile()));
+            }
         }
-        
+
         securityHandler.setConstraintMappings(new ConstraintMapping[]{constraintMapping});
-               
+
         // Add all the servlets...
         //
         ContextHandlerCollection contexts = new ContextHandlerCollection();
-        
+
         // Root
         //
-        Context root = new Context(contexts, GetRootServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler root = new ServletContextHandler(contexts, GetRootServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         GetRootServlet rootServlet = new GetRootServlet();
         rootServlet.setJettyMode(true);
         root.addServlet(new ServletHolder(rootServlet), "/*");
-        
+
         // Carte Status
         //
-        Context status = new Context(contexts, GetStatusServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler status = new ServletContextHandler(contexts, GetStatusServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         status.addServlet(new ServletHolder(new GetStatusServlet(transformationMap, jobMap)), "/*");
 
         // Trans status
         //
-        Context transStatus = new Context(contexts, GetTransStatusServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler transStatus = new ServletContextHandler(contexts, GetTransStatusServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         transStatus.addServlet(new ServletHolder(new GetTransStatusServlet(transformationMap)), "/*");
 
         // Prepare execution
         //
-        Context prepareExecution = new Context(contexts, PrepareExecutionTransServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler prepareExecution = new ServletContextHandler(contexts, PrepareExecutionTransServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         prepareExecution.addServlet(new ServletHolder(new PrepareExecutionTransServlet(transformationMap)), "/*");
-        
+
         // Start execution
         //
-        Context startExecution = new Context(contexts, StartExecutionTransServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler startExecution = new ServletContextHandler(contexts, StartExecutionTransServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         startExecution.addServlet(new ServletHolder(new StartExecutionTransServlet(transformationMap)), "/*");
 
         // Start transformation
         //
-        Context startTrans = new Context(contexts, StartTransServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler startTrans = new ServletContextHandler(contexts, StartTransServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         startTrans.addServlet(new ServletHolder(new StartTransServlet(transformationMap)), "/*");
 
         // Pause/Resume transformation
         //
-        Context pauseTrans = new Context(contexts, PauseTransServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler pauseTrans = new ServletContextHandler(contexts, PauseTransServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         pauseTrans.addServlet(new ServletHolder(new PauseTransServlet(transformationMap)), "/*");
 
         // Stop transformation
         //
-        Context stopTrans = new Context(contexts, StopTransServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler stopTrans = new ServletContextHandler(contexts, StopTransServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         stopTrans.addServlet(new ServletHolder(new StopTransServlet(transformationMap)), "/*");
 
         // Transformation cleanup
         //
-        Context cleanupTrans = new Context(contexts, CleanupTransServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler cleanupTrans = new ServletContextHandler(contexts, CleanupTransServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         cleanupTrans.addServlet(new ServletHolder(new CleanupTransServlet(transformationMap)), "/*");
 
         // Add transformation
         //
-        Context addTrans = new Context(contexts, AddTransServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler addTrans = new ServletContextHandler(contexts, AddTransServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         addTrans.addServlet(new ServletHolder(new AddTransServlet(transformationMap, socketRepository)), "/*");
 
         // Remove Transformation
         //
-        Context removeTrans = new Context(contexts, RemoveTransServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler removeTrans = new ServletContextHandler(contexts, RemoveTransServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         removeTrans.addServlet(new ServletHolder(new RemoveTransServlet(transformationMap)), "/*");
 
         // Step port reservation
         //
-        Context getPort = new Context(contexts, AllocateServerSocketServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler getPort = new ServletContextHandler(contexts, AllocateServerSocketServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         getPort.addServlet(new ServletHolder(new AllocateServerSocketServlet(transformationMap)), "/*");
 
-        // Port listing information 
+        // Port listing information
         //
-        Context listPorts = new Context(contexts, ListServerSocketServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler listPorts = new ServletContextHandler(contexts, ListServerSocketServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         listPorts.addServlet(new ServletHolder(new ListServerSocketServlet(transformationMap)), "/*");
 
         // Sniff transformation step
         //
-        Context sniffStep = new Context(contexts, SniffStepServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler sniffStep = new ServletContextHandler(contexts, SniffStepServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         sniffStep.addServlet(new ServletHolder(new SniffStepServlet(transformationMap)), "/*");
 
         // execute transformation
         //
-        Context executeTrans = new Context(contexts, ExecuteTransServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler executeTrans = new ServletContextHandler(contexts, ExecuteTransServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         executeTrans .addServlet(new ServletHolder(new ExecuteTransServlet(transformationMap)), "/*");
-        
+
         // add repository
         //
-        Context addRep = new Context(contexts, AddRepServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler addRep = new ServletContextHandler(contexts, AddRepServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         addRep .addServlet(new ServletHolder(new AddRepServlet(transformationMap)), "/*");
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////
         //
         // The job handlers...
         //
-        
+
         // Start job
         //
-        Context startJob = new Context(contexts, StartJobServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler startJob = new ServletContextHandler(contexts, StartJobServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         startJob.addServlet(new ServletHolder(new StartJobServlet(jobMap)), "/*");
-        
+
         // Stop transformation
         //
-        Context stopJob = new Context(contexts, StopJobServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler stopJob = new ServletContextHandler(contexts, StopJobServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         stopJob.addServlet(new ServletHolder(new StopJobServlet(jobMap)), "/*");
 
         // Trans status
         //
-        Context jobStatus = new Context(contexts, GetJobStatusServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler jobStatus = new ServletContextHandler(contexts, GetJobStatusServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         jobStatus.addServlet(new ServletHolder(new GetJobStatusServlet(jobMap)), "/*");
 
         // Add job
         //
-        Context addJob= new Context(contexts, AddJobServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler addJob= new ServletContextHandler(contexts, AddJobServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         addJob.addServlet(new ServletHolder(new AddJobServlet(jobMap, socketRepository)), "/*");
 
         // Remove Job
         //
-        Context removeJob = new Context(contexts, RemoveJobServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler removeJob = new ServletContextHandler(contexts, RemoveJobServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         removeJob.addServlet(new ServletHolder(new RemoveJobServlet(jobMap)), "/*");
 
-        
+
         ///////////////////////////////////////////////////////////////////////////////////////////////////////
         //
         /// Cluster management
         //
-        
+
         // Register a new slave on the master
         //
-        Context registerSlave= new Context(contexts, RegisterSlaveServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler registerSlave= new ServletContextHandler(contexts, RegisterSlaveServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         registerSlave.addServlet(new ServletHolder(new RegisterSlaveServlet(detections)), "/*");
 
         // Get list of registered slave servers
         //
-        Context getSlaves= new Context(contexts, GetSlavesServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler getSlaves= new ServletContextHandler(contexts, GetSlavesServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         getSlaves.addServlet(new ServletHolder(new GetSlavesServlet(detections)), "/*");
 
 
@@ -270,22 +272,283 @@ public class WebServer
         /// Resources
         //
 
-        // Add export 
+        // Add export
         //
-        Context addExport = new Context(contexts, AddExportServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler addExport = new ServletContextHandler(contexts, AddExportServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         addExport.addServlet(new ServletHolder(new AddExportServlet(jobMap, transformationMap)), "/*");
 
         // Get next value from a slave sequence
         //
-        Context nextSequence = new Context(contexts, NextSequenceValueServlet.CONTEXT_PATH, Context.SESSIONS);
+        ServletContextHandler nextSequence = new ServletContextHandler(contexts, NextSequenceValueServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
         nextSequence.addServlet(new ServletHolder(new NextSequenceValueServlet(transformationMap)), "/*");
-        
-        
+
+
         server.setHandlers(new Handler[] { securityHandler, contexts });
 
         // Start execution
         createListeners();
-        
+
+        server.start();
+    }*/
+
+    String SERVICE_NAME = "Kettle";
+    public void startServer() throws Exception {
+        server = new Server();
+
+        List<String> roles = new ArrayList<>();
+        roles.add( Constraint.ANY_AUTH );
+
+        // Set up the security handler, optionally with JAAS
+        //
+        ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
+
+        if ( System.getProperty( "loginmodulename" ) != null
+                && System.getProperty( "java.security.auth.login.config" ) != null ) {
+            JAASLoginService jaasLoginService = new JAASLoginService( SERVICE_NAME );
+            jaasLoginService.setLoginModuleName( System.getProperty( "loginmodulename" ) );
+            if( jaasLoginService.getIdentityService() == null ) {
+                jaasLoginService.setIdentityService( new DefaultIdentityService() );
+            }
+            securityHandler.setLoginService( jaasLoginService );
+        } else {
+            HashLoginService hashLoginService;
+            SlaveServer slaveServer = transformationMap.getSlaveServerConfig().getSlaveServer();
+            if ( !StrUtil.isEmpty( slaveServer.getPassword() ) ) {
+                hashLoginService = new HashLoginService( SERVICE_NAME );
+                UserStore userStore = new UserStore();
+                userStore.addUser( slaveServer.getUsername(), new Password( slaveServer.getPassword() ),
+                        new String[] { } );
+                hashLoginService.setUserStore( userStore );
+            } else {
+                // See if there is a kettle.pwd file in the KETTLE_HOME directory:
+                if ( StrUtil.isEmpty( passwordFile ) ) {
+                    File homePwdFile = new File( Const.getKettleCartePasswordFile() );
+                    if ( homePwdFile.exists() ) {
+                        passwordFile = Const.getKettleCartePasswordFile();
+                    } else {
+                        passwordFile = Const.getKettleLocalCartePasswordFile();
+                    }
+                }
+                hashLoginService = new HashLoginService( SERVICE_NAME, passwordFile ) {
+                    @Override
+                    protected String[] loadRoleInfo( UserPrincipal user ) {
+                        List<String> newRoles = new ArrayList<>();
+                        String[] roles = super.loadRoleInfo( user );
+                        if ( null != roles ) {
+                            Collections.addAll( newRoles, roles );
+                        }
+                        return newRoles.toArray( new String[ newRoles.size() ] );
+                    }
+                };
+            }
+            securityHandler.setLoginService( hashLoginService );
+        }
+
+        Constraint constraint = new Constraint();
+        constraint.setName( Constraint.__BASIC_AUTH );
+        constraint.setRoles( roles.toArray( new String[ roles.size() ] ) );
+        constraint.setAuthenticate( true );
+
+        ConstraintMapping constraintMapping = new ConstraintMapping();
+        constraintMapping.setConstraint( constraint );
+        constraintMapping.setPathSpec( "/*" );
+
+        securityHandler.setConstraintMappings( new ConstraintMapping[] { constraintMapping } );
+        securityHandler.setAuthenticator( new BasicAuthenticator() );
+
+
+        // Add all the servlets defined in kettle-servlets.xml ...
+        //
+        ContextHandlerCollection contexts = new ContextHandlerCollection();
+
+        // Root
+        //
+        ServletContextHandler
+                root =
+                new ServletContextHandler( contexts, GetRootServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS );
+        GetRootServlet rootServlet = new GetRootServlet();
+        rootServlet.setJettyMode( true );
+        root.addServlet( new ServletHolder( rootServlet ), "/*" );
+
+// Carte Status
+        //
+        ServletContextHandler status = new ServletContextHandler(contexts, GetStatusServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        status.addServlet(new ServletHolder(new GetStatusServlet(transformationMap, jobMap)), "/*");
+
+        // Trans status
+        //
+        ServletContextHandler transStatus = new ServletContextHandler(contexts, GetTransStatusServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        transStatus.addServlet(new ServletHolder(new GetTransStatusServlet(transformationMap)), "/*");
+
+        // Prepare execution
+        //
+        ServletContextHandler prepareExecution = new ServletContextHandler(contexts, PrepareExecutionTransServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        prepareExecution.addServlet(new ServletHolder(new PrepareExecutionTransServlet(transformationMap)), "/*");
+
+        // Start execution
+        //
+        ServletContextHandler startExecution = new ServletContextHandler(contexts, StartExecutionTransServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        startExecution.addServlet(new ServletHolder(new StartExecutionTransServlet(transformationMap)), "/*");
+
+        // Start transformation
+        //
+        ServletContextHandler startTrans = new ServletContextHandler(contexts, StartTransServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        startTrans.addServlet(new ServletHolder(new StartTransServlet(transformationMap)), "/*");
+
+        // Pause/Resume transformation
+        //
+        ServletContextHandler pauseTrans = new ServletContextHandler(contexts, PauseTransServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        pauseTrans.addServlet(new ServletHolder(new PauseTransServlet(transformationMap)), "/*");
+
+        // Stop transformation
+        //
+        ServletContextHandler stopTrans = new ServletContextHandler(contexts, StopTransServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        stopTrans.addServlet(new ServletHolder(new StopTransServlet(transformationMap)), "/*");
+
+        // Transformation cleanup
+        //
+        ServletContextHandler cleanupTrans = new ServletContextHandler(contexts, CleanupTransServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        cleanupTrans.addServlet(new ServletHolder(new CleanupTransServlet(transformationMap)), "/*");
+
+        // Add transformation
+        //
+        ServletContextHandler addTrans = new ServletContextHandler(contexts, AddTransServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        addTrans.addServlet(new ServletHolder(new AddTransServlet(transformationMap, socketRepository)), "/*");
+
+        // Remove Transformation
+        //
+        ServletContextHandler removeTrans = new ServletContextHandler(contexts, RemoveTransServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        removeTrans.addServlet(new ServletHolder(new RemoveTransServlet(transformationMap)), "/*");
+
+        // Step port reservation
+        //
+        ServletContextHandler getPort = new ServletContextHandler(contexts, AllocateServerSocketServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        getPort.addServlet(new ServletHolder(new AllocateServerSocketServlet(transformationMap)), "/*");
+
+        // Port listing information
+        //
+        ServletContextHandler listPorts = new ServletContextHandler(contexts, ListServerSocketServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        listPorts.addServlet(new ServletHolder(new ListServerSocketServlet(transformationMap)), "/*");
+
+        // Sniff transformation step
+        //
+        ServletContextHandler sniffStep = new ServletContextHandler(contexts, SniffStepServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        sniffStep.addServlet(new ServletHolder(new SniffStepServlet(transformationMap)), "/*");
+
+        // execute transformation
+        //
+        ServletContextHandler executeTrans = new ServletContextHandler(contexts, ExecuteTransServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        executeTrans .addServlet(new ServletHolder(new ExecuteTransServlet(transformationMap)), "/*");
+
+        // add repository
+        //
+        ServletContextHandler addRep = new ServletContextHandler(contexts, AddRepServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        addRep .addServlet(new ServletHolder(new AddRepServlet(transformationMap)), "/*");
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////
+        //
+        // The job handlers...
+        //
+
+        // Start job
+        //
+        ServletContextHandler startJob = new ServletContextHandler(contexts, StartJobServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        startJob.addServlet(new ServletHolder(new StartJobServlet(jobMap)), "/*");
+
+        // Stop transformation
+        //
+        ServletContextHandler stopJob = new ServletContextHandler(contexts, StopJobServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        stopJob.addServlet(new ServletHolder(new StopJobServlet(jobMap)), "/*");
+
+        // Trans status
+        //
+        ServletContextHandler jobStatus = new ServletContextHandler(contexts, GetJobStatusServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        jobStatus.addServlet(new ServletHolder(new GetJobStatusServlet(jobMap)), "/*");
+
+        // Add job
+        //
+        ServletContextHandler addJob= new ServletContextHandler(contexts, AddJobServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        addJob.addServlet(new ServletHolder(new AddJobServlet(jobMap, socketRepository)), "/*");
+
+        // Remove Job
+        //
+        ServletContextHandler removeJob = new ServletContextHandler(contexts, RemoveJobServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        removeJob.addServlet(new ServletHolder(new RemoveJobServlet(jobMap)), "/*");
+
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////
+        //
+        /// Cluster management
+        //
+
+        // Register a new slave on the master
+        //
+        ServletContextHandler registerSlave= new ServletContextHandler(contexts, RegisterSlaveServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        registerSlave.addServlet(new ServletHolder(new RegisterSlaveServlet(detections)), "/*");
+
+        // Get list of registered slave servers
+        //
+        ServletContextHandler getSlaves= new ServletContextHandler(contexts, GetSlavesServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        getSlaves.addServlet(new ServletHolder(new GetSlavesServlet(detections)), "/*");
+
+
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////
+        //
+        /// Resources
+        //
+
+        // Add export
+        //
+        ServletContextHandler addExport = new ServletContextHandler(contexts, AddExportServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        addExport.addServlet(new ServletHolder(new AddExportServlet(jobMap, transformationMap)), "/*");
+
+        // Get next value from a slave sequence
+        //
+        ServletContextHandler nextSequence = new ServletContextHandler(contexts, NextSequenceValueServlet.CONTEXT_PATH, ServletContextHandler.SESSIONS);
+        nextSequence.addServlet(new ServletHolder(new NextSequenceValueServlet(transformationMap)), "/*");
+
+
+        // setup jersey (REST)
+        ServletHolder jerseyServletHolder = new ServletHolder( ServletContainer.class );
+        jerseyServletHolder.setInitParameter( "com.sun.jersey.config.property.resourceConfigClass",
+                "com.sun.jersey.api.core.PackagesResourceConfig" );
+        jerseyServletHolder.setInitParameter( "com.sun.jersey.config.property.packages", "org.pentaho.di.www.jaxrs" );
+        root.addServlet( jerseyServletHolder, "/api/*" );
+
+        // setup static resource serving
+        // ResourceHandler mobileResourceHandler = new ResourceHandler();
+        // mobileResourceHandler.setWelcomeFiles(new String[]{"index.html"});
+        // mobileResourceHandler.setResourceBase(getClass().getClassLoader().
+        // getResource("org/pentaho/di/www/mobile").toExternalForm());
+        // ServletContextHandler mobileContext = new ServletContextHandler(contexts, "/mobile", ServletContextHandler.SESSIONS);
+        // mobileContext.setHandler(mobileResourceHandler);
+
+        // Allow png files to be shown for transformations and jobs...
+        //
+        ResourceHandler resourceHandler = new ResourceHandler();
+        resourceHandler.setResourceBase( "temp" );
+        // add all handlers/contexts to server
+
+        // set up static servlet
+        ServletHolder staticHolder = new ServletHolder( "static", DefaultServlet.class );
+        // resourceBase maps to the path relative to where carte is started
+        staticHolder.setInitParameter( "resourceBase", "./static/" );
+        staticHolder.setInitParameter( "dirAllowed", "true" );
+        staticHolder.setInitParameter( "pathInfoOnly", "true" );
+        root.addServlet( staticHolder, "/static/*" );
+
+        HandlerList handlers = new HandlerList();
+        handlers.setHandlers( new Handler[] { resourceHandler, contexts,root } );
+        securityHandler.setHandler( handlers );
+
+        server.setHandler( securityHandler );
+
+        //ExtensionPointHandler.callExtensionPoint( log, KettleExtensionPoint.BeforeCarteStartup.id, server );
+
+        // Start execution
+        createListeners();
+
         server.start();
     }
 
@@ -312,10 +575,10 @@ public class WebServer
 			log.logError(BaseMessages.getString(PKG, "WebServer.Error.FailedToStop.Title"), BaseMessages.getString(PKG, "WebServer.Error.FailedToStop.Msg", "" + e));
 		}
 	}
-    
-    private void createListeners() 
+
+    private void createListeners()
     {
-        SocketConnector connector = new SocketConnector();
+        ServerConnector connector = new ServerConnector(server,new HttpConnectionFactory());
         connector.setPort(port);
         connector.setHost(hostname);
         connector.setSoLingerTime(1000);

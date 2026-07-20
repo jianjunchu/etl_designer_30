@@ -61,6 +61,7 @@ import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import com.oscar.jdbc.OscarResultSetMetaData;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.Counter;
 import org.pentaho.di.core.DBCache;
@@ -3033,13 +3034,17 @@ public class Database implements VariableSpace, LoggingObjectInterface
             case java.sql.Types.FLOAT:
             case java.sql.Types.REAL:
             case java.sql.Types.NUMERIC:
+
                 valtype=ValueMetaInterface.TYPE_NUMBER;
                 length=rm.getPrecision(index);
                 precision=rm.getScale(index);
                 if (length    >=126) length=-1;
                 if (precision >=126) precision=-1;
 
-                if (type==java.sql.Types.DOUBLE || type==java.sql.Types.FLOAT || type==java.sql.Types.REAL)
+                if("com.oscar.jdbc.OscarResultSetMetaData".equalsIgnoreCase(rm.getClass().getName())){
+                    valtype=ValueMetaInterface.TYPE_BIGNUMBER;
+                }
+                else if (type==java.sql.Types.DOUBLE || type==java.sql.Types.FLOAT || type==java.sql.Types.REAL)
                 {
                     if (precision==0)
                     {
